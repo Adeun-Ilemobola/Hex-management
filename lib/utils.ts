@@ -33,3 +33,54 @@ export const toB64 = (file: File): Promise<Base64FileResult> => {
     reader.readAsDataURL(file);
   });
 };
+
+
+
+ export const countries = [
+  // North America
+  "Canada",
+  "United States",
+  "Mexico",
+  "Guatemala",
+  "Cuba",
+  "Honduras",
+  "El Salvador",
+  "Nicaragua",
+  "Costa Rica",
+  "Panama",
+
+  // South America
+  "Argentina",
+  "Brazil",
+  "Chile",
+  "Colombia",
+  "Ecuador",
+  "Peru",
+  "Uruguay",
+  "Paraguay",
+  "Bolivia",
+  "Venezuela",
+
+  // Europe
+  "United Kingdom",
+  "France",
+  "Germany",
+  "Italy",
+  "Spain",
+  "Portugal",
+  "Netherlands",
+  "Belgium",
+  "Switzerland",
+  "Austria",
+  "Poland",
+  "Sweden",
+  "Norway",
+  "Denmark",
+  "Finland",
+  "Greece",
+  "Czech Republic",
+  "Hungary",
+  "Ireland",
+  "Romania"
+];
+
