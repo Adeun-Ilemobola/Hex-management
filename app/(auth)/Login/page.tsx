@@ -3,25 +3,64 @@
 import Strips from '@/components/Designs/strip'
 import InputBox from '@/components/InputBox'
 import { Button } from '@/components/ui/button'
-import { Card , CardContent , CardHeader , CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { zodLoginSchema } from '@/lib/Zod'
+import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { createAuthClient } from "better-auth/client"
+import { useRouter } from 'next/navigation'
+import { authClient } from '@/lib/auth-client'
+
 
 export default function page() {
-    const [loginIfo , setLoginInfo] = useState<z.infer<typeof zodLoginSchema>>({
+   
+    const router = useRouter()
+
+    const [loginIfo, setLoginInfo] = useState<z.infer<typeof zodLoginSchema>>({
         email: '',
         password: ''
     })
 
+    const LoginMut = useMutation({
+        mutationFn: async (loginData: z.infer<typeof zodLoginSchema>) => {
+            // Replace with your actual login API endpoint
+            await authClient.signIn.email({
+                password: loginData.password,
+                email: loginData.email,
+                fetchOptions: {
+                    onSuccess(ctx) {
+                         console.log(ctx);
+                        toast.success('Login successful');
+                        // Optionally redirect or update state here
+                        router.push("/")
+
+                    },
+                    onError(context) {
+                        console.log(context);
+                        
+                        toast.error("Invalid credentials or server error.");
+                        
+                        
+                    },
+                }
+
+            })
 
 
+        },
+        onSuccess: (data) => {
 
 
+        },
+        onError: (error: any) => {
+            toast.error(error.message || 'Login failed');
+        }
+    });
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const { name, value , type } = e.target;
+        const { name, value } = e.target;
         setLoginInfo((prev) => ({
             ...prev,
             [name]: value
@@ -35,63 +74,55 @@ export default function page() {
             result.error.errors.forEach((error) => {
                 toast.error(error.message);
             })
-            
             return;
         }
-        console.log(result.data);
-        toast.success('Login successful');
-        // Perform login action here
-
+        LoginMut.mutate(result.data);
     }
 
+    return (
+        <div className=" relative flex flex-col items-center justify-center min-h-screen  overflow-hidden">
+
+            <Strips stripConut={3} className="absolute top-[4rem] left-[-10rem] w-[520px] gap-5 rotate-[-45deg]" height={2} />
+            <Strips stripConut={3} className="absolute bottom-[4rem] right-[-10rem]  w-[520px] gap-5 rotate-[-45deg] " height={2} />
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-center  text-3xl">Login</CardTitle>
+                </CardHeader>
 
 
+                <CardContent className="">
+                    <form className="flex flex-col w-full items-center justify-center gap-3" onSubmit={handleSubmit}>
+                        <InputBox
+                            label="Email"
+                            type="email"
+                            placeholder="Enter your email"
+                            isDisable={LoginMut.isPending}
+                            setValue={handleChange}
+                            value={loginIfo.email}
+                            identify="email"
 
-     
-  return (
-    <div className=" relative flex flex-col items-center justify-center min-h-screen  overflow-hidden">
+                        />
+                        <InputBox
+                            label="Password"
+                            type="password"
+                            placeholder="Enter your password"
+                            isDisable={LoginMut.isPending}
+                            setValue={handleChange}
+                            value={loginIfo.password}
+                            identify="password"
+                        />
 
-        <Strips stripConut={3} className="absolute top-[4rem] left-[-10rem] w-[520px] gap-5 rotate-[-45deg]" height={2} />
-        <Strips stripConut={3}  className="absolute bottom-[4rem] right-[-10rem]  w-[520px] gap-5 rotate-[-45deg] " height={2} />
-
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-center  text-3xl">Login</CardTitle>
-            </CardHeader>
+                        <Button type='submit' size={"lg"} disabled={LoginMut.isPending} >
+                            Login
+                        </Button>
 
 
-            <CardContent className="">
-                <form className="flex flex-col w-full items-center justify-center gap-3" onSubmit={handleSubmit}>
-                    <InputBox
-                        label="Email"
-                        type="email"
-                        placeholder="Enter your email"
-                        isDisable={false}
-                        setValue={handleChange}
-                        value={loginIfo.email}
-                        identify="email"
-                    
-                    />
-                    <InputBox
-                        label="Password"
-                        type="password"
-                        placeholder="Enter your password"
-                        isDisable={false}
-                        setValue={handleChange}
-                        value={loginIfo.password}
-                        identify="password"
-                    />
+                    </form>
 
-                    <Button type='submit' size={"lg"} >
-                        Login
-                    </Button>
-                    
-                    
-                </form>
+                </CardContent>
+            </Card>
 
-            </CardContent>
-        </Card>
-
-    </div>
-  )
+        </div>
+    )
 }
