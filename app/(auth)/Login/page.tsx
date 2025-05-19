@@ -37,7 +37,7 @@ export default function Page() {
                 }
             })
         },
-        onError: (error: any) => {
+        onError: (error) => {
             toast.error(error.message || 'Login failed');
         }
     });

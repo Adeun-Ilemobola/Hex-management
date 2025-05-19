@@ -30,9 +30,6 @@ export default function Page() {
             }
             return response.json();
         },
-        onSuccess: (data) => {
-
-        },
         onError: (error) => {
             toast.error('Error fetching country data');
             console.error('Error fetching country data:', error);
@@ -47,6 +44,10 @@ export default function Page() {
     }
 
     function setCountry(e: string, identify: string) {
+        console.log(
+            identify
+        );
+        
 
         if (e && e !== registerInfo.country && e !== null || e !== undefined || e !== '' || e !== 'None') {
             setRegisterInfo((prev) => ({
