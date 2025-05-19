@@ -8,11 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { zodRegisterSchema } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import Warper from '@/components/Warper'
 import { useMutation } from '@tanstack/react-query'
 import { countries } from '@/lib/utils'
 
-export default function page() {
+export default function Page() {
     const [registerInfo, setRegisterInfo] = useState<z.infer<typeof zodRegisterSchema>>({
         name: '',
         email: '',
