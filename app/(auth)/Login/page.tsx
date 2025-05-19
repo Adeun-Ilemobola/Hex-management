@@ -1,5 +1,4 @@
 "use client"
-
 import Strips from '@/components/Designs/strip'
 import InputBox from '@/components/InputBox'
 import { Button } from '@/components/ui/button'
@@ -15,7 +14,7 @@ import { authClient } from '@/lib/auth-client'
 export default function Page() {
     const router = useRouter()
 
-    const [loginIfo, setLoginInfo] = useState<z.infer<typeof zodLoginSchema>>({
+    const [loginInfo, setLoginInfo] = useState<z.infer<typeof zodLoginSchema>>({
         email: '',
         password: ''
     })
@@ -53,7 +52,7 @@ export default function Page() {
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const result = zodLoginSchema.safeParse(loginIfo);
+        const result = zodLoginSchema.safeParse(loginInfo);
         if (!result.success) {
             result.error.errors.forEach((error) => {
                 toast.error(error.message);
@@ -79,7 +78,7 @@ export default function Page() {
                             placeholder="Enter your email"
                             isDisable={LoginMut.isPending}
                             setValue={handleChange}
-                            value={loginIfo.email}
+                            value={loginInfo.email}
                             identify="email"
                         />
                         <InputBox
@@ -88,7 +87,7 @@ export default function Page() {
                             placeholder="Enter your password"
                             isDisable={LoginMut.isPending}
                             setValue={handleChange}
-                            value={loginIfo.password}
+                            value={loginInfo.password}
                             identify="password"
                         />
                         <Button type='submit' size={"lg"} disabled={LoginMut.isPending} >
