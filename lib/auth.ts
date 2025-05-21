@@ -8,15 +8,42 @@ export const auth = betterAuth({
   }),
   emailAndPassword: { 
     enabled: true, 
+    
   }, 
+   socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
+        reddit: {
+            clientId: process.env.REDDIT_CLIENT_ID as string,
+            clientSecret: process.env.REDDIT_CLIENT_SECRET as string,
+        },
+        discord: { 
+            clientId: process.env.DISCORD_CLIENT_ID as string, 
+            clientSecret: process.env.DISCORD_CLIENT_SECRET as string, 
+        }, 
+        github: { 
+            clientId: process.env.GITHUB_CLIENT_ID as string, 
+            clientSecret: process.env.GITHUB_CLIENT_SECRET as string, 
+        }, 
+    },
+  user:{
+    additionalFields:{
+      phoneNumber:{
+        type:"string",
+        returned:false,
+        required:true,
+        input:true
+      },
+      country:{
+        type:"string",
+        returned:false,
+        required:true,
+         input:true
+      }
+    }
+  },
+  
 
-  // emailVerification: {
-  //   sendVerificationEmail: async ( { user, url, token }, request) => {
-  //   //   await sendEmail({
-  //   //     to: user.email,
-  //   //     subject: "Verify your email address",
-  //   //     text: `Click the link to verify your email: ${url}`,
-  //   //   });
-  //   },
-  // },
 });

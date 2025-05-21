@@ -2,7 +2,7 @@
 import Strips from '@/components/Designs/strip'
 import InputBox from '@/components/InputBox'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { zodLoginSchema } from '@/lib/Zod'
 import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
+import SocialSignOn from '@/components/SocialSignOn'
 
 export default function Page() {
     const router = useRouter()
@@ -95,6 +96,14 @@ export default function Page() {
                         </Button>
                     </form>
                 </CardContent>
+
+                <CardFooter>
+                    <div className=' flex flex-row gap-1.5 justify-center'>
+                        <SocialSignOn />
+
+                    </div>
+
+                </CardFooter>
             </Card>
         </div>
     )

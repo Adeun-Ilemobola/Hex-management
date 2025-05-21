@@ -4,14 +4,22 @@ import Strips from '@/components/Designs/strip'
 import React, { useState } from 'react'
 import InputBox, { SelectorBox } from '@/components/InputBox'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { zodRegisterSchema } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useMutation } from '@tanstack/react-query'
 import { countries } from '@/lib/utils'
+import { authClient } from '@/lib/auth-client'
+import { useRouter } from 'next/navigation'
+import { Label } from '@/components/ui/label'
+import { Switch } from "@/components/ui/switch"
+import SocialSignOn from '@/components/SocialSignOn'
+
 
 export default function Page() {
+    const router = useRouter()
+
     const [registerInfo, setRegisterInfo] = useState<z.infer<typeof zodRegisterSchema>>({
         name: '',
         email: '',
@@ -20,6 +28,34 @@ export default function Page() {
         phoneNumber: '',
         country: '',
         terms: true
+    })
+
+    const registerMut = useMutation({
+        mutationFn: async (con: z.infer<typeof zodRegisterSchema>) => {
+
+            console.log("main Data :" ,con);
+            
+            const { data } = await authClient.signUp.email({
+                name: con.name,
+                email: con.email,
+                password: con.password,
+                country: con.country,
+                phoneNumber: con.phoneNumber,
+            },
+                {
+                    onSuccess: () => {
+                        toast.error("successfully signed up");
+                        router.push("/Home")
+                    },
+                    onError(context) {
+                        console.log("onError context -- " ,context);
+                         toast.error(context.error.message)
+                    },
+                }
+            )
+
+            
+        }
     })
 
     const getCountryData = useMutation({
@@ -47,7 +83,7 @@ export default function Page() {
         console.log(
             identify
         );
-        
+
 
         if (e && e !== registerInfo.country && e !== null || e !== undefined || e !== '' || e !== 'None') {
             setRegisterInfo((prev) => ({
@@ -67,11 +103,9 @@ export default function Page() {
             result.error.errors.forEach((error) => {
                 toast.error(error.message);
             })
-
             return;
         }
-        console.log(result.data);
-        toast.success('Registration successful');
+        registerMut.mutate(result.data)
         // Perform registration action here
 
     }
@@ -91,14 +125,14 @@ export default function Page() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                            <InputBox isDisable={false} label='Name' type="text" identify="name" value={registerInfo.name} setValue={handleChange} placeholder="Name" />
-                            <InputBox isDisable={false} label='Email' type="email" identify="email" value={registerInfo.email} setValue={handleChange} placeholder="Email" />
-                            <InputBox isDisable={false} label='Password' type="password" identify="password" value={registerInfo.password} setValue={handleChange} placeholder="Password" />
-                            <InputBox isDisable={false} label='confirm Password' type="password" identify="confirmPassword" value={registerInfo.confirmPassword} setValue={handleChange} placeholder="Confirm Password" />
-                            <InputBox isDisable={false} label='phone Number' type="text" identify="phoneNumber" value={registerInfo.phoneNumber} setValue={handleChange} placeholder="Phone Number" />
+                            <InputBox isDisable={registerMut.isPending} label='Name' type="text" identify="name" value={registerInfo.name} setValue={handleChange} placeholder="Name" />
+                            <InputBox isDisable={registerMut.isPending} label='Email' type="email" identify="email" value={registerInfo.email} setValue={handleChange} placeholder="Email" />
+                            <InputBox isDisable={registerMut.isPending} label='Password' type="password" identify="password" value={registerInfo.password} setValue={handleChange} placeholder="Password" />
+                            <InputBox isDisable={registerMut.isPending} label='confirm Password' type="password" identify="confirmPassword" value={registerInfo.confirmPassword} setValue={handleChange} placeholder="Confirm Password" />
+                            <InputBox isDisable={registerMut.isPending} label='phone Number' type="text" identify="phoneNumber" value={registerInfo.phoneNumber} setValue={handleChange} placeholder="Phone Number" />
 
                             <SelectorBox
-                                isDisable={false}
+                                isDisable={registerMut.isPending}
                                 label='country'
                                 identify="country"
                                 value={registerInfo.country} setValue={setCountry}
@@ -113,28 +147,40 @@ export default function Page() {
 
 
                             <div className='flex items-center gap-2'>
-                                <input type='checkbox' name='terms' checked={registerInfo.terms} onChange={handleChange} />
-                                <label htmlFor='terms'>I accept the terms and conditions</label>
+                                <Switch
+                                    checked={registerInfo.terms}
+                                    onCheckedChange={(c) => {
+                                        setRegisterInfo(pre => ({
+                                            ...pre,
+                                            terms: c as true
+                                        }))
+
+                                    }}
+                                    id='terms'
+
+
+                                />
+                                <Label htmlFor='terms'>I accept the terms and conditions</Label>
                             </div>
 
                             <Button type='submit' className=''>Register</Button>
                         </form>
                     </CardContent>
 
-                </Card>
+                    <CardFooter>
+                        <div className=' flex flex-row gap-1.5 justify-center'>
+                            <SocialSignOn/>
 
+                        </div>
 
-
-
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="text-center  text-3xl">Register by Providers</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                       
-                    </CardContent>
+                    </CardFooter>
 
                 </Card>
+
+
+
+
+                
             </div>
 
 
