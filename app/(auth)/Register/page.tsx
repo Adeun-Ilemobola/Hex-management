@@ -35,7 +35,7 @@ export default function Page() {
 
             console.log("main Data :" ,con);
             
-            const { data } = await authClient.signUp.email({
+            await authClient.signUp.email({
                 name: con.name,
                 email: con.email,
                 password: con.password,
