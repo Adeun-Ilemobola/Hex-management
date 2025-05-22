@@ -1,32 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
- 
+import { getSessionCookie } from "better-auth/cookies";
 
-const Rount ={
-    auth:["/Login" , "/Register"],
-    main:["/Home"]
-}
+const Rount = {
+  auth: ["/login", "/register"],
+  main: ["/home"],
+};
+
 export async function middleware(request: NextRequest) {
-    const pathName= request.nextUrl.pathname;
-    const isAuthentication = Rount.auth.some(route => pathName.includes(route));
-    const isMain = Rount.main.some(route => pathName.includes(route));
-    const session = await auth.api.getSession({
-        headers: await headers()
-    })
+  const pathName = request.nextUrl.pathname;
+  console.log("------- middleware -------");
  
-    if(!session && isMain ) {
-        return NextResponse.redirect(new URL("/Login", request.url));
-    }
-    if(session && isAuthentication ) {
-        return NextResponse.redirect(new URL("/Home", request.url));
-    }
+  const isAuthentication = Rount.auth.some((route) => pathName.startsWith(route));
+  const isMain = Rount.main.some((route) => pathName.startsWith(route));
 
- 
-    return NextResponse.next();
+   const sessionCookie = getSessionCookie(request);
+
+   console.log({
+    isAuthentication,
+    isMain,
+    sessionCookie,
+    pathName
+
+   });
+   
+
+
+  // If no session and trying to access main (protected) route
+  if (!sessionCookie && isMain) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // If logged in and trying to access auth pages like Login/Register
+  if (sessionCookie && isAuthentication) {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  return NextResponse.next();
 }
- 
+
 export const config = {
-  runtime: "nodejs",
-  matcher: [ "/Home" , "/Login" , "/Register"], // Apply middleware to specific routes
+  runtime: "nodejs", // Required for auth.api usage in middleware
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
 };

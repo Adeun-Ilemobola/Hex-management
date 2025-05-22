@@ -45,7 +45,7 @@ export default function SocialSignOn() {
     })
     return (
         <>
-            {Social.map(social => (<Button disabled={RegisterSocialMut.isPending} onClick={()=>RegisterSocialMut.mutate(social.id)} size={"icon"}></Button>))}
+            {Social.map(social => (<Button key={social.id} disabled={RegisterSocialMut.isPending} onClick={()=>RegisterSocialMut.mutate(social.id)} size={"icon"}>{social.tsx}</Button>))}
         </>
     )
 }
