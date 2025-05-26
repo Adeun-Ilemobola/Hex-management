@@ -1,21 +1,19 @@
-"use client"
+import PropertyFilterView from "@/components/(propertyFragments)/propertyFilterView"
+import { use } from "react"
 
-import { Button } from '@/components/ui/button'
-import { authClient } from '@/lib/auth-client'
-import React from 'react'
 
-export default function Page() {
-  const {data} = authClient.useSession()
+export default function Page({searchParams}:{ searchParams: Promise<{ [key: string]: string | string[] | undefined }>}) {
+
+  const dat = use(searchParams)
   return (
-    <div className='relative flex flex-col items-center justify-center min-h-screen  overflow-hidden'>
-        <h1 className=' text-6xl'>{data ? ` welcome ${data.user.name}` : "no session"}</h1>
+
+    <div className='relative flex flex-col  min-h-screen  overflow-hidden'>
+
+      <PropertyFilterView data={dat}/>
+     
 
 
-        {data && (<Button onClick={()=>{authClient.signOut()}}>
-          Logout
-        </Button>)}
-        
-        
     </div>
+
   )
 }

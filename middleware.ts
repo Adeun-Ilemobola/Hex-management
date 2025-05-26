@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const Rount = {
-  auth: ["/login", "/register"],
+  auth: ["/login", "/register" ,"/"],
   main: ["/home"],
 };
 
@@ -22,16 +22,18 @@ export async function middleware(request: NextRequest) {
     pathName
 
    });
+    if (request.nextUrl.pathname.startsWith('/api/auth')) {
+    return NextResponse.next();
+  }
    
 
 
-  // If no session and trying to access main (protected) route
-  if (!sessionCookie && isMain) {
+  if (!sessionCookie && isMain && pathName !== "/login") {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // If logged in and trying to access auth pages like Login/Register
-  if (sessionCookie && isAuthentication) {
+  if (sessionCookie && isAuthentication && pathName !== "/home") {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 

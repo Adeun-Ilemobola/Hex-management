@@ -39,7 +39,7 @@ export default function Page() {
                 name: con.name,
                 email: con.email,
                 password: con.password,
-                country: con.country,
+                country: con.country ?? "Unknown",
                 phoneNumber: con.phoneNumber,
             },
                 {

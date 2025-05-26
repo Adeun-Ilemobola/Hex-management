@@ -4,17 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev-no-turbopack":"next dev",
+    "dev-no-turbopack": "next dev ",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "db":" npx prisma generate && npx prisma migrate dev  && npx prisma db push"
+    "db": " npx prisma generate && npx prisma migrate dev  && npx prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "@radix-ui/react-alert-dialog": "^1.1.13",
+    "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.13",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-label": "^2.1.6",
     "@radix-ui/react-popover": "^1.1.13",
     "@radix-ui/react-select": "^2.2.4",
@@ -22,6 +24,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@tanstack/react-query": "^5.76.1",
     "@types/randomcolor": "^0.5.9",
+    "axios": "^1.9.0",
     "better-auth": "^1.2.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -26,7 +26,7 @@ export default function SocialSignOn() {
             await authClient.signIn.social(
                 {
                     provider: data,
-                    callbackURL:"/Home"
+                    callbackURL:"/home"
                 },
                 {
                     onSuccess() {
