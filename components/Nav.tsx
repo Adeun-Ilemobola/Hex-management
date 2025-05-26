@@ -19,7 +19,7 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
     const rount = useRouter()
 
     return (
-        <div className=' flex flex-row gap-0.5 min-w-full h-20 border-b '>
+        <div className=' flex flex-row gap-0.5 min-w-full h-16 border-b '>
 
             {/* logo and name  */}
             <div className=' flex w-[25%] items-center'>
