@@ -13,12 +13,35 @@ export async function middleware(request: NextRequest) {
   const isAuthentication = Rount.auth.some((route) => pathName.startsWith(route));
   const isMain = Rount.main.some((route) => pathName.startsWith(route));
   const sessionCookie = getSessionCookie(request);
+  const envTest = {
+    DATABASE_URL: process.env.DATABASE_URL,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    REDDIT_CLIENT_ID: process.env.REDDIT_CLIENT_ID,
+    REDDIT_CLIENT_SECRET: process.env.REDDIT_CLIENT_SECRET,
+    DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+    DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+    // ...add more if needed
+  };
 
   console.log({
     isAuthentication,
     isMain,
     sessionCookie,
-    pathName
+    pathName,
+
+
+    envTest,
+    requestUrl: request.url,
+    requestPathname: request.nextUrl.pathname,
+    requestSearchParams: request.nextUrl.searchParams.toString(),
+    requestHeaders: Object.fromEntries(request.headers.entries()),
+    requestMethod: request.method,
+    
 
   });
   if (request.nextUrl.pathname.startsWith('/api/auth')) {
