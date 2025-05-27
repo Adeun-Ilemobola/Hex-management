@@ -125,11 +125,11 @@ export default function Page() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                            <InputBox isDisable={registerMut.isPending} label='Name' type="text" identify="name" value={registerInfo.name} setValue={handleChange} placeholder="Name" />
-                            <InputBox isDisable={registerMut.isPending} label='Email' type="email" identify="email" value={registerInfo.email} setValue={handleChange} placeholder="Email" />
-                            <InputBox isDisable={registerMut.isPending} label='Password' type="password" identify="password" value={registerInfo.password} setValue={handleChange} placeholder="Password" />
-                            <InputBox isDisable={registerMut.isPending} label='confirm Password' type="password" identify="confirmPassword" value={registerInfo.confirmPassword} setValue={handleChange} placeholder="Confirm Password" />
-                            <InputBox isDisable={registerMut.isPending} label='phone Number' type="text" identify="phoneNumber" value={registerInfo.phoneNumber} setValue={handleChange} placeholder="Phone Number" />
+                            <InputBox disabled={registerMut.isPending} label='Name' type="text" identify="name" value={registerInfo.name} setValue={handleChange} placeholder="Name" />
+                            <InputBox disabled={registerMut.isPending} label='Email' type="email" identify="email" value={registerInfo.email} setValue={handleChange} placeholder="Email" />
+                            <InputBox disabled={registerMut.isPending} label='Password' type="password" identify="password" value={registerInfo.password} setValue={handleChange} placeholder="Password" />
+                            <InputBox disabled={registerMut.isPending} label='confirm Password' type="password" identify="confirmPassword" value={registerInfo.confirmPassword} setValue={handleChange} placeholder="Confirm Password" />
+                            <InputBox disabled={registerMut.isPending} label='phone Number' type="text" identify="phoneNumber" value={registerInfo.phoneNumber} setValue={handleChange} placeholder="Phone Number" />
 
                             <SelectorBox
                                 isDisable={registerMut.isPending}

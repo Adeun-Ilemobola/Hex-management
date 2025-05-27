@@ -31,6 +31,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  properties    propertie[]
 
   @@unique([email])
   @@map("user")
@@ -50,6 +51,58 @@ model Session {
   @@unique([token])
   @@map("session")
 }
+
+model propertie{
+   id            String    @id
+   name String
+   address  String // The exact location with the ZIP Code and the general address
+   initialInvestment Float // How much money did the user buy this property?
+   margin Float  // Profit percentage Based off the initial investment
+   typeOfSale String @default("sell") // Rent , Sell , Lease
+   saleDuration Int?  @default(0) // This is for rent and leasing
+
+
+  description        String?  // General description of the property.
+  yearBuilt          Int?     // The year the property was built. Helpful for valuation and depreciation.
+  squareFootage      Int?     // Useful for investors, renters, and comparative analysis.
+  numBedrooms        Int?     // Common requirement for housing.
+  numBathrooms       Int?     // Same as above.
+
+  Leavingstatus String?  @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
+
+
+  lotSize            Float?   // Size of the property land, in square meters or feet.
+  propertyType       String?  // House, Apartment, Condo, Commercial, etc.
+  status             String?  @default("active") // active, pending, sold, etc.
+  ownerName          String  // Who currently owns the property.
+  contactInfo        String  // Contact details for inquiries.
+
+
+
+  // Amenities and Features
+  hasGarage          Boolean? // Quick way to check for popular amenities.
+  hasGarden          Boolean?
+  hasPool            Boolean?
+  amenities          String[] // List of amenities (e.g., ["Elevator", "Gym", "Fireplace"]).
+
+
+ // Media
+  imageUrls          String[] // Array of URLs for property images.
+  videoTourUrl       String?  // Optional video tour.
+
+  // Timestamps
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relationships
+
+ userId   String
+ user     User  @relation(fields: [userId], references: [id])
+
+
+
+}
+
 
 model Account {
   id                    String    @id

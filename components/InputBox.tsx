@@ -12,16 +12,15 @@ import {
 } from "@/components/ui/select"
 
 type InputType = React.HTMLInputTypeAttribute
-interface InputBoxProps {
-    label: string;
-    type: InputType;
-    placeholder: string;
-    isDisable: boolean;
-
-    setValue: (value: React.ChangeEvent<HTMLInputElement>) => void;
-    value: string;
-    identify: string;
-    ClassName?: string;
+interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  type: InputType;
+  placeholder?: string;
+  disabled?: boolean;
+  value: string;
+  setValue?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  identify: string;
+  className?: string;
 }
 type SelectorBoxProps = {
    label: string;
@@ -35,9 +34,9 @@ type SelectorBoxProps = {
 }
 
 
-export default function InputBox({label , type ,placeholder , isDisable =false ,setValue , value ,identify , ClassName}: InputBoxProps) {
+export default function InputBox({label , type ,placeholder , disabled =false ,setValue , value ,identify , className , ...all}: InputBoxProps) {
   return (
-    <div className={clsx("flex flex-col gap-1", ClassName)}>
+    <div className={clsx("flex flex-col gap-1", className)}>
         <Label htmlFor={identify} className="text-[1em] font-medium ">
             {label}
         </Label>
@@ -46,10 +45,11 @@ export default function InputBox({label , type ,placeholder , isDisable =false ,
             name={identify}
             type={type}
             placeholder={placeholder}
-            disabled={isDisable}
+            disabled={disabled}
             value={value}
-            onChange={(e) => setValue(e)}
+            onChange={(e) => setValue && setValue(e)}
             size={45}
+            {...all}
             
         
         />

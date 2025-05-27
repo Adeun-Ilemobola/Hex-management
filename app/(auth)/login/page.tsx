@@ -77,7 +77,7 @@ export default function Page() {
                             label="Email"
                             type="email"
                             placeholder="Enter your email"
-                            isDisable={LoginMut.isPending}
+                            disabled={LoginMut.isPending}
                             setValue={handleChange}
                             value={loginInfo.email}
                             identify="email"
@@ -86,7 +86,7 @@ export default function Page() {
                             label="Password"
                             type="password"
                             placeholder="Enter your password"
-                            isDisable={LoginMut.isPending}
+                            disabled={LoginMut.isPending}
                             setValue={handleChange}
                             value={loginInfo.password}
                             identify="password"
