@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import Warper from "@/components/Warper";
+import { Provider } from "@/components/provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,10 +39,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster richColors position="top-right" expand={false} />
-          <Warper>
+         
+          <Provider>
+             <Toaster richColors position="top-right" expand={false} />
             {children}
-          </Warper>
+          </Provider>
         </ThemeProvider>
       </body>
     </html>
