@@ -5,7 +5,7 @@ import { api } from '@/lib/trpc'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 
-export default function page() {
+export default function Page() {
   const [newDate, setNewDatw] = useState<string | undefined>("")
   const helloQuery = useQuery(api().hello.queryOptions({ text: "ddfsd" }))
   const sumQuery = useQuery(api().addNumbers.queryOptions({ a: 4, b: 5 }));
