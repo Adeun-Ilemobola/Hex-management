@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   
   },
   images: {
-    domains: ['your-supabase-bucket-url', 'cdn.shadcn.com'],
+    domains: ['your-supabase-bucket-url', 'cdn.shadcn.com' , "images.unsplash.com"],
     // Add domains you use for images (e.g., Supabase storage)
   },
    

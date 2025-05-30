@@ -35,12 +35,12 @@ export async function middleware(request: NextRequest) {
     pathName,
 
 
-    envTest,
-    requestUrl: request.url,
-    requestPathname: request.nextUrl.pathname,
-    requestSearchParams: request.nextUrl.searchParams.toString(),
-    requestHeaders: Object.fromEntries(request.headers.entries()),
-    requestMethod: request.method,
+    // envTest,
+    // requestUrl: request.url,
+    // requestPathname: request.nextUrl.pathname,
+    // requestSearchParams: request.nextUrl.searchParams.toString(),
+    // requestHeaders: Object.fromEntries(request.headers.entries()),
+    // requestMethod: request.method,
     
 
   });

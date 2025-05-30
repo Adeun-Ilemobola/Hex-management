@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter } from '../init';
+import { PropertiesRouter } from './UserRouter';
 export const appRouter = createTRPCRouter({
+  Propertie:PropertiesRouter,
+
   hello: baseProcedure
     .input(
       z.object({

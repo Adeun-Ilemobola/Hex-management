@@ -51,7 +51,6 @@ export default function InputBox({label , type ,placeholder , disabled =false ,s
             size={45}
             {...all}
             
-        
         />
 
     </div>

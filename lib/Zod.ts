@@ -2,8 +2,8 @@
 import { z } from 'zod';
 
 export const zodLoginSchema = z.object({
-    email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string(),
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string(),
 })
 
 
@@ -80,7 +80,7 @@ export const zodRegisterSchema = z
     email: z
       .string()
       .email({ message: "Invalid email address" }),
-      
+
 
     password: z
       .string()
@@ -114,22 +114,43 @@ export const zodRegisterSchema = z
 
 
 
-  export const propertieSchema = z.object({
-  
+export const propertieSchema = z.object({
+
   name: z.string().min(2, "Name should be at least 2 characters."),
   address: z.string().min(5, "Please provide a valid address with ZIP Code."),
-  initialInvestment: z.number().positive("Investment must be a positive number."),
-  margin: z.number().min(0, "Margin should not be negative."),
-  typeOfSale: z.enum(["sell", "rent", "lease"]).default("sell"),
-
-  saleDuration: z.number().int().min(0, "Duration must be zero or positive.").optional().default(0),
   description: z.string().max(1500, "Description too long.").optional(),
-  yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()).optional(),
-  squareFootage: z.number().int().positive("Square footage must be positive.").optional(),
   numBedrooms: z.number().int().min(0, "Bedrooms cannot be negative.").optional(),
   numBathrooms: z.number().int().min(0, "Bathrooms cannot be negative.").optional(),
-  Leavingstatus: z.enum(["Active", "Inactive", "Renovation", "Developing", "Purchase Planning"]).optional().default("Active"),
   lotSize: z.number().positive("Lot size must be positive.").optional(),
+  yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()).optional(),
+  squareFootage: z.number().int().positive("Square footage must be positive.").optional(),
+
+
+
+
+  typeOfSale: z.enum(["sell", "rent", "lease"]).default("sell"),
+  initialInvestment: z.number().positive("Investment must be a positive number."),
+  saleDuration: z.number().int().min(0, "Duration must be zero or positive.").optional().default(0),
+  margin: z.number().min(0, "Margin should not be negative."),
+  leaseCycle: z.number().optional().default(0)
+    .describe(
+      "Every amount of months for LeaseCycle, can be a certain amount of years plus months for LeaseCycle"
+    ),
+  leaseType: z.string().optional().default("Month")
+    .describe(
+      "Lease candy every week, every amount of months for LeaseCycle, can be a certain amount of years plus months for LeaseCycle"
+    ),
+
+  finalResult: z
+    .number()
+    .default(0)
+    .describe("The result for the investment"),
+
+
+
+
+  Leavingstatus: z.enum(["active", "Inactive", "Renovation", "Developing", "Purchase Planning"]).optional().default("active"),
+
   propertyType: z.string().optional(),
   status: z.enum(["active", "pending", "sold"]).optional().default("active"),
   ownerName: z.string().min(2, "Owner name required."),
@@ -142,9 +163,68 @@ export const zodRegisterSchema = z
   amenities: z.array(z.string()),
 
 
-  imageUrls: z.array(z.string().url("Must be a valid URL.")),
+  imageUrls: z.array(
+    z.object({
+      name: z.string(),
+      base64: z.string(),
+      size: z.string(),
+      type: z.string(),
+      lastModified: z.string(),
+
+    })
+  ),
   videoTourUrl: z.string().url("Must be a valid URL.").optional(),
-  
+
+}).superRefine((data, ctx) => {
+  // 1. If rent
+  if (data.typeOfSale === "rent") {
+    if (!(data.initialInvestment > 1000)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["initialInvestment"],
+        message: "Initial investment must be greater than 1000 for rent.",
+      });
+    }
+    if (!(data.margin > 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["margin"],
+        message: "Margin must be greater than zero for rent.",
+      });
+    }
+  }
+  // 2. If lease
+  if (data.typeOfSale === "lease") {
+    if (!(data.initialInvestment > 1000)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["initialInvestment"],
+        message: "Initial investment must be greater than 1000 for lease.",
+      });
+    }
+    if (!(data.margin > 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["margin"],
+        message: "Margin must be greater than zero for lease.",
+      });
+    }
+    if (!(data.leaseCycle && data.leaseCycle > 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["leaseCycle"],
+        message: "Lease cycle must be provided and greater than zero for lease.",
+      });
+    }
+    if (!(data.leaseType && data.leaseType.length > 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["leaseType"],
+        message: "Lease type must be provided for lease.",
+      });
+    }
+  }
+
 });
 export type PropertieInput = z.infer<typeof propertieSchema>;
 

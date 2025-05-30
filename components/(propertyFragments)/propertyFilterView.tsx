@@ -10,6 +10,9 @@ import DropBack from '../DropBack'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useRouter } from "next/navigation";
+import { api } from '@/lib/trpc'
+import PropertyCard from './propertyCard'
+import Link from 'next/link'
 const zSearch = z.object({
     status: z.string().min(4, "").optional(),
     searchText: z.string().min(2).optional(),
@@ -25,18 +28,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
 
 
-    const getProperties = useQuery({
-        queryKey: ["Properties"],
-        queryFn: async () => {
-            if (session) {
-                const { data } = await axios.post(`/api/user/${session.user.id}/properties`)
-                return data
-            }
-            return null
-
-        },
-        retry: 5
-    })
+    const getProperties = useQuery(api().Propertie.getUserProperties.queryOptions())
 
 
 
@@ -63,7 +55,10 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
                 <PropertySearchNav onSubmit={NavSearch} />
 
                 {/* list  of card  */}
-                <div className=' flex-1 flex flex-row gap-1.5 shrink-0 p-1'>
+                <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
+                    {getProperties.data && getProperties.data.map((item , i)=>{
+                        return(<Link href={`/property/${item.id}`}><PropertyCard data={item}/></Link>)
+                    })}
 
                 </div>
 
