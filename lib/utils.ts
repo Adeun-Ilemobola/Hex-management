@@ -12,6 +12,7 @@ export interface Base64FileResult {
   size: number; // in bytes
   type: string;
   lastModified: number;
+  Thumbnail:boolean
 }
 
 export const toB64 = (file: File): Promise<Base64FileResult> => {
@@ -26,6 +27,8 @@ export const toB64 = (file: File): Promise<Base64FileResult> => {
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
+        Thumbnail:false
+
       });
     };
 

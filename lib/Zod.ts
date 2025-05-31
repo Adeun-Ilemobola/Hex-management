@@ -115,15 +115,26 @@ export const zodRegisterSchema = z
 
 
 export const propertieSchema = z.object({
+  
 
   name: z.string().min(2, "Name should be at least 2 characters."),
   address: z.string().min(5, "Please provide a valid address with ZIP Code."),
-  description: z.string().max(1500, "Description too long.").optional(),
-  numBedrooms: z.number().int().min(0, "Bedrooms cannot be negative.").optional(),
-  numBathrooms: z.number().int().min(0, "Bathrooms cannot be negative.").optional(),
-  lotSize: z.number().positive("Lot size must be positive.").optional(),
-  yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()).optional(),
-  squareFootage: z.number().int().positive("Square footage must be positive.").optional(),
+  description: z.string().max(1500, "Description too long."),
+  numBedrooms: z.number().int().min(0, "Bedrooms cannot be negative."),
+  numBathrooms: z.number().int().min(0, "Bathrooms cannot be negative."),
+  lotSize: z.number().positive("Lot size must be positive."),
+  yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()),
+  squareFootage: z.number().int().positive("Square footage must be positive."),
+
+  hasGarage: z.boolean(),
+  hasGarden: z.boolean(),
+  hasPool: z.boolean(),
+  amenities: z.array(z.string()),
+
+  propertyType: z.string().optional(),
+  status: z.enum(["active", "pending", "sold"]).optional().default("active"),
+  ownerName: z.string().min(2, "Owner name required."),
+  contactInfo: z.string().min(5, "Contact info required."),
 
 
 
@@ -151,16 +162,10 @@ export const propertieSchema = z.object({
 
   Leavingstatus: z.enum(["active", "Inactive", "Renovation", "Developing", "Purchase Planning"]).optional().default("active"),
 
-  propertyType: z.string().optional(),
-  status: z.enum(["active", "pending", "sold"]).optional().default("active"),
-  ownerName: z.string().min(2, "Owner name required."),
-  contactInfo: z.string().min(5, "Contact info required."),
+  
 
 
-  hasGarage: z.boolean().optional(),
-  hasGarden: z.boolean().optional(),
-  hasPool: z.boolean().optional(),
-  amenities: z.array(z.string()),
+  
 
 
   imageUrls: z.array(
@@ -170,6 +175,8 @@ export const propertieSchema = z.object({
       size: z.string(),
       type: z.string(),
       lastModified: z.string(),
+     Thumbnail:z.boolean()
+
 
     })
   ),

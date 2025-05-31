@@ -13,7 +13,7 @@ import {
 
 type InputType = React.HTMLInputTypeAttribute
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label: string | React.ReactNode;
   type: InputType;
   placeholder?: string;
   disabled?: boolean;
@@ -23,7 +23,7 @@ interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
 }
 type SelectorBoxProps = {
-   label: string;
+   label: string | React.ReactNode;
    setValue: (value: string , identify:string) => void;
    value: string;
    identify: string;
@@ -32,8 +32,6 @@ type SelectorBoxProps = {
    options: { value: string; label: string }[];
 
 }
-
-
 export default function InputBox({label , type ,placeholder , disabled =false ,setValue , value ,identify , className , ...all}: InputBoxProps) {
   return (
     <div className={clsx("flex flex-col gap-1", className)}>
