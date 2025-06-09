@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If logged in and trying to access auth pages like Login/Register
-  if (sessionCookie && isAuthentication && pathName !== "/home") {
+  if (sessionCookie && isAuthentication && (pathName !== "/home" && pathName !== "/test" ) ) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 

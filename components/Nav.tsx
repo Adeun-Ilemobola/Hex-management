@@ -40,6 +40,7 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
                       name={session.user.name}
                       Logout={SignOut}
                       img={session.user.image ? session.user.image : undefined}
+                        go={() => rount.push("/")}
                      />
                     </>)
 
@@ -63,11 +64,14 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
 
 
 
-export default function UserCard({   img  , Logout ,name}:{name:string , img:string | undefined  ,  id:string , Logout:()=>void }) {
+export default function UserCard({go,    img  , Logout ,name}:{name:string , img:string | undefined  ,  id:string , Logout:()=>void , go:()=>void }) {
+   
+   
     return (
+
         <div>
-            <DropdownMenu>
-                <DropdownMenuTrigger className='flex flex-row gap-1 justify-center items-center ring-1 ring-blue-500/5 p-1'>
+            <DropdownMenu >
+                <DropdownMenuTrigger className='flex ml-auto flex-row gap-1 justify-center items-center ring-1 ring-blue-500/5 p-1'>
                     <Avatar className='h-10 w-10'>
                         <AvatarImage src={img} />
                         <AvatarFallback>{name.substring(0 ,1)}</AvatarFallback>
@@ -79,7 +83,10 @@ export default function UserCard({   img  , Logout ,name}:{name:string , img:str
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuItem>Subscription</DropdownMenuItem>
                     <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuItem variant={"destructive"} onClick={()=>{Logout()}}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem variant={"destructive"} onClick={()=>{
+                        Logout();
+                        go();
+                        }}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 

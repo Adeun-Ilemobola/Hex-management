@@ -10,6 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from './ui/switch';
+
+type SwitchBoxProp = {
+  value:boolean,
+  setValue:(oldvalue:boolean)=>void,
+  label: string | React.ReactNode;
+   className?: string;
+}
 
 type InputType = React.HTMLInputTypeAttribute
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -83,3 +91,18 @@ export function SelectorBox({label , setValue , value ,identify , ClassName , op
     </div>
   )
 }
+
+
+
+
+export  function SwitchBox({value , setValue , className ,label}:SwitchBoxProp) {
+  return (
+    <div className={clsx(" flex gap-1" ,className)}>
+      <Label>{label}</Label>
+      <Switch checked={value} onCheckedChange={(e)=>setValue(e)}/>
+      
+    </div>
+  )
+}
+
+ 

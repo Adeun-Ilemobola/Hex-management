@@ -126,9 +126,9 @@ export const propertieSchema = z.object({
   yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()),
   squareFootage: z.number().int().positive("Square footage must be positive."),
 
-  hasGarage: z.boolean(),
-  hasGarden: z.boolean(),
-  hasPool: z.boolean(),
+  hasGarage: z.boolean().default(false),
+  hasGarden: z.boolean().default(false),
+  hasPool: z.boolean().default(false),
   amenities: z.array(z.string()),
 
   propertyType: z.string().optional(),
@@ -172,12 +172,10 @@ export const propertieSchema = z.object({
     z.object({
       name: z.string(),
       base64: z.string(),
-      size: z.string(),
+      size: z.number(),
       type: z.string(),
-      lastModified: z.string(),
-     Thumbnail:z.boolean()
-
-
+      lastModified: z.number(),
+      Thumbnail:z.boolean().default(false)
     })
   ),
   videoTourUrl: z.string().url("Must be a valid URL.").optional(),
