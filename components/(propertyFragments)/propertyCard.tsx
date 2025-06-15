@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 interface PropertyCardProp {
     data: {
-        img?: string,
+        img?: string | undefined;
         name: string,
         address: string,
         status: string,
