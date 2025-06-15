@@ -52,8 +52,24 @@ model Session {
   @@map("session")
 }
 
+model image{
+  id String @id @default(uuid())
+  url String // The URL of the image
+  size Int // Size of the image in bytes
+  type String // Type of the image (e.g., "jpg", "png", "gif")
+  lastModified BigInt // Last modified timestamp in milliseconds since epoch
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Thumbnail Boolean // Whether this image is a thumbnail or not
+  supabaseID String // The ID of the image in Supabase storage, if applicable
+
+  // Relationships
+  propertyId String?
+  property   propertie? @relation(fields: [propertyId], references: [id])
+}
+
 model propertie {
-  id String @id
+  id String @id @default(uuid())
 
   name          String
   address       String // The exact location with the ZIP Code and the general address
@@ -97,7 +113,7 @@ model propertie {
  
 
   // Media
-  imageUrls    String[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
+  imageUrls    image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
   videoTourUrl String? // Optional video tour.
 
   // Timestamps

@@ -75,7 +75,7 @@ export default function ImgBox({ disabled, fileList, Class, SetMainImg, setData 
                         }}
                         className={` relative shrink-0 h-28 w-40 rounded-md ring-2 hover:ring-indigo-600/25 ${file.Thumbnail ? " ring-green-400" : " ring-indigo-600/65"} `}
                     >
-                        <Image className=' w-full h-full object-cover' alt={file.name} width={300} height={300} src={file.base64} />
+                        <Image draggable="false"  className=' w-full h-full object-cover select-none pointer-events-none' alt={file.name} width={300} height={300} src={file.url} />
 
                     </div>)
                 })}</>)}

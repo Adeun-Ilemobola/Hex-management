@@ -7,15 +7,27 @@ export function cn(...inputs: ClassValue[]) {
 
 
 export interface Base64FileResult {
+ supabaseID: string;
   name: string;
-  base64: string;
+  url: string;
   size: number; // in bytes
   type: string;
   lastModified: number;
   Thumbnail:boolean
 }
 
-export const toB64 = (file: File): Promise<Base64FileResult> => {
+export interface FileUploadResult {
+  supabaseID: string;
+  name: string;
+  url: string;
+  size: number; // in bytes
+  type: string;
+  lastModified: number;
+  Thumbnail:boolean
+}
+
+
+export const toB64 = (file: File): Promise<FileUploadResult> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -23,11 +35,12 @@ export const toB64 = (file: File): Promise<Base64FileResult> => {
       const base64String = reader.result as string;
       resolve({
         name: file.name,
-        base64: base64String,
+        url: base64String,
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-        Thumbnail:false
+        Thumbnail:false,
+        supabaseID: "",
 
       });
     };
@@ -38,7 +51,7 @@ export const toB64 = (file: File): Promise<Base64FileResult> => {
 };
 
 
-function base64ToBlob(base64: string, contentType = ''): Blob {
+export function base64ToBlob(base64: string, contentType = ''): Blob {
   const byteCharacters = atob(base64.split(',')[1]);
   const byteNumbers = new Array(byteCharacters.length).fill(0).map((_, i) => byteCharacters.charCodeAt(i));
   const byteArray = new Uint8Array(byteNumbers);

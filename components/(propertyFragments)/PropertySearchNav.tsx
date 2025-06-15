@@ -9,8 +9,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Label } from '../ui/label'
+import { Switch } from '../ui/switch'
 interface PropertySearchNavProps {
     onSubmit: (data: { status: string, searchText: string }) => void
+    changeMode ?: (mode: boolean) => void
+    mode?: boolean
 
 }
 
@@ -23,7 +27,7 @@ const Status = [
 ]
 
 
-export default function PropertySearchNav({ onSubmit }: PropertySearchNavProps) {
+export default function PropertySearchNav({ onSubmit , changeMode ,mode }: PropertySearchNavProps) {
     const [search, setSearch] = useState({
         status: "",
         searchText: ""
@@ -56,6 +60,22 @@ export default function PropertySearchNav({ onSubmit }: PropertySearchNavProps) 
                     {Status.map((s, i) => (<SelectItem key={i} value={s.name} className={`${s.Colour}`}>{s.name}</SelectItem>))}
                 </SelectContent>
             </Select>
+
+            <div className=' flex flex-row items-center gap-2'>
+                <Label htmlFor='mode-switch' className=' text-sm font-semibold'>Change Mode</Label>
+                <Switch
+                    className=' ml-2'
+                    onCheckedChange={(e) => {
+                        if (changeMode) changeMode(e)
+                    }}
+                    defaultChecked={false}
+                    checked={mode}
+                    id="mode-switch"
+                />
+            </div>
+
+
+
         </div>
     )
 }

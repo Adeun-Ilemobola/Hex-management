@@ -3,6 +3,7 @@
 import PropertyCard from '@/components/(propertyFragments)/propertyCard'
 import { DatePicker } from '@/components/date-picker'
 import ImgBox from '@/components/ImgBox'
+import { NumberBox } from '@/components/InputBox'
 import MakeUpdate from '@/components/MakeUpdate'
 import { api } from '@/lib/trpc'
 import { Base64FileResult } from '@/lib/utils'
@@ -33,21 +34,23 @@ export default function Page() {
 
 
   }
+  const [price, setPrice] = useState(100); 
 
 
   return (
     <div className='relative flex flex-col   min-h-screen  overflow-hidden'>
 
-      {/* <ImgBox
-        setData={setData}
-        SetMainImg={SetMainImg}
-        fileList={newDate}
-        Class=' w-[50%]'
 
-      /> */}
+      {/* <MakeUpdate id={undefined}/> */}
+      <NumberBox
+        label="Price"
+        value={price}
+        setValue={setPrice}
+        min={0}
+        max={10000}
+        step={1}
+      />
 
-
-      <MakeUpdate id={undefined}/>
 
 
 

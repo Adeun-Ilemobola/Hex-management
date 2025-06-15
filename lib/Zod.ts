@@ -131,7 +131,7 @@ export const propertieSchema = z.object({
   hasPool: z.boolean().default(false),
   amenities: z.array(z.string()),
 
-  propertyType: z.string().optional(),
+  propertyType: z.enum(["House", "Apartment", "Condo", "Commercial", "Other"]).optional().default("House"),
   status: z.enum(["active", "pending", "sold"]).optional().default("active"),
   ownerName: z.string().min(2, "Owner name required."),
   contactInfo: z.string().min(5, "Contact info required."),
@@ -171,11 +171,12 @@ export const propertieSchema = z.object({
   imageUrls: z.array(
     z.object({
       name: z.string(),
-      base64: z.string(),
+      url: z.string(),
       size: z.number(),
       type: z.string(),
       lastModified: z.number(),
-      Thumbnail:z.boolean().default(false)
+      Thumbnail:z.boolean().default(false),
+      supabaseID: z.string().default(""),
     })
   ),
   videoTourUrl: z.string().url("Must be a valid URL.").optional(),

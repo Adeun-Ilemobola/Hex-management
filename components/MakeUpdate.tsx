@@ -4,7 +4,7 @@ import DropBack from './DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from './Nav'
 import { PropertieInput, propertieSchema } from '@/lib/Zod'
-import InputBox, { SwitchBox } from './InputBox'
+import InputBox, { SelectorBox, SwitchBox } from './InputBox'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
@@ -39,11 +39,18 @@ const defaultProperty: PropertieInput = {
     leaseType: "Month",
     finalResult: 0,
     Leavingstatus: "active",
+    propertyType: "House", // Default value, can be changed
 
     imageUrls: [],
     videoTourUrl: "", // or omit if not required
 };
 
+const propertyTypeOP = [{ value: "House", label: "House" },
+{ value: "Apartment", label: "Apartment" },
+{ value: "Condo", label: "Condo" },
+{ value: "Commercial", label: "Commercial" },
+{ value: "Other", label: "Other" }
+]
 export default function MakeUpdate({ id }: MakeUpdatePros) {
     const Session = authClient.useSession()
     const getProperty = useQuery(api().Propertie.getPropertie.queryOptions({ pID: id }))
@@ -245,7 +252,23 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 className='shrink-0 w-[8rem]'
                             />
 
+                            <SelectorBox 
+                            options={propertyTypeOP}
+                            label={"Property Type"}
+                            identify='propertyType'
+                            setValue={(e) => HandleSel("propertyType", e)}
+                            value={property.propertyType}
+                            isDisable={postProperty.isPending}
+                            ClassName='shrink-0 w-[8rem]'
+                            
+                            />
+
+
+
+
                         </div>
+
+
 
                         <div className=' flex flex-row gap-2 items-center'>
 
@@ -284,8 +307,9 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
 
                     <ImgBox
                         fileList={property.imageUrls}
+                        Class=' w-[30rem] '
                         disabled={postProperty.isPending}
-                        setData={(list)=>{
+                        setData={(list) => {
                             setProperty(pre => ({
                                 ...pre,
                                 imageUrls: list

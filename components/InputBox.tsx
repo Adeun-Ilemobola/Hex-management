@@ -11,6 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from './ui/switch';
+import { Minus, Plus } from "lucide-react";
+import { Input as AriaInput, Button, Group, NumberField, Label as AriaLabel } from "react-aria-components";
+
 
 type SwitchBoxProp = {
   value:boolean,
@@ -18,6 +21,17 @@ type SwitchBoxProp = {
   label: string | React.ReactNode;
    className?: string;
 }
+
+export type NumberBoxProps = {
+  label: string | React.ReactNode;
+  value: number;
+  setValue: (value: number) => void;
+  className?: string;
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+};
 
 type InputType = React.HTMLInputTypeAttribute
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -63,9 +77,6 @@ export default function InputBox({label , type ,placeholder , disabled =false ,s
   )
 }
 
-
-
-
 export function SelectorBox({label , setValue , value ,identify , ClassName , options  , isDisable}: SelectorBoxProps) {
   return (
     <div className={clsx("flex flex-col gap-1", ClassName)}>
@@ -92,9 +103,6 @@ export function SelectorBox({label , setValue , value ,identify , ClassName , op
   )
 }
 
-
-
-
 export  function SwitchBox({value , setValue , className ,label}:SwitchBoxProp) {
   return (
     <div className={clsx(" flex gap-1" ,className)}>
@@ -105,4 +113,52 @@ export  function SwitchBox({value , setValue , className ,label}:SwitchBoxProp) 
   )
 }
 
- 
+
+export function NumberBox({
+  label = "Number input with plus/minus buttons",
+  value,
+  setValue,
+  min = 0,
+  max = 999999,
+  step = 1,
+  className = "",
+  disabled = false,
+}: NumberBoxProps) {
+  return (
+    <NumberField
+      value={value}
+      minValue={min}
+      maxValue={max}
+      step={step}
+      onChange={setValue}
+      isDisabled={disabled}
+      className={`max-w-[300px] ${className}`}
+    >
+      <div className="space-y-2">
+        <AriaLabel className="text-sm font-medium text-foreground">
+          {label}
+        </AriaLabel>
+        <Group className="relative inline-flex h-9 w-full items-center overflow-hidden whitespace-nowrap rounded-md border bg-background px-1 text-foreground shadow-sm">
+          <Button
+            slot="decrement"
+            className="-ms-px flex aspect-square h-[inherit] items-center justify-center rounded-sm border-none px-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+            isDisabled={disabled || value <= min}
+          >
+            <Minus size={16} strokeWidth={2} aria-hidden="true" />
+          </Button>
+          <AriaInput
+            className="w-full grow bg-background px-3 py-2 text-center tabular-nums text-foreground outline-none transition"
+            disabled={disabled}
+          />
+          <Button
+            slot="increment"
+            className="-me-px flex aspect-square h-[inherit] items-center justify-center rounded-sm border-none px-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+            isDisabled={disabled || value >= max}
+          >
+            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+          </Button>
+        </Group>
+      </div>
+    </NumberField>
+  );
+}

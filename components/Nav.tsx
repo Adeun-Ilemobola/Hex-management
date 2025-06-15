@@ -31,7 +31,7 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
             </div>
 
 
-            <div className=' flex w-[15%] items-center  '>
+            <div className=' flex w-[15%] items-center p-3  '>
 
                 {session &&
                     (<>
@@ -48,7 +48,7 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
 
                 {!session &&
                     (<>
-                      <Button onClick={()=>rount.push("/login")}>
+                      <Button  className=' ml-auto' onClick={()=>rount.push("/login")}>
                         Login
                       </Button>
                     </>)
@@ -69,10 +69,10 @@ export default function UserCard({go,    img  , Logout ,name}:{name:string , img
    
     return (
 
-        <div>
-            <DropdownMenu >
-                <DropdownMenuTrigger className='flex ml-auto flex-row gap-1 justify-center items-center ring-1 ring-blue-500/5 p-1'>
-                    <Avatar className='h-10 w-10'>
+
+            <DropdownMenu  >
+                <DropdownMenuTrigger asChild className='' >
+                    <Avatar  className=' ml-auto h-12 w-12 rounded-lg'>
                         <AvatarImage src={img} />
                         <AvatarFallback>{name.substring(0 ,1)}</AvatarFallback>
                     </Avatar>
@@ -92,7 +92,7 @@ export default function UserCard({go,    img  , Logout ,name}:{name:string , img
 
 
 
-        </div>
+      
     )
 }
 
