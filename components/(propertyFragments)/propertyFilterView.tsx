@@ -27,7 +27,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
 
     const getProperties = useQuery(api().Propertie.getUserProperties.queryOptions({data: data }))
-    // const [isEdit, setIsEdit] = useState(false)
+     const [isEdit, setIsEdit] = useState(false)
 
 
     function NavSearch(urlData: { status: string, searchText: string }) {
@@ -50,12 +50,16 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
             <div className=' flex-1 flex flex-col gap-2.5'>
                 <Nav session={session} SignOut={authClient.signOut} />
 
-                <PropertySearchNav onSubmit={NavSearch} />
+                <PropertySearchNav 
+                onSubmit={NavSearch} 
+                changeMode={(mode) => setIsEdit(mode)}
+                mode={isEdit}
+                />
 
                 {/* list  of card  */}
                 <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
                     {getProperties.data && getProperties.data.map((item , i)=>{
-                        return(<PropertyCard key={i} data={item}/>)
+                        return(<PropertyCard mode={isEdit} key={i} data={item}/>)
                     })}
 
                 </div>

@@ -9,6 +9,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
 import ImgBox from './ImgBox'
+import { Button } from './ui/button'
 
 interface MakeUpdatePros {
     id: string | undefined
@@ -85,83 +86,83 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
         }))
     }
 
-    // const finSel = useMemo(() => {
-    //     if (property.typeOfSale === "sell" && property.margin > 0 && property.initialInvestment > 100) {
+    const finSel = useMemo(() => {
+        if (property.typeOfSale === "sell" && property.margin > 0 && property.initialInvestment > 100) {
 
 
-    //     }
+        }
 
-    //     switch (property.typeOfSale) {
-    //         case "sell": {
-    //             if (property.margin > 0 && property.initialInvestment > 100) {
-    //                 setProperty(pre => ({
-    //                     ...pre,
-    //                     finalResult: pre.initialInvestment + (pre.initialInvestment * pre.margin / 100)
-    //                 }))
-    //             }
-    //             break;
-    //         }
-    //         // Mp =  initialInvestment / 12
-    //         // M =  mp + (mp * margin / 100)
-
-
-    //         // get the initial investment back time line 
-    //         //  investment back time line = initialInvestment / M
-
-    //         case "rent": {
-    //             const mp = property.initialInvestment / 12
-    //             const M = mp + (mp * property.margin / 100)
-    //             if (mp > 0 && M > 0) {
-    //                 setProperty(pre => ({
-    //                     ...pre,
-    //                     finalResult: M,
-    //                     saleDuration: Math.ceil(pre.initialInvestment / M)
-    //                 }))
-    //             } else {
-    //                 setProperty(pre => ({
-    //                     ...pre,
-    //                     finalResult: 0,
-    //                     saleDuration: 0
-    //                 }))
-    //                 toast.error("Please make sure the initial investment and margin are set correctly.")
-    //             }
-
-    //             break;
-    //         }
-
-    //         case "lease": {
-    //             const mp = property.initialInvestment / property.leaseCycle
-    //             const M = mp + (mp * property.margin / 100)
-    //             if (mp > 0 && M > 0) {
-    //                 setProperty(pre => ({
-    //                     ...pre,
-    //                     finalResult: M,
-    //                     saleDuration: Math.ceil(pre.initialInvestment / M)
-    //                 }))
-    //             } else {
-    //                 setProperty(pre => ({
-    //                     ...pre,
-    //                     finalResult: 0,
-    //                     leaseCycle: 0
-    //                 }))
-    //                 toast.error("Please make sure the initial investment and margin are set correctly.")
-    //             }
-    //             break;
-    //         }
+        switch (property.typeOfSale) {
+            case "sell": {
+                if (property.margin > 0 && property.initialInvestment > 100) {
+                    setProperty(pre => ({
+                        ...pre,
+                        finalResult: pre.initialInvestment + (pre.initialInvestment * pre.margin / 100)
+                    }))
+                }
+                break;
+            }
+            // Mp =  initialInvestment / 12
+            // M =  mp + (mp * margin / 100)
 
 
-    //         default:
-    //             setProperty(pre => ({
-    //                 ...pre,
-    //                 finalResult: 0,
-    //                 saleDuration: 0
-    //             }))
-    //             toast.error("Please select a valid type of sale.")
-    //             break;
-    //     }
+            // get the initial investment back time line 
+            //  investment back time line = initialInvestment / M
+
+            case "rent": {
+                const mp = property.initialInvestment / 12
+                const M = mp + (mp * property.margin / 100)
+                if (mp > 0 && M > 0) {
+                    setProperty(pre => ({
+                        ...pre,
+                        finalResult: M,
+                        saleDuration: Math.ceil(pre.initialInvestment / M)
+                    }))
+                } else {
+                    setProperty(pre => ({
+                        ...pre,
+                        finalResult: 0,
+                        saleDuration: 0
+                    }))
+                    toast.error("Please make sure the initial investment and margin are set correctly.")
+                }
+
+                break;
+            }
+
+            case "lease": {
+                const mp = property.initialInvestment / property.leaseCycle
+                const M = mp + (mp * property.margin / 100)
+                if (mp > 0 && M > 0) {
+                    setProperty(pre => ({
+                        ...pre,
+                        finalResult: M,
+                        saleDuration: Math.ceil(pre.initialInvestment / M)
+                    }))
+                } else {
+                    setProperty(pre => ({
+                        ...pre,
+                        finalResult: 0,
+                        leaseCycle: 0
+                    }))
+                    toast.error("Please make sure the initial investment and margin are set correctly.")
+                }
+                break;
+            }
 
 
-    // }, [property.typeOfSale, property.margin, property.initialInvestment])
+            default:
+                setProperty(pre => ({
+                    ...pre,
+                    finalResult: 0,
+                    saleDuration: 0
+                }))
+                toast.error("Please select a valid type of sale.")
+                break;
+        }
+
+
+    }, [property.typeOfSale, property.margin, property.initialInvestment])
 
     function HandleBool(identify: string, value: boolean) {
         setProperty(pre => ({
@@ -326,7 +327,8 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                         }}
                     />
 
-                    <div>
+                    <div className=' w-[30rem] p-4 flex flex-col gap-2 '>
+                        <Button onClick={()=> finSel}> reCal</Button>
 
                     </div>
 
