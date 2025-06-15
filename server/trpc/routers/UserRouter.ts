@@ -26,15 +26,20 @@ export const PropertiesRouter = createTRPCRouter({
                             }
                         })
                     },
+                    include:{
+                        imageUrls: true,
+                    }
                 }
             )
             if (!getP) {
-                return undefined
+                return {
+                    data: null,
+                }
             }
             const cleanP = getP.map(item => {
                 return {
                     id: item.id,
-                    img: item.imageUrls.length === 0 ? undefined : item.imageUrls[0],
+                    img: item.imageUrls.length === 0 ? undefined : item.imageUrls[0].url,
                     name: item.name,
                     address: item.address,
                     status: item.status as string,
@@ -43,8 +48,7 @@ export const PropertiesRouter = createTRPCRouter({
             })
 
             return {
-                data: cleanP,
-                count: getP.length
+                data: cleanP, 
             }
 
 

@@ -17,6 +17,14 @@ const zSearch = z.object({
 
 
 })
+export interface CleanProperty {
+  id: string;
+  img?: string;
+  name: string;
+  address: string;
+  status: string;
+  saleStatus: string;
+}
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
     const router = useRouter();
@@ -24,11 +32,8 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     const { data: session, isPending, error } = authClient.useSession();
     console.log({ session, isPending, error, data });
 
-
-
-    const getProperties = useQuery(api().Propertie.getUserProperties.queryOptions({data: data }))
+    const {data:getProperties , isPending:getPropertiesPending} = useQuery(api().Propertie.getUserProperties.queryOptions({data: data }))
      const [isEdit, setIsEdit] = useState(false)
-
 
     function NavSearch(urlData: { status: string, searchText: string }) {
         const vSearch = zSearch.safeParse(urlData);
@@ -46,7 +51,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
     }
     return (
-        <DropBack is={isPending || getProperties.isPending}>
+        <DropBack is={isPending || getPropertiesPending}>
             <div className=' flex-1 flex flex-col gap-2.5'>
                 <Nav session={session} SignOut={authClient.signOut} />
 
@@ -58,7 +63,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
                 {/* list  of card  */}
                 <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
-                    {getProperties.data?.data && getProperties.data.data.map((item , i)=>{
+                    {getProperties?.data && (getProperties.data as CleanProperty[]).map((item , i)=>{
                         return(<PropertyCard mode={isEdit} key={i} data={item}/>)
                     })}
 
