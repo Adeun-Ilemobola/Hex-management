@@ -2,7 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import React , {useState} from 'react'
-import axios from "axios"
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
 import PropertySearchNav from './PropertySearchNav'
@@ -12,7 +11,6 @@ import { toast } from 'sonner'
 import { useRouter } from "next/navigation";
 import { api } from '@/lib/trpc'
 import PropertyCard from './propertyCard'
-import Link from 'next/link'
 const zSearch = z.object({
     status: z.string().min(4, "").optional(),
     searchText: z.string().min(2).optional(),
@@ -29,7 +27,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
 
     const getProperties = useQuery(api().Propertie.getUserProperties.queryOptions({data: data }))
-    const [isEdit, setIsEdit] = useState(false)
+    // const [isEdit, setIsEdit] = useState(false)
 
 
     function NavSearch(urlData: { status: string, searchText: string }) {
@@ -57,7 +55,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
                 {/* list  of card  */}
                 <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
                     {getProperties.data && getProperties.data.map((item , i)=>{
-                        return(<PropertyCard data={item}/>)
+                        return(<PropertyCard key={i} data={item}/>)
                     })}
 
                 </div>

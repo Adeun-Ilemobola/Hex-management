@@ -1,39 +1,10 @@
 "use client"
 
-import PropertyCard from '@/components/(propertyFragments)/propertyCard'
-import { DatePicker } from '@/components/date-picker'
-import ImgBox from '@/components/ImgBox'
-import { NumberBox } from '@/components/InputBox'
-import MakeUpdate from '@/components/MakeUpdate'
-import { api } from '@/lib/trpc'
-import { Base64FileResult } from '@/lib/utils'
-import { useMutation, useQuery } from '@tanstack/react-query'
+
+import { NumberBox } from '@/components/InputBox';
 import React, { useState } from 'react'
 
 export default function Page() {
-  const [newDate, setNewDatw] = useState<Base64FileResult[]>([])
-
-
-
-
-  function setData(params: Base64FileResult[]) {
-    setNewDatw(pre => [...pre, ...params])
-
-  }
-
-  function SetMainImg(id: number) {
-    setNewDatw(per => per.map((item, i) => {
-      if (id === i) {
-        item.Thumbnail = true
-      } else {
-        item.Thumbnail = false
-
-      }
-      return item
-    }))
-
-
-  }
   const [price, setPrice] = useState(100); 
 
 
@@ -50,14 +21,6 @@ export default function Page() {
         max={10000}
         step={1}
       />
-
-
-
-
-
-
-
-
 
 
     </div>
