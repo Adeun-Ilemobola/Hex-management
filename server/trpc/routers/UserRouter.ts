@@ -28,11 +28,9 @@ export const PropertiesRouter = createTRPCRouter({
                     },
                 }
             )
-
             if (!getP) {
                 return undefined
             }
-
             const cleanP = getP.map(item => {
                 return {
                     id: item.id,
@@ -44,7 +42,10 @@ export const PropertiesRouter = createTRPCRouter({
                 }
             })
 
-            return cleanP
+            return {
+                data: cleanP,
+                count: getP.length
+            }
 
 
         }),

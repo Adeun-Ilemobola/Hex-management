@@ -58,7 +58,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
                 {/* list  of card  */}
                 <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
-                    {getProperties.data && getProperties.data.map((item , i)=>{
+                    {getProperties.data?.data && getProperties.data.data.map((item , i)=>{
                         return(<PropertyCard mode={isEdit} key={i} data={item}/>)
                     })}
 
