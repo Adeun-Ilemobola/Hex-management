@@ -2,10 +2,20 @@
 import React from 'react'
 import Loading from './Loading'
 
-export default function DropBack({ is, children }: { is: boolean, children: React.ReactNode }) {
+interface DropBackProps {
+    is: boolean;
+    children: React.ReactNode;
+    isTextMessage?:{
+        data: string |React.ReactNode;
+        show: boolean;
+    };
 
-    if (is) {
-        return (<Loading /> )
+}
+
+export default function DropBack({ is, children , isTextMessage }: DropBackProps) {
+
+    if (is || isTextMessage?.show) {
+        return (<Loading text={isTextMessage?.data} /> )
 
     }
     return (

@@ -51,7 +51,9 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
     }
     return (
-        <DropBack is={isPending || getPropertiesPending}>
+        <DropBack 
+        is={isPending || getPropertiesPending}
+        >
             <div className=' flex-1 flex flex-col gap-2.5'>
                 <Nav session={session} SignOut={authClient.signOut} />
 

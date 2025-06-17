@@ -5,6 +5,7 @@ import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertieSchema } from '@/lib/Zod';
 import { Prisma } from '@prisma/client';
+import { UploadImage } from '@/lib/supabase';
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
         .input(z.object({
@@ -26,14 +27,14 @@ export const PropertiesRouter = createTRPCRouter({
                             }
                         })
                     },
-                    include:{
+                    include: {
                         imageUrls: true,
                     }
                 }
             )
             if (!getP) {
                 return {
-                    data: null,
+                    data: [],
                 }
             }
             const cleanP = getP.map(item => {
@@ -48,7 +49,7 @@ export const PropertiesRouter = createTRPCRouter({
             })
 
             return {
-                data: cleanP, 
+                data: cleanP,
             }
 
 
@@ -78,29 +79,67 @@ export const PropertiesRouter = createTRPCRouter({
     postPropertie: protectedProcedure
         .input(z.object({ data: propertieSchema, pID: z.string().optional(), Type: z.enum(["Update", "Post"]).default("Post"), }))
         .mutation(async ({ input, ctx }) => {
-            const { data, Type, pID } = input;
-            const { imageUrls, videoTourUrl, ...rest } = data;
-            if (Type === "Post") {
+            try {
+                const { data, Type, pID } = input;
+                const { imageUrls, videoTourUrl, ...rest } = data;
+                if (Type === "Post") {
 
-                const newProperty = await prisma.propertie.create({
-                    data:{
-                        ...rest,
-                        userId: ctx.user.id,
-                        videoTourUrl: videoTourUrl || undefined
+                    const newProperty = await prisma.propertie.create({
+                        data: {
+                            ...rest,
+                            userId: ctx.user.id,
+                            videoTourUrl: undefined
+                        }
+                    });
+                    if (!newProperty) {
+                        return {
+                            message: "Failed to create property",
+                            success: false,
+                            data: null
+                        }
                     }
-                });
 
-                
-            } else if (Type === "Update") {
-                if (!pID) {
-                    throw new Error("pID is required for update")
+                    const supabaseNewImageUrls = await UploadImage(imageUrls, `${ctx.user.id}/${newProperty.id}`);
+                    if (!supabaseNewImageUrls || supabaseNewImageUrls.length === 0) {
+                        return {
+                            message: "Failed to upload images to Supabase",
+                            success: false,
+                            data: null
+                        }
+                    }
+
+                    const addNewImageUrls = await prisma.image.createMany({
+                        data: supabaseNewImageUrls.map((img) => ({
+                            ...img,
+                            propertieId: newProperty.id,
+                        })),
+                    })
+
+
+
+                }
+
+
+                return {
+                    message: "Property processed successfully",
+                    success: true,
+                    data: {
+                        ...rest,
+                        imageUrls,
+                        videoTourUrl
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error in postPropertie:", error);
+                return {
+                    message: "Failed to process property",
+                    success: false,
+                    data: null
                 }
 
             }
 
-
-
-            return { msg: "goo" }
         }),
 
 

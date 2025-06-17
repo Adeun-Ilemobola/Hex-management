@@ -4,7 +4,7 @@ import DropBack from './DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from './Nav'
 import { PropertieInput, propertieSchema } from '@/lib/Zod'
-import InputBox, { SelectorBox, SwitchBox } from './InputBox'
+import InputBox, { NumberBox, SelectorBox, SwitchBox } from './InputBox'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
@@ -50,7 +50,8 @@ const propertyTypeOP = [{ value: "House", label: "House" },
 { value: "Apartment", label: "Apartment" },
 { value: "Condo", label: "Condo" },
 { value: "Commercial", label: "Commercial" },
-{ value: "Other", label: "Other" }
+{ value: "Other", label: "Other" },
+{ value: "None", label: "None" }
 ]
 export default function MakeUpdate({ id }: MakeUpdatePros) {
     const Session = authClient.useSession()
@@ -173,8 +174,8 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
     }
 
     return (
-        <DropBack is={getProperty.isPending || postProperty.isPending}>
-            <div className='relative flex flex-col  min-h-screen  overflow-hidden'>
+        <DropBack is={ (getProperty.isPending || postProperty.isPending) }>
+            <div className='relative flex-1 flex flex-col  min-h-screen  overflow-hidden'>
                 <Nav SignOut={authClient.signOut} session={Session.data} />
 
                 <div>
@@ -203,65 +204,67 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                             value={property.address}
                         />
 
-                        <div className=' fle8x flex-row flex-wrap gap-2 '>
+                        <div className=' flex flex-row flex-wrap gap-2 '>
 
-                            <InputBox
+                            <NumberBox
                                 label={"Bedrooms"}
                                 disabled={postProperty.isPending}
-                                type="number"
-                                identify='numBedrooms'
-                                setValue={(e) => Handle("numBedrooms", e.target.value, e.target.type)}
-                                value={property.numBedrooms.toString()}
-                                className='shrink-0 w-[8rem]'
+                                
+                                setValue={(e) => Handle("numBedrooms", e.toString(), "number")}
+                                value={property.numBedrooms}
+                                className='shrink-0 w-[10rem]'
 
                             />
-                            <InputBox
+                            <NumberBox
                                 label={"Bathrooms"}
                                 disabled={postProperty.isPending}
-                                type="number"
-                                identify='numBathrooms'
-                                setValue={(e) => Handle("numBathrooms", e.target.value, e.target.type)}
-                                value={property.numBathrooms.toString()}
-                                className='shrink-0 w-[8rem]'
+                               
+                                setValue={(e) => Handle("numBathrooms", e.toString(), "number")}
+                                value={property.numBathrooms}
+                                className='shrink-0 w-[10rem]'
                             />
-                            <InputBox
+                            <NumberBox
                                 label={"Lot Size"}
                                 disabled={postProperty.isPending}
-                                type="number"
-                                identify='lotSize'
-                                setValue={(e) => Handle("lotSize", e.target.value, e.target.type)}
-                                value={property.lotSize.toString()}
-                                className='shrink-0 w-[8rem]'
+                                setValue={(e) => Handle("lotSize", e.toString(), "number")}
+                                value={property.lotSize}
+                                className='shrink-0 w-[10rem]'
+                                min={2}
+
                             />
-                            <InputBox
+                            <NumberBox
                                 label={"Year Built"}
                                 disabled={postProperty.isPending}
-                                type="number"
-                                identify='yearBuilt'
-                                setValue={(e) => Handle("yearBuilt", e.target.value, e.target.type)}
-                                value={property.yearBuilt.toString()}
+                                setValue={(e) => Handle("yearBuilt", e.toString(), "number")} 
+                                value={property.yearBuilt}
                                 min={1800}
-                                className='shrink-0 w-[8rem]'
-                            />
-                            <InputBox
-                                label={"Square Footage"}
-                                disabled={postProperty.isPending}
-                                type="number"
-                                identify='squareFootage'
-                                setValue={(e) => Handle("squareFootage", e.target.value, e.target.type)}
-                                value={property.squareFootage.toString()}
-                                className='shrink-0 w-[8rem]'
+                                max={new Date().getFullYear()}
+                                step={1}
+                            
+                                className='shrink-0 w-[10rem]'
                             />
 
-                            <SelectorBox 
-                            options={propertyTypeOP}
-                            label={"Property Type"}
-                            identify='propertyType'
-                            setValue={(e) => HandleSel("propertyType", e)}
-                            value={property.propertyType}
-                            isDisable={postProperty.isPending}
-                            ClassName='shrink-0 w-[8rem]'
-                            
+                            <NumberBox
+                                label={"Square Footage"}
+                                disabled={postProperty.isPending}
+                                max={50000}
+                                min={2}
+                                step={1}
+                                value={property.squareFootage}
+                                setValue={(e) => Handle("squareFootage", e.toString(), "number")}
+                                className='shrink-0 w-[10rem]'
+
+                            />
+
+                            <SelectorBox
+                                options={propertyTypeOP}
+                                label={"Property Type"}
+                                identify='propertyType'
+                                setValue={(e) => HandleSel("propertyType", e)}
+                                value={property.propertyType}
+                                isDisable={postProperty.isPending}
+                                ClassName='shrink-0 w-[9rem]'
+
                             />
 
 
@@ -328,7 +331,10 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                     />
 
                     <div className=' w-[30rem] p-4 flex flex-col gap-2 '>
-                        <Button onClick={()=> finSel}> reCal</Button>
+                        <Button className=' ml-auto w-32' onClick={() => finSel}> reCal</Button>
+
+
+
 
                     </div>
 
