@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/select"
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
+import { PackagePlus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 interface PropertySearchNavProps {
     onSubmit: (data: { status: string, searchText: string }) => void
     changeMode ?: (mode: boolean) => void
@@ -28,6 +30,7 @@ const Status = [
 
 
 export default function PropertySearchNav({ onSubmit , changeMode ,mode }: PropertySearchNavProps) {
+    const rount = useRouter()
     const [search, setSearch] = useState({
         status: "",
         searchText: ""
@@ -72,6 +75,16 @@ export default function PropertySearchNav({ onSubmit , changeMode ,mode }: Prope
                     checked={mode}
                     id="mode-switch"
                 />
+            </div>
+
+            <div
+                onClick={() => {
+                    rount.push("home/propertie-mp")
+                   
+                }
+                }
+            >
+                  <PackagePlus size={35} strokeWidth={1.8} className=' hover:text-cyan-700' />
             </div>
 
 

@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (sessionCookie && !authPage && !protectedPage) {
+  if (sessionCookie && (!authPage || !protectedPage)) {
   return NextResponse.redirect(new URL("/home", request.url));
 }
 

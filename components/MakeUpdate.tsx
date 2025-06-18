@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import ImgBox from './ImgBox'
 import { Button } from './ui/button'
 import { set } from 'date-fns'
+import { log } from 'console'
 
 interface MakeUpdatePros {
     id: string | undefined
@@ -111,7 +112,9 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
         }))
     }
 
-    const finSel = useMemo(() => {
+    const FinalCalculation  =() => {
+        console.log("Final Calculation triggered with typeOfSale:", property.typeOfSale, "and margin:", property.margin);
+        
 
         switch (property.typeOfSale) {
             case "sell": {
@@ -152,7 +155,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             }
 
             case "lease": {
-               
+
                 const basePerCycle = property.initialInvestment / property.leaseCycle;
                 const paymentPerCycle = basePerCycle + (basePerCycle * property.margin / 100);
                 const saleDuration = Math.ceil(property.initialInvestment / paymentPerCycle);
@@ -186,7 +189,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
         }
 
 
-    }, [property.typeOfSale, property.margin, property.initialInvestment])
+    }
 
 
 
@@ -199,15 +202,17 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
     }
 
     function typeOfSaleMode() {
+    
+
         if (property.typeOfSale === "sell") {
             return (
                 <div className='r'>
                     <p className='text-lg font-semibold'>
-                        <span className='text-green-500'>Selling Price:</span> {property.finalResult.toLocaleString("en-US", { style: "currency", currency: "USD" })}
                         <span className='text-gray-500'>
-                            Initial investment of {property.initialInvestment.toLocaleString("en-US", { style: "currency", currency: "USD" })}
-                            {property.margin > 0 ? ` with a margin of ${property.margin}%` : ""}
-                            is expected to yield a profit of <span className=' text-indigo-500'>{(property.finalResult - property.finalResult).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+                            <span className='text-green-500'>Selling Price:</span> {property.finalResult.toLocaleString("en-US", { style: "currency", currency: "USD" })}. 
+                             Initial investment of {property.initialInvestment.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+                            {property.margin > 0 ? ` with a margin of ${property.margin}%` : ""}  
+                              is expected to yield a profit of <span className=' text-indigo-500'>{(property.initialInvestment - property.finalResult).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
 
 
                         </span>
@@ -266,7 +271,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             ...pre,
             ownerName: Session.data?.user?.name || "",
             contactInfo: Session.data?.user?.email || ""
-           
+
         }))
         try {
             const validatedProperty = await propertieSchema.safeParseAsync(property);
@@ -468,14 +473,17 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                     />
 
                     <div className=' w-[30rem] p-4 flex flex-col gap-2 '>
-                        <Button className=' ml-auto w-32' onClick={() => finSel}> reCal</Button>
+                        <Button className=' ml-auto w-32' onClick={() => FinalCalculation}> Recalculate</Button>
                         <div className=' flex flex-row gap-2 items-center'>
                             <InputBox
                                 disabled={postProperty.isPending}
                                 label={"initial Investment"}
                                 type="number"
                                 identify='initialInvestment'
-                                setValue={(e) => Handle("initialInvestment", e.target.value,)}
+                                setValue={(e) => {
+                                    Handle("initialInvestment", e.target.value, e.target.type);
+                                    FinalCalculation(); // Recalculate when initial investment changes
+                                }}
                                 value={property.initialInvestment.toString()}
                                 className='shrink-0 w-[10rem]'
 
@@ -483,19 +491,22 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                             <NumberBox
                                 label={"Margin (%)"}
                                 disabled={postProperty.isPending}
-                                setValue={(e) => Handle("margin", e.toString(), "number")}
+                                setValue={(e) => {
+                                    Handle("margin", e.toString(), "number");
+                                    FinalCalculation(); // Recalculate when margin changes
+                                }}
                                 value={property.margin}
                                 className='shrink-0 w-[8rem]'
 
                             />
                             {property.typeOfSale === "lease" && (
-                            <NumberBox
-                                label={"Lease Cycle (Months)"}
-                                disabled={postProperty.isPending}
-                                setValue={(e) => Handle("leaseCycle", e.toString(), "number")}
-                                value={property.leaseCycle}
-                                className='shrink-0 w-[10rem]'
-                            />
+                                <NumberBox
+                                    label={"Lease Cycle (Months)"}
+                                    disabled={postProperty.isPending}
+                                    setValue={(e) => Handle("leaseCycle", e.toString(), "number")}
+                                    value={property.leaseCycle}
+                                    className='shrink-0 w-[10rem]'
+                                />
                             )}
 
 
@@ -506,17 +517,21 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 options={typeOfSaleOP}
                                 label={"Type of Sale"}
                                 identify='typeOfSale'
-                                setValue={(e) => HandleSel("typeOfSale", e)}
+                                setValue={(e) => {
+                                    HandleSel("typeOfSale", e);
+                                    FinalCalculation(); // Recalculate when type of sale changes
+                                }}
                                 value={property.typeOfSale}
                                 isDisable={postProperty.isPending}
                                 ClassName='shrink-0 w-[9rem]'
+                                defaultValue='sell'
                             />
                         </div>
 
                         <div className=' flex flex-col gap-2'>
                             {typeOfSaleMode()}
                         </div>
-                            
+
 
 
 
@@ -528,6 +543,13 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
 
 
                 </div>
+                <Button onClick={handleSubmit} disabled={postProperty.isPending} className=' w-[30rem] ml-auto mb-4'>
+                    <div className=' flex flex-row gap-2 items-center'>
+
+                        <span>Update or make Property</span>
+                        {postProperty.isPending && <span className='animate-spin'>🔄</span>}
+                    </div>
+                </Button>
 
             </div>
         </DropBack>
