@@ -52,6 +52,7 @@ type SelectorBoxProps = {
   ClassName?: string;
   isDisable: boolean;
   options: { value: string; label: string }[];
+  defaultValue?: string;
 
 }
 export default function InputBox({ label, type, placeholder, disabled = false, setValue, value, identify, className, ...all }: InputBoxProps) {
@@ -77,14 +78,14 @@ export default function InputBox({ label, type, placeholder, disabled = false, s
   )
 }
 
-export function SelectorBox({ label, setValue, value, identify, ClassName, options, isDisable }: SelectorBoxProps) {
+export function SelectorBox({ label, setValue, value, identify, ClassName, options, isDisable , defaultValue="None" }: SelectorBoxProps) {
   return (
     <div className={clsx("flex flex-col gap-1", ClassName)}>
       <Label htmlFor={identify} className="text-[1em] font-medium ">
         {label}
       </Label>
 
-      <Select onValueChange={(value) => { setValue(value, identify) }} disabled={isDisable} defaultValue={"None"} >
+      <Select onValueChange={(value) => { setValue(value, identify) }} disabled={isDisable} defaultValue={defaultValue} >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder={value.length < 1 ? "None" : value} />
         </SelectTrigger>
@@ -103,7 +104,7 @@ export function SelectorBox({ label, setValue, value, identify, ClassName, optio
   )
 }
 
-export function SwitchBox({ value, setValue, className, label }: SwitchBoxProp) {
+export function SwitchBox({ value, setValue, className, label,  }: SwitchBoxProp) {
   return (
     <div className={clsx(" flex gap-1", className)}>
       <Label>{label}</Label>
