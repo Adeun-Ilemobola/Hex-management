@@ -8,6 +8,7 @@ export default function Page({searchParams}:{ searchParams: Promise<{ [key: stri
   return (
 
     <div className='relative flex flex-col  min-h-screen  overflow-hidden'>
+      
 
       <PropertyFilterView data={dat}/>
      

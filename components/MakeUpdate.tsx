@@ -6,11 +6,11 @@ import { Nav } from './Nav'
 import { PropertieInput, propertieSchema } from '@/lib/Zod'
 import InputBox, { NumberBox, SelectorBox, SwitchBox } from './InputBox'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/trpc'
+import { useTRPC } from '@/lib/trpc'
 import { toast } from 'sonner'
 import ImgBox from './ImgBox'
 import { Button } from './ui/button'
-import { DeleteImages, UploadImage } from '@/lib/supabase'
+import { DeleteImages, UploadImage, UploadImageList } from '@/lib/supabase'
 import { FileUploadResult } from '@/lib/utils'
 
 interface MakeUpdatePros {
@@ -64,7 +64,6 @@ const LeavingstatusOP = [
     { value: "None", label: "None" }
 ]
 
-
 const statusOP = [
     { value: "active", label: "Active" },
     { value: "pending", label: "Pending" },
@@ -79,9 +78,12 @@ const typeOfSaleOP = [
     { value: "None", label: "None" }
 ]
 export default function MakeUpdate({ id }: MakeUpdatePros) {
+    const api = useTRPC();
     const Session = authClient.useSession()
-    const getProperty = useQuery(api().Propertie.getPropertie.queryOptions({ pID: id }))
-    const postProperty = useMutation(api().Propertie.postPropertie.mutationOptions())
+    const getProperty = useQuery(api.Propertie.getPropertie.queryOptions({ pID: id }))
+    const postProperty =useMutation( api.Propertie.postPropertie.mutationOptions())
+
+   
 
 
     const [property, setProperty] = useState<PropertieInput>(defaultProperty)
@@ -302,9 +304,6 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                 ownerName: Session.data?.user?.name,
                 contactInfo: Session.data?.user?.email,
             });
-
-
-
             //
             if (!validatedProperty.success) {
                 validatedProperty.error.errors.forEach(err => {
@@ -313,20 +312,18 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                 );
                 return;
             }
-               // Prevent duplications uploads
-            const imagesToUpload = property.imageUrls.filter(img => !img.supabaseID && img.supabaseID === "");
-            uploadedImages = await UploadImage(imagesToUpload, Session.data?.user?.id)
-            
-            const post = await postProperty.mutateAsync({
-                pID: id, data: {
-                    ...validatedProperty.data,
-                    imageUrls: [
-                        ...property.imageUrls.filter(img => img.supabaseID && img.supabaseID !== ""),
-                        ...uploadedImages
-                    ],
+            // Prevent duplications uploads
+            const imagesToUpload = property.imageUrls.filter(img => !img.supabaseID || img.supabaseID === "");
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
 
+            console.log("Uploading property:", validatedProperty.data);
+            const post = await postProperty.mutateAsync({
+                data: {
+                    ...validatedProperty.data,
+                    imageUrls: [ ...uploadedImages , ...property.imageUrls.filter(img => img.supabaseID && img.supabaseID !== "")],
                 }
             });
+
             console.log("Post response:", post);
             if (post.success) {
                 setProperty(defaultProperty);
@@ -334,7 +331,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                     toast.success("Property updated successfully!");
                 }
             } else {
-                toast.error(post.message || "Failed to update property.");
+                toast.error("Failed to update property.");
                 await DeleteImages(uploadedImages.map(img => img.supabaseID));
             }
         } catch (error) {

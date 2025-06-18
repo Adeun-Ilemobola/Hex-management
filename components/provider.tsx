@@ -1,9 +1,17 @@
-"use client"
+'use client';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createTRPCClient, httpBatchLink } from '@trpc/client';
-import  React , { useState  } from 'react';
-import { TRPCProvider } from '@/lib/trpc';
-import { AppRouter } from '@/server/trpc/routers/_app';
+import { TRPCProvider } from '@/lib/trpc'; 
+import { httpBatchLink, createTRPCClient } from '@trpc/client';
+import type { AppRouter } from '@/server/trpc/routers/_app';
+import { useState } from 'react';
+
+function getBaseUrl() {
+  if (typeof window !== 'undefined') return '';
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -11,12 +19,7 @@ function makeQueryClient() {
         // With SSR, we usually want to set some default staleTime
         // above 0 to avoid refetching immediately on the client
         staleTime: 60 * 1000,
-        retry:2
       },
-      mutations:{
-         retry:2
-
-      }
     },
   });
 }
@@ -34,13 +37,14 @@ function getQueryClient() {
     return browserQueryClient;
   }
 }
-export function Provider({children}:{children:React.ReactNode}) {
+
+export function Provider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
-          url: process.env.NEXT_PUBLIC_TRPC_URL || "http://localhost:3000/api/trpc",
+          url: getBaseUrl(),
         }),
       ],
     }),
@@ -48,7 +52,6 @@ export function Provider({children}:{children:React.ReactNode}) {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {/* Your app here */}
         {children}
       </TRPCProvider>
     </QueryClientProvider>

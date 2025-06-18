@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,16 +33,20 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-         
+
           <Provider>
-             <Toaster richColors position="top-right" expand={false} />
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              duration={5000}
+             />
             {children}
           </Provider>
         </ThemeProvider>

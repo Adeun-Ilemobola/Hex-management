@@ -1,11 +1,9 @@
 //UserRouter
 
-import { date, z } from 'zod';
+import {  z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertieSchema } from '@/lib/Zod';
-import { Prisma } from '@prisma/client';
-import { UploadImage } from '@/lib/supabase';
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
         .input(z.object({
@@ -77,14 +75,14 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .input(z.object({ data: propertieSchema, pID: z.string().optional(), Type: z.enum(["Update", "Post"]).default("Post"), }))
+        .input(z.object({ data: propertieSchema,}))
         .mutation(async ({ input, ctx }) => {
             try {
-                const { data, Type, pID } = input;
+                const { data} = input;
                 const { imageUrls, videoTourUrl, ...rest } = data;
-                console.log("Processing property data:", data , Type, pID);
+                console.log("Processing property data:", data );
                 
-                if (Type === "Post") {
+              
 
                     const newProperty = await prisma.propertie.create({
                         data: {
@@ -106,7 +104,7 @@ export const PropertiesRouter = createTRPCRouter({
                             propertieId: newProperty.id,
                         })),
                     })
-                }
+                
                 return {
                     message: "Property processed successfully",
                     success: true,

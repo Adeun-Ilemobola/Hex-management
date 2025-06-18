@@ -7,11 +7,17 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+function sanitizeFilename(name: string): string {
+    return name
+        .replace(/\s+/g, "_")       // replace spaces with underscores
+        .replace(/[:]/g, "-")       // replace colons with dashes
+        .replace(/[^a-zA-Z0-9._-]/g, ""); // remove invalid characters
+}
 
-export async function UploadImage(file: Base64FileResult[], userID: string): Promise<FileUploadResult[]> {
+export  function UploadImage(file: Base64FileResult, userID: string): Promise<FileUploadResult> {
     return new Promise(async (resolve, reject) => {
 
-        if (!file || file.length === 0) {
+        if (!file) {
             reject(new Error('No file provided for upload'));
             return;
         }
@@ -19,47 +25,67 @@ export async function UploadImage(file: Base64FileResult[], userID: string): Pro
             reject(new Error('No path provided for upload'));
             return;
         }
+        const path = `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
 
-        const newFile: FileUploadResult[] = await Promise.all(
-            file.map(async (f) => {
-                const path = `${userID}/${Date.now()}-${f.name}`;
+        const { data: uploadData, error } = await supabase.storage
+            .from("img")
+            .upload(path, base64ToBlob(file.url, file.type), {
+                cacheControl: '3600',
+                upsert: false,
+            });
 
-                const { data: uploadData, error } = await supabase.storage
-                    .from("img")
-                    .upload(path, base64ToBlob(f.url, f.type), {
-                        cacheControl: '3600',
-                        upsert: false,
-                    });
+        if (error) {
+            throw new Error(`Upload failed: ${error.message}`);
+        }
 
-                if (error) {
-                    throw new Error(`Upload failed: ${error.message}`);
-                }
+        const { data } = supabase
+            .storage
+            .from('img')
+            .getPublicUrl(uploadData.path);
 
-                const { data } = supabase
-                    .storage
-                    .from('img')
-                    .getPublicUrl(uploadData.path);
+        resolve({
+            name: file.name,
+            url: data.publicUrl,
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified,
+            Thumbnail: file.Thumbnail,
+            supabaseID: uploadData.path
 
-
-                return {
-                    name: f.name,
-                    url: data.publicUrl,
-                    size: f.size,
-                    type: f.type,
-                    lastModified: f.lastModified,
-                    Thumbnail: f.Thumbnail,
-                    supabaseID: uploadData.path
-
-                };
-            })
-        )
-        resolve(newFile);
-
-
+        });
 
     })
 
 
+}
+
+function chunkArray<T>(array: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
+}
+
+export  function UploadImageList(files: Base64FileResult[], userID: string): Promise<FileUploadResult[]> {
+    return new Promise(async (resolve, reject) => {
+        const uploadedImages: FileUploadResult[] = [];
+
+        for (const chunk of chunkArray(files, 3)) {
+            const chunkResult = await Promise.allSettled(chunk.map(f => UploadImage(f, userID)));
+            for (const result of chunkResult) {
+                if (result.status === "fulfilled") {
+                    uploadedImages.push(result.value);
+                } else {
+                    console.error("Image upload failed:", result.reason);
+                }
+            }
+               await new Promise(res => setTimeout(res, 200));
+        }
+
+        resolve(uploadedImages);
+
+    })
 
 }
 
