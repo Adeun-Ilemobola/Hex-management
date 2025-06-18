@@ -1,90 +1,101 @@
-"use client"
-import React, { useRef } from 'react'
-import { Button } from './ui/button'
-import { Base64FileResult, toB64 } from '@/lib/utils'
-import clsx from 'clsx'
-import Image from 'next/image'
+"use client";
+
+import React, { useRef } from 'react';
+import { Button } from './ui/button';
+import { Base64FileResult, toB64 } from '@/lib/utils';
+import clsx from 'clsx';
+import Image from 'next/image';
 import { Upload } from 'lucide-react';
 
-
-interface imgBoxPros {
-    disabled?: boolean
-    fileList: Base64FileResult[],
-    Class?: string,
-    SetMainImg: (index: number) => void,
-    setData: (list: Base64FileResult[]) => void
+interface ImgBoxProps {
+  disabled?: boolean;
+  fileList: Base64FileResult[];
+  Class?: string;
+  SetMainImg: (index: number) => void;
+  setData: (list: Base64FileResult[]) => void;
 }
 
-export default function ImgBox({ disabled, fileList, Class, SetMainImg, setData }: imgBoxPros) {
+export default function ImgBox({ disabled, fileList, Class, SetMainImg, setData }: ImgBoxProps) {
+  const imgRef = useRef<HTMLInputElement | null>(null);
 
-    const imgRef = useRef<HTMLInputElement | null>(null)
-
-    async function Add() {
-        if (imgRef.current && imgRef.current.files) {
-            const files = Array.from(imgRef.current.files)
-            const b64 = await Promise.all(files.map(async (file) => {
-                return await toB64(file)
-            }))
-
-            setData(b64)
-            imgRef.current.value = ""
-
-        }
-
-
+  async function Add() {
+    if (imgRef.current?.files) {
+      const files = Array.from(imgRef.current.files);
+      const b64 = await Promise.all(files.map(async file => await toB64(file)));
+      setData(b64);
+      imgRef.current.value = '';
     }
+  }
 
-
-    return (
-        <div
-            className={clsx(`ring-1 ring-red-400/60 p-1 rounded-lg flex flex-col gap-1.5 ${disabled && "opacity-25"}`, Class)}
-            onClick={() => {
-
-            }}
+  return (
+    <div
+      className={clsx(
+        'ring-1 ring-red-400/60 p-3 rounded-xl flex flex-col gap-2 transition-opacity duration-300',
+        disabled && 'opacity-40 cursor-not-allowed',
+        Class
+      )}
+    >
+      {/* Upload Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={e => {
+            e.stopPropagation();
+            imgRef.current?.click();
+          }}
+          variant="outline"
+          size="icon"
+          className="hover:bg-indigo-100"
+          disabled={disabled}
         >
-            <div className=' flex flex-row items-center w-full h-8'>
-                <Button
-                    className=' ml-auto'
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        imgRef.current?.click()
+          <Upload className="animate-pulse" />
+        </Button>
+      </div>
 
-                    }}
-                    variant={"outline"}
-                    size={"icon"}
-                >
-                    <Upload className=' animate-pulse'/>
-                </Button>
-            </div>
-
-
+      {/* Image Preview List */}
+      <div
+        className={clsx(
+          'flex gap-3 overflow-x-auto p-1 rounded-md border border-dashed border-red-200 min-h-[7rem] transition-all',
+          fileList.length === 0 && 'justify-center items-center text-cyan-800/15 text-2xl'
+        )}
+        onClick={() => !disabled && imgRef.current?.click()}
+      >
+        {fileList.length > 0 ? (
+          fileList.map((file, i) => (
             <div
-                className={` p-0.5 flex flex-row gap-2 shrink-0 flex-1 overflow-x-auto ${fileList.length <= 0 && " justify-center items-center"} `}
-                onClick={(e) => {
-                    e.stopPropagation()
-                    imgRef.current?.click()
-
-                }}
+              key={i}
+              onClick={e => {
+                e.stopPropagation();
+                SetMainImg(i);
+              }}
+              className={clsx(
+                'relative h-28 w-40 shrink-0 rounded-lg overflow-hidden ring-2 transition-all duration-200 cursor-pointer hover:ring-indigo-500/40',
+                file.Thumbnail ? 'ring-green-400' : 'ring-indigo-600/65'
+              )}
             >
-                {fileList.length > 0 && (<>{fileList.map((file, i) => {
-                    return (<div
-                        key={i}
-                        onClick={(e) =>{
-                            e.stopPropagation()
-                            SetMainImg(i)
-                        }}
-                        className={` relative shrink-0 h-28 w-40 rounded-md ring-2 hover:ring-indigo-600/25 ${file.Thumbnail ? " ring-green-400" : " ring-indigo-600/65"} `}
-                    >
-                        <Image draggable="false"  className=' w-full h-full object-cover select-none pointer-events-none' alt={file.name} width={300} height={300} src={file.url} />
-
-                    </div>)
-                })}</>)}
-
-                {fileList.length <= 0 && (<h1 className=' text-5xl  text-cyan-800/15'> no image</h1>)}
-
+              <Image
+                alt={file.name}
+                src={file.url}
+                width={300}
+                height={300}
+                draggable={false}
+                className="w-full h-full object-cover pointer-events-none select-none"
+              />
             </div>
+          ))
+        ) : (
+          <span className="select-none">No images</span>
+        )}
+      </div>
 
-            <input ref={imgRef} onChange={Add} className=' hidden' type="file" multiple accept="image/*" />
-        </div>
-    )
+      <input
+        ref={imgRef}
+        onChange={Add}
+        type="file"
+        multiple
+        accept="image/*"
+        className="hidden"
+        disabled={disabled}
+      />
+    </div>
+  );
 }

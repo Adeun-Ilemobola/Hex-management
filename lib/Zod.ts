@@ -179,7 +179,8 @@ export const propertieSchema = z.object({
       supabaseID: z.string().default(""),
     })
   ),
-  videoTourUrl: z.string().url("Must be a valid URL.").optional(),
+   videoTourUrl: z.string().optional().nullable().default(""),
+
 
 }).superRefine((data, ctx) => {
   // 1. If rent

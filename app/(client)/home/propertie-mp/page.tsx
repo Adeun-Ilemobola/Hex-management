@@ -11,7 +11,7 @@ export default async function Page({
       const { id  } = await searchParams
 
     return (
-        <div className='relative flex flex-col  min-h-screen  overflow-hidden'>
+        <div className='relative flex flex-col  min-h-screen  overflow-hidden '>
             <MakeUpdate id={id} />
         </div>
     )

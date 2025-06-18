@@ -82,6 +82,8 @@ export const PropertiesRouter = createTRPCRouter({
             try {
                 const { data, Type, pID } = input;
                 const { imageUrls, videoTourUrl, ...rest } = data;
+                console.log("Processing property data:", data , Type, pID);
+                
                 if (Type === "Post") {
 
                     const newProperty = await prisma.propertie.create({
@@ -98,28 +100,13 @@ export const PropertiesRouter = createTRPCRouter({
                             data: null
                         }
                     }
-
-                    const supabaseNewImageUrls = await UploadImage(imageUrls, `${ctx.user.id}/${newProperty.id}`);
-                    if (!supabaseNewImageUrls || supabaseNewImageUrls.length === 0) {
-                        return {
-                            message: "Failed to upload images to Supabase",
-                            success: false,
-                            data: null
-                        }
-                    }
-
                     const addNewImageUrls = await prisma.image.createMany({
-                        data: supabaseNewImageUrls.map((img) => ({
+                        data: imageUrls.map((img) => ({
                             ...img,
                             propertieId: newProperty.id,
                         })),
                     })
-
-
-
                 }
-
-
                 return {
                     message: "Property processed successfully",
                     success: true,
