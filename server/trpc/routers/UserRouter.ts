@@ -82,18 +82,20 @@ export const PropertiesRouter = createTRPCRouter({
                 const { imageUrls, videoTourUrl, ...rest } = data;
                 console.log("Processing property data:", data );
                 
+                
               
 
                     const newProperty = await prisma.propertie.create({
                         data: {
                             ...rest,
                             userId: ctx.user.id,
-                            videoTourUrl: undefined
+                            videoTourUrl: undefined,
+                           
                         }
                     });
                     if (!newProperty) {
                         return {
-                            message: "Failed to create property",
+                            message: "Failed to create property new property was not created",
                             success: false,
                             data: null
                         }
@@ -101,7 +103,7 @@ export const PropertiesRouter = createTRPCRouter({
                     const addNewImageUrls = await prisma.image.createMany({
                         data: imageUrls.map((img) => ({
                             ...img,
-                            propertieId: newProperty.id,
+                            propertyId: newProperty.id,
                         })),
                     })
                 
@@ -118,7 +120,7 @@ export const PropertiesRouter = createTRPCRouter({
             } catch (error) {
                 console.error("Error in postPropertie:", error);
                 return {
-                    message: "Failed to process property",
+                    message: "Failed to process property XXXXXX",
                     success: false,
                     data: null
                 }

@@ -6,13 +6,12 @@ import { Nav } from './Nav'
 import { PropertieInput, propertieSchema } from '@/lib/Zod'
 import InputBox, { NumberBox, SelectorBox, SwitchBox } from './InputBox'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useTRPC } from '@/lib/trpc'
+import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
 import ImgBox from './ImgBox'
 import { Button } from './ui/button'
 import { DeleteImages, UploadImage, UploadImageList } from '@/lib/supabase'
 import { FileUploadResult } from '@/lib/utils'
-
 interface MakeUpdatePros {
     id: string | undefined
 }
@@ -41,13 +40,12 @@ const defaultProperty: PropertieInput = {
     leaseCycle: 0,
     leaseType: "Month",
     finalResult: 0,
-    Leavingstatus: "Developing",
+    leavingstatus: "Developing",
     propertyType: "House", // Default value, can be changed
 
     imageUrls: [],
     videoTourUrl: "", // or omit if not required
 };
-
 const propertyTypeOP = [{ value: "House", label: "House" },
 { value: "Apartment", label: "Apartment" },
 { value: "Condo", label: "Condo" },
@@ -70,7 +68,6 @@ const statusOP = [
     { value: "sold", label: "Sold" },
     { value: "None", label: "None" }
 ]
-
 const typeOfSaleOP = [
     { value: "sell", label: "Sell" },
     { value: "rent", label: "Rent" },
@@ -78,10 +75,22 @@ const typeOfSaleOP = [
     { value: "None", label: "None" }
 ]
 export default function MakeUpdate({ id }: MakeUpdatePros) {
-    const api = useTRPC();
+   
     const Session = authClient.useSession()
-    const getProperty = useQuery(api.Propertie.getPropertie.queryOptions({ pID: id }))
-    const postProperty =useMutation( api.Propertie.postPropertie.mutationOptions())
+    const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
+    const postProperty = api.Propertie.postPropertie.useMutation({
+
+    })
+    const testMutation = api.testM.useMutation({
+        onSuccess: (data) => {
+            console.log("Test mutation success:", data);
+            toast.success(data.message);
+        },
+        onError: (error) => {
+            console.error("Test mutation error:", error);
+            toast.error(error.message);
+        }
+    })
 
    
 
@@ -382,6 +391,11 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 setValue={(e) => Handle("address", e.target.value, e.target.type)}
                                 value={property.address}
                             />
+                            <Button
+                            onClick={() => {
+                                testMutation.mutate({ name: "Test Property" });
+                            }}
+                            >test</Button>
                         </div>
 
                         <div className="flex flex-wrap gap-3 mt-4">
@@ -400,7 +414,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                         </div>
 
                         <div className="flex gap-3 mt-4">
-                            <SelectorBox options={LeavingstatusOP} label="Leaving Status" identify="Leavingstatus" value={property.Leavingstatus} setValue={(e) => HandleSel("Leavingstatus", e)} isDisable={postProperty.isPending} ClassName="w-40" />
+                            <SelectorBox options={LeavingstatusOP} label="Leaving Status" identify="leavingstatus" value={property.leavingstatus} setValue={(e) => HandleSel("leavingstatus", e)} isDisable={postProperty.isPending} ClassName="w-40" />
                             <SelectorBox options={statusOP} label="Status" identify="status" value={property.status} setValue={(e) => HandleSel("status", e)} isDisable={postProperty.isPending} ClassName="w-40" />
                         </div>
                     </div>

@@ -1,13 +1,13 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TRPCProvider } from '@/lib/trpc'; 
+import { api } from '@/lib/trpc'; 
 import { httpBatchLink, createTRPCClient } from '@trpc/client';
 import type { AppRouter } from '@/server/trpc/routers/_app';
 import { useState } from 'react';
 
 function getBaseUrl() {
-  if (typeof window !== 'undefined') return '';
+  if (typeof window !== 'undefined') return window.location.origin;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
 }
@@ -19,6 +19,18 @@ function makeQueryClient() {
         // With SSR, we usually want to set some default staleTime
         // above 0 to avoid refetching immediately on the client
         staleTime: 60 * 1000,
+        retry: 1, // Retry failed queries once
+        refetchOnWindowFocus: false, // Don't refetch on window focus
+        refetchOnReconnect: false, // Don't refetch on reconnect
+      },
+      mutations: {
+        // With SSR, we usually want to set some default retry
+        // to avoid failing mutations immediately on the client
+        retry: 1, // Retry failed mutations once
+        // Don't refetch queries after a mutation
+        // This is important to avoid refetching queries that
+        // were already fetched on the server
+       
       },
     },
   });
@@ -41,19 +53,19 @@ function getQueryClient() {
 export function Provider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
   const [trpcClient] = useState(() =>
-    createTRPCClient<AppRouter>({
+     api.createClient({
       links: [
         httpBatchLink({
-          url: getBaseUrl(),
+          url: `${getBaseUrl()}/api/trpc`,
         }),
       ],
     }),
   );
   return (
-    <QueryClientProvider client={queryClient}>
-      <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+   <QueryClientProvider client={queryClient}>
+      <api.Provider client={trpcClient} queryClient={queryClient}>
         {children}
-      </TRPCProvider>
+      </api.Provider>
     </QueryClientProvider>
   );
 }

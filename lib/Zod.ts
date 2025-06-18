@@ -115,8 +115,6 @@ export const zodRegisterSchema = z
 
 
 export const propertieSchema = z.object({
-  
-
   name: z.string().min(2, "Name should be at least 2 characters."),
   address: z.string().min(5, "Please provide a valid address with ZIP Code."),
   description: z.string().max(1500, "Description too long."),
@@ -125,20 +123,14 @@ export const propertieSchema = z.object({
   lotSize: z.number().positive("Lot size must be positive."),
   yearBuilt: z.number().int().gte(1800, "Year should be realistic.").lte(new Date().getFullYear()),
   squareFootage: z.number().int().positive("Square footage must be positive."),
-
   hasGarage: z.boolean().default(false),
   hasGarden: z.boolean().default(false),
   hasPool: z.boolean().default(false),
   amenities: z.array(z.string()),
-
   propertyType: z.enum(["House", "Apartment", "Condo", "Commercial", "Other"]).optional().default("House"),
   status: z.enum(["active", "pending", "sold"]).optional().default("active"),
   ownerName: z.string().min(2, "Owner name required."),
   contactInfo: z.string().min(5, "Contact info required."),
-
-
-
-
   typeOfSale: z.enum(["sell", "rent", "lease"]).default("sell"),
   initialInvestment: z.number().positive("Investment must be a positive number."),
   saleDuration: z.number().int().min(0, "Duration must be zero or positive.").optional().default(0),
@@ -156,18 +148,7 @@ export const propertieSchema = z.object({
     .number()
     .default(0)
     .describe("The result for the investment"),
-
-
-
-
-  Leavingstatus: z.enum(["active", "Inactive", "Renovation", "Developing", "Purchase Planning"]).optional().default("active"),
-
-  
-
-
-  
-
-
+  leavingstatus: z.enum(["active", "Inactive", "Renovation", "Developing", "Purchase Planning"]).optional().default("active"),
   imageUrls: z.array(
     z.object({
       name: z.string(),

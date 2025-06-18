@@ -1,13 +1,17 @@
+
+import { auth } from '@/lib/auth';
 import { initTRPC, TRPCError } from '@trpc/server';
-import { cache } from 'react';
-import { authClient } from '@/lib/auth-client'; 
+import { headers } from 'next/headers';
 
-export const createTRPCContext = cache(async () => {
-  
-const { data: session } = await authClient.getSession()
 
- return { session };
-});
+
+export const createTRPCContext = async (opts: { req: Request }) => {
+  const session = await auth.api.getSession({
+    headers: await headers(), 
+  });
+
+  return { session };
+};
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
 const t = initTRPC.context<Context>().create();

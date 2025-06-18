@@ -9,7 +9,7 @@ import DropBack from '../DropBack'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useRouter } from "next/navigation";
-import { useTRPC , useTRPCClient } from '@/lib/trpc'
+import { api } from '@/lib/trpc'
 import PropertyCard from './propertyCard'
 const zSearch = z.object({
     status: z.string().min(4, "").optional(),
@@ -27,13 +27,13 @@ export interface CleanProperty {
 }
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
-    const api = useTRPC();
+    
     const router = useRouter();
 
     const { data: session, isPending, error } = authClient.useSession();
     console.log({ session, isPending, error, data });
 
-    const {data:getProperties , isPending:getPropertiesPending} = useQuery(api.Propertie.getUserProperties.queryOptions({data: data }))
+    const {data:getProperties , isPending:getPropertiesPending} = api.Propertie.getUserProperties.useQuery({data: data })
      const [isEdit, setIsEdit] = useState(false)
 
     function NavSearch(urlData: { status: string, searchText: string }) {

@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     sessionCookie,
     pathName,
   });
-  if (request.nextUrl.pathname.startsWith('/api/auth')) {
+  if (request.nextUrl.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 

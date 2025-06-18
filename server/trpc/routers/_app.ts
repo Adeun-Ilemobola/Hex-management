@@ -1,9 +1,20 @@
+import { z } from 'zod';
 
-import { baseProcedure, createTRPCRouter } from '../init';
+import { protectedProcedure, createTRPCRouter } from '../init';
 import { PropertiesRouter } from './UserRouter';
 export const appRouter = createTRPCRouter({
 
   Propertie:PropertiesRouter,
+
+  // Add other routers here as needed
+  testM:protectedProcedure
+  .input( z.object({name: z.string().min(1, "Name is required") }))
+  .mutation(async ({ ctx , input }) => {
+    return {
+      message: 'Hello from the test mutation! NAME HERE' + input.name,
+      user: ctx.user,
+    };
+  })
 
   
 });

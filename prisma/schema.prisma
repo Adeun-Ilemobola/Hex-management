@@ -54,6 +54,7 @@ model Session {
 
 model image{
   id String @id @default(uuid())
+  name String // The name of the image file
   url String // The URL of the image
   size Int // Size of the image in bytes
   type String // Type of the image (e.g., "jpg", "png", "gif")
@@ -70,7 +71,6 @@ model image{
 
 model propertie {
   id String @id @default(uuid())
-
   name          String
   address       String // The exact location with the ZIP Code and the general address
   description   String? // General description of the property.
@@ -103,15 +103,9 @@ model propertie {
   leaseCycle  Float? @default(0.0)
   leaseType  String? @default("Month")  // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
 
-
-
-
   finalResult Float @default(0.0) // The result for the investment
 
   leavingstatus String? @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
-
- 
-
   // Media
   imageUrls    image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
   videoTourUrl String? // Optional video tour.
