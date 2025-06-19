@@ -5,13 +5,20 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-    bodySizeLimit: '7mb', // or whatever value you want
+    bodySizeLimit: '10mb', // or whatever value you want
     allowedOrigins: ['https://hex-management.vercel.app/'],
   }, // Unlocks server actions (Next.js 14+)
   
   },
   images: {
-    domains: ['your-supabase-bucket-url', 'cdn.shadcn.com' , "images.unsplash.com"],
+    domains: ['etfqwejgpqszeglrqaza.supabase.co', 'cdn.shadcn.com' , "images.unsplash.com"],
+     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'etfqwejgpqszeqlrqaza.supabase.co',
+        pathname: '/storage/v1/object/public/img/**',
+      },
+    ],
     // Add domains you use for images (e.g., Supabase storage)
   },
    

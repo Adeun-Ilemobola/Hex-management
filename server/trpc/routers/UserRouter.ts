@@ -80,11 +80,7 @@ export const PropertiesRouter = createTRPCRouter({
             try {
                 const { data} = input;
                 const { imageUrls, videoTourUrl, ...rest } = data;
-                console.log("Processing property data:", data );
-                
-                
-              
-
+          
                     const newProperty = await prisma.propertie.create({
                         data: {
                             ...rest,

@@ -7,7 +7,7 @@ interface DropBackProps {
     children: React.ReactNode;
     isTextMessage?:{
         data: string |React.ReactNode;
-        show: boolean;
+        show?: boolean;
     };
 
 }

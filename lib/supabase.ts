@@ -14,7 +14,7 @@ function sanitizeFilename(name: string): string {
         .replace(/[^a-zA-Z0-9._-]/g, ""); // remove invalid characters
 }
 
-export  function UploadImage(file: Base64FileResult, userID: string): Promise<FileUploadResult> {
+export function UploadImage(file: Base64FileResult, userID: string): Promise<FileUploadResult> {
     return new Promise(async (resolve, reject) => {
 
         if (!file) {
@@ -27,25 +27,22 @@ export  function UploadImage(file: Base64FileResult, userID: string): Promise<Fi
         }
         const path = `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
 
-        const { data: uploadData, error } = await supabase.storage
-            .from("img")
-            .upload(path, base64ToBlob(file.url, file.type), {
-                cacheControl: '3600',
-                upsert: false,
-            });
-
+        const { data: uploadData, error } = await supabase.storage.from("img").upload(path, base64ToBlob(file.url, file.type));
         if (error) {
             throw new Error(`Upload failed: ${error.message}`);
         }
+        const publicUrl = supabase.storage.from("img").getPublicUrl(uploadData.path).data.publicUrl;
 
-        const { data } = supabase
-            .storage
-            .from('img')
-            .getPublicUrl(uploadData.path);
+        console.log({
+            path,
+            uploadData,
+            publicUrl,
+    
+        });
 
         resolve({
             name: file.name,
-            url: data.publicUrl,
+            url: publicUrl,
             size: file.size,
             type: file.type,
             lastModified: file.lastModified,
@@ -67,7 +64,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     return result;
 }
 
-export  function UploadImageList(files: Base64FileResult[], userID: string): Promise<FileUploadResult[]> {
+export function UploadImageList(files: Base64FileResult[], userID: string): Promise<FileUploadResult[]> {
     return new Promise(async (resolve, reject) => {
         const uploadedImages: FileUploadResult[] = [];
 
@@ -80,7 +77,7 @@ export  function UploadImageList(files: Base64FileResult[], userID: string): Pro
                     console.error("Image upload failed:", result.reason);
                 }
             }
-               await new Promise(res => setTimeout(res, 200));
+            await new Promise(res => setTimeout(res, 200));
         }
 
         resolve(uploadedImages);
