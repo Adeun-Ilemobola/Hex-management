@@ -105,6 +105,8 @@ model propertie {
 
   finalResult Float @default(0.0) // The result for the investment
 
+  discountPercentage Float? @default(0) // Discount percentage for the property, if applicable
+
   leavingstatus String? @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
   // Media
   imageUrls    image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.

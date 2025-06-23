@@ -44,6 +44,7 @@ const defaultProperty: PropertieInput = {
     finalResult: 0,
     leavingstatus: "Developing",
     propertyType: "House", // Default value, can be changed
+    discountPercentage: 0, // Default value for discount percentage
 
     imageUrls: [],
     videoTourUrl: "", // or omit if not required
@@ -130,10 +131,11 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
 
         switch (property.typeOfSale) {
             case "sell": {
+
                 if (property.margin > 0 && property.initialInvestment > 100) {
                     setProperty(pre => ({
                         ...pre,
-                        finalResult: pre.initialInvestment + (pre.initialInvestment * pre.margin / 100)
+                        finalResult: (pre.initialInvestment + (pre.initialInvestment * pre.margin / 100)) - (pre.initialInvestment * pre.discountPercentage / 100),
                     }))
                 } else {
                     setProperty(pre => ({
@@ -155,11 +157,12 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             case "rent": {
                 const MonthlyPaymentBase = property.initialInvestment / 12
                 const MonthlyPayment = MonthlyPaymentBase + (MonthlyPaymentBase * (property.margin / 100))
+                const discount = (MonthlyPayment * (property.discountPercentage / 100));
                 if (MonthlyPaymentBase > 0 && MonthlyPayment > 0) {
                     setProperty(pre => ({
                         ...pre,
-                        finalResult: MonthlyPayment,
-                        saleDuration: Math.ceil(pre.initialInvestment / MonthlyPayment)
+                        finalResult: MonthlyPayment - discount,
+                        saleDuration: Math.ceil(pre.initialInvestment / (MonthlyPayment - discount))
                     }))
                 } else {
                     setProperty(pre => ({
@@ -177,12 +180,13 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
 
                 const basePerCycle = property.initialInvestment / property.leaseCycle;
                 const paymentPerCycle = basePerCycle + (basePerCycle * property.margin / 100);
-                const saleDuration = Math.ceil(property.initialInvestment / paymentPerCycle);
+                const discount = (paymentPerCycle * (property.discountPercentage / 100));
+                const saleDuration = Math.ceil(property.initialInvestment / (paymentPerCycle - discount));
 
                 if (basePerCycle > 0 && paymentPerCycle > 0) {
                     setProperty(pre => ({
                         ...pre,
-                        finalResult: paymentPerCycle,
+                        finalResult: paymentPerCycle - discount,
                         saleDuration: saleDuration,
                     }))
                 } else {
@@ -226,12 +230,13 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
 
         if (property.typeOfSale === "sell") {
             const profit = property.finalResult - property.initialInvestment;
+            const discount = (property.finalResult * (property.discountPercentage / 100));
             return (
                 <Card className="border-green-200 bg-green-50/70 dark:border-green-500/30 dark:bg-green-900/50 mb-2 shadow-none">
                     <CardContent className="py-4 px-5 space-y-2">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">🏷️</span>
-                            <span className="font-semibold text-green-700 dark:text-green-300">Selling Price</span>
+                            <span className="font-bold text-green-700 dark:text-green-300">Selling Price</span>
                             <span className="ml-auto text-lg font-bold">{currency(property.finalResult)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -241,12 +246,15 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 <>
                                     <span>➕ Margin:</span>
                                     <span className="font-medium text-yellow-600 dark:text-yellow-300">{property.margin}%</span>
+                                    <span>➖ Discount:</span>
+                                    <span className="font-medium text-red-600 dark:text-red-300">{property.discountPercentage}%</span>
                                 </>
                             )}
                         </div>
                         <div className="flex items-center gap-2 text-base text-indigo-700 dark:text-indigo-300 font-medium">
                             <span>📈 Expected Profit:</span>
                             <span>{currency(profit)}</span>
+                          
                         </div>
                     </CardContent>
                 </Card>
@@ -257,6 +265,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             const monthly = property.finalResult;
             const yearlyProfit = monthly * 12 - property.initialInvestment;
             const timeline = property.saleDuration > 0 ? property.saleDuration : 0;
+            const discount = (monthly * (property.discountPercentage / 100));
 
             return (
                 <Card className="border-blue-200 bg-blue-50/70 dark:border-blue-500/30 dark:bg-blue-900/50 mb-2 shadow-none">
@@ -271,10 +280,13 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                             <span className="font-medium text-foreground">{currency(property.initialInvestment)}</span>
                             <span>➕ Margin:</span>
                             <span className="font-medium text-yellow-600 dark:text-yellow-300">{property.margin}%</span>
+                            <span>➖ Discount:</span>
+                            <span className="font-medium text-red-600 dark:text-red-300">{property.discountPercentage}%</span>
                         </div>
                         <div className="flex items-center gap-2 text-base text-indigo-700 dark:text-indigo-300 font-medium">
                             <span>📈 Expected Annual Profit:</span>
                             <span>{currency(yearlyProfit)}</span>
+                            
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>⏳ Estimated recovery time:</span>
@@ -289,6 +301,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             const leaseCycle = property.leaseCycle;
             const cycles = property.saleDuration > 0 ? property.saleDuration : 0;
             const totalMonths = cycles * leaseCycle;
+            const discount = (property.finalResult * (property.discountPercentage / 100));
 
             return (
                 <Card className="border-purple-200 bg-purple-50/70 dark:border-purple-500/30 dark:bg-purple-900/50 mb-2 shadow-none">
@@ -299,12 +312,15 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 Lease Payment (every {leaseCycle} month{leaseCycle > 1 ? "s" : ""})
                             </span>
                             <span className="ml-auto text-lg font-bold">{currency(property.finalResult)}</span>
+                            
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>💸 Initial Investment:</span>
                             <span className="font-medium text-foreground">{currency(property.initialInvestment)}</span>
                             <span>➕ Margin:</span>
                             <span className="font-medium text-yellow-600 dark:text-yellow-300">{property.margin}%</span>
+                            <span>➖ Discount:</span>
+                            <span className="font-medium text-red-600 dark:text-red-300">{property.discountPercentage}%</span>
                         </div>
                         <div className="flex items-center gap-2 text-base text-indigo-700 dark:text-indigo-300 font-medium">
                             <span>⏳ Recovery Time:</span>
@@ -391,10 +407,10 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
             <div className="relative flex flex-col min-h-screen overflow-hidden">
                 <Nav SignOut={authClient.signOut} session={Session.data} />
 
-                <div className="flex flex-col gap-8 p-4 sm:p-6 max-w-5xl mx-auto">
+                <div className="flex flex-col gap-6 p-2 sm:p-4 max-w-5xl mx-auto">
 
                     {/* Property Info */}
-                    <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900">
+                    <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900 min-w-[50rem]">
                         <CardContent>
                             <h2 className="text-xl font-bold mb-4">🏠 Property Information</h2>
 
@@ -489,7 +505,19 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                             Handle("margin", e.toString(), "number");
                                             FinalCalculation();
                                         }}
+                                        className="w-32"
+                                    />
+                                    <NumberBox
+                                        label="Discount (%)"
+                                        disabled={postProperty.isPending}
+                                        value={property.discountPercentage}
+                                        setValue={(e) => {
+                                            Handle("discountPercentage", e.toString(), "number");
+                                            FinalCalculation();
+                                        }}
                                         className="w-28"
+                                        min={0}
+                                        max={100}
                                     />
                                     {property.typeOfSale === "lease" && (
                                         <NumberBox
@@ -510,7 +538,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                             FinalCalculation();
                                         }}
                                         isDisable={postProperty.isPending}
-                                        ClassName="w-28"
+                                        ClassName="w-20"
                                         defaultValue="sell"
                                     />
                                 </div>

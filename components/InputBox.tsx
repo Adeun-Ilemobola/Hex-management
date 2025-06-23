@@ -86,7 +86,7 @@ export function SelectorBox({ label, setValue, value, identify, ClassName, optio
       </Label>
 
       <Select onValueChange={(value) => { setValue(value, identify) }} disabled={isDisable} defaultValue={defaultValue} >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="">
           <SelectValue placeholder={value.length < 1 ? "None" : value} />
         </SelectTrigger>
         <SelectContent>

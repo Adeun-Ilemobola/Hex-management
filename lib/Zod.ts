@@ -161,6 +161,7 @@ export const propertieSchema = z.object({
     })
   ),
    videoTourUrl: z.string().optional().nullable().default(""),
+   discountPercentage: z.number().min(0, "Discount percentage cannot be negative.").max(100, "Discount percentage cannot exceed 100.").optional().default(0),
 
 
 }).superRefine((data, ctx) => {
