@@ -254,7 +254,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                         <div className="flex items-center gap-2 text-base text-indigo-700 dark:text-indigo-300 font-medium">
                             <span>📈 Expected Profit:</span>
                             <span>{currency(profit)}</span>
-                          
+
                         </div>
                     </CardContent>
                 </Card>
@@ -286,7 +286,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                         <div className="flex items-center gap-2 text-base text-indigo-700 dark:text-indigo-300 font-medium">
                             <span>📈 Expected Annual Profit:</span>
                             <span>{currency(yearlyProfit)}</span>
-                            
+
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>⏳ Estimated recovery time:</span>
@@ -312,7 +312,7 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                 Lease Payment (every {leaseCycle} month{leaseCycle > 1 ? "s" : ""})
                             </span>
                             <span className="ml-auto text-lg font-bold">{currency(property.finalResult)}</span>
-                            
+
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>💸 Initial Investment:</span>
@@ -406,66 +406,68 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
         <DropBack is={(getProperty.isPending || postProperty.isPending)} isTextMessage={{ data: "" }} >
             <div className="relative flex flex-col min-h-screen overflow-hidden">
                 <Nav SignOut={authClient.signOut} session={Session.data} />
+                {/* Property Info */}
 
-                <div className="flex flex-col gap-6 p-2 sm:p-4 max-w-5xl mx-auto">
-
-                    {/* Property Info */}
-                    <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900 min-w-[50rem]">
-                        <CardContent>
-                            <h2 className="text-xl font-bold mb-4">🏠 Property Information</h2>
-
-                            <div className="flex flex-col gap-3 w-full max-w-md">
-                                <InputBox
-                                    disabled={postProperty.isPending}
-                                    label="Name"
-                                    type="text"
-                                    identify="name"
-                                    setValue={(e) => Handle("name", e.target.value, e.target.type)}
-                                    value={property.name}
-                                />
-
-                                <InputBox
-                                    label="Address"
-                                    disabled={postProperty.isPending}
-                                    type="text"
-                                    identify="address"
-                                    setValue={(e) => Handle("address", e.target.value, e.target.type)}
-                                    value={property.address}
-                                />
-                                <Button
-                                    onClick={() => {
-                                        testMutation.mutate({ name: "Test Property" });
-                                    }}
-                                >test</Button>
-                            </div>
-
-                            <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-                                <NumberBox label="Bedrooms" disabled={postProperty.isPending} value={property.numBedrooms} setValue={(e) => Handle("numBedrooms", e.toString(), "number")} className="w-40 shrink-0" />
-                                <NumberBox label="Bathrooms" disabled={postProperty.isPending} value={property.numBathrooms} setValue={(e) => Handle("numBathrooms", e.toString(), "number")} className="w-40 shrink-0" />
-                                <NumberBox label="Lot Size" disabled={postProperty.isPending} min={2} value={property.lotSize} setValue={(e) => Handle("lotSize", e.toString(), "number")} className="w-40 shrink-0" />
-                                <NumberBox label="Year Built" disabled={postProperty.isPending} min={1800} max={new Date().getFullYear()} step={1} value={property.yearBuilt} setValue={(e) => Handle("yearBuilt", e.toString(), "number")} className="w-40 shrink-0" />
-                                <NumberBox label="Square Footage" disabled={postProperty.isPending} min={2} max={50000} step={1} value={property.squareFootage} setValue={(e) => Handle("squareFootage", e.toString(), "number")} className="w-40 shrink-0" />
-                                <SelectorBox options={propertyTypeOP} label="Property Type" identify="propertyType" value={property.propertyType} setValue={(e) => HandleSel("propertyType", e)} isDisable={postProperty.isPending} ClassName="w-36 shrink-0" />
-                            </div>
-
-                            <div className="flex gap-4 mt-4">
-                                <SwitchBox value={property.hasPool} setValue={(e) => HandleBool("hasPool", e)} label="Pool" />
-                                <SwitchBox value={property.hasGarden} setValue={(e) => HandleBool("hasGarden", e)} label="Garden" />
-                                <SwitchBox value={property.hasGarage} setValue={(e) => HandleBool("hasGarage", e)} label="Garage" />
-                            </div>
-
-                            <div className="flex gap-3 mt-4">
-                                <SelectorBox options={LeavingstatusOP} label="Leaving Status" identify="leavingstatus" value={property.leavingstatus} setValue={(e) => HandleSel("leavingstatus", e)} isDisable={postProperty.isPending} ClassName="w-40" />
-                                <SelectorBox options={statusOP} label="Status" identify="status" value={property.status} setValue={(e) => HandleSel("status", e)} isDisable={postProperty.isPending} ClassName="w-40" />
-                            </div>
-                        </CardContent>
-                    </Card>
+                <div className="flex flex-col gap-6 p-2 sm:p-4 flex-1 min-w-full items-center  ">
 
 
-                    <div className='flex flex-col gap-3 '>
-                        {/* Image Box */}
-                        <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900">
-                            <CardContent className="flex flex-col gap-6 ">
+                    <div className= "flex flex-row gap-4 ">
+                        <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 min-w-xl dark:bg-gray-900 ">
+                            <CardContent>
+                                <h2 className="text-xl font-bold mb-4">🏠 Property Information</h2>
+
+                                <div className="flex flex-col gap-3 w-full max-w-md">
+                                    <InputBox
+                                        disabled={postProperty.isPending}
+                                        label="Name"
+                                        type="text"
+                                        identify="name"
+                                        setValue={(e) => Handle("name", e.target.value, e.target.type)}
+                                        value={property.name}
+                                    />
+
+                                    <InputBox
+                                        label="Address"
+                                        disabled={postProperty.isPending}
+                                        type="text"
+                                        identify="address"
+                                        setValue={(e) => Handle("address", e.target.value, e.target.type)}
+                                        value={property.address}
+                                    />
+                                    
+                                </div>
+
+                                <div className=" flex flex-row gap-2 flex-wrap  w-[420px] ">
+                                    <NumberBox label="Bedrooms" disabled={postProperty.isPending} value={property.numBedrooms} setValue={(e) => Handle("numBedrooms", e.toString(), "number")} className=" w-40 shrink-0" />
+                                    <NumberBox label="Bathrooms" disabled={postProperty.isPending} value={property.numBathrooms} setValue={(e) => Handle("numBathrooms", e.toString(), "number")} className="w-40 shrink-0" />
+                                    <NumberBox label="Lot Size" disabled={postProperty.isPending} min={2} value={property.lotSize} setValue={(e) => Handle("lotSize", e.toString(), "number")} className="w-40 shrink-0" />
+                                    <NumberBox label="Year Built" disabled={postProperty.isPending} min={1800} max={new Date().getFullYear()} step={1} value={property.yearBuilt} setValue={(e) => Handle("yearBuilt", e.toString(), "number")} className="w-40 shrink-0" />
+                                    <NumberBox label="Square Footage" disabled={postProperty.isPending} min={2} max={50000} step={1} value={property.squareFootage} setValue={(e) => Handle("squareFootage", e.toString(), "number")} className="w-40 shrink-0" />
+                                    <SelectorBox options={propertyTypeOP} label="Property Type" identify="propertyType" value={property.propertyType} setValue={(e) => HandleSel("propertyType", e)} isDisable={postProperty.isPending} ClassName="w-40 shrink-0" />
+                                </div>
+
+                                <div className="flex gap-4 mt-4">
+                                    <SwitchBox value={property.hasPool} setValue={(e) => HandleBool("hasPool", e)} label="Pool" />
+                                    <SwitchBox value={property.hasGarden} setValue={(e) => HandleBool("hasGarden", e)} label="Garden" />
+                                    <SwitchBox value={property.hasGarage} setValue={(e) => HandleBool("hasGarage", e)} label="Garage" />
+                                </div>
+
+                                <div className="flex gap-3 mt-4">
+                                    <SelectorBox options={LeavingstatusOP} label="Leaving Status" identify="leavingstatus" value={property.leavingstatus} setValue={(e) => HandleSel("leavingstatus", e)} isDisable={postProperty.isPending} ClassName="w-40" />
+                                    <SelectorBox options={statusOP} label="Status" identify="status" value={property.status} setValue={(e) => HandleSel("status", e)} isDisable={postProperty.isPending} ClassName="w-40" />
+                                </div>
+
+                            </CardContent>
+
+                        </Card>
+
+
+
+
+                        <div className='flex flex-col gap-10 min-w-3xl'>
+
+                            {/* {Image Box } */}
+                            <div className=' flex gap-2 flex-col'>
                                 <h2 className="text-xl font-bold">🖼️ Property Images</h2>
 
                                 <ImgBox
@@ -478,91 +480,88 @@ export default function MakeUpdate({ id }: MakeUpdatePros) {
                                         imageUrls: prev.imageUrls.map((img, i) => ({ ...img, Thumbnail: i === index }))
                                     }))}
                                 />
-                            </CardContent>
-                        </Card>
+                            </div>
 
-                        {/* Sale and Calculation Section */}
-                        <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900">
-                            <CardContent>
-                                <div className="flex flex-wrap gap-3">
-                                    <InputBox
-                                        disabled={postProperty.isPending}
-                                        label="Initial Investment"
-                                        type="number"
-                                        identify="initialInvestment"
-                                        value={property.initialInvestment.toString()}
-                                        setValue={(e) => {
-                                            Handle("initialInvestment", e.target.value, e.target.type);
-                                            FinalCalculation();
-                                        }}
-                                        className="w-40"
-                                    />
-                                    <NumberBox
-                                        label="Margin (%)"
-                                        disabled={postProperty.isPending}
-                                        value={property.margin}
-                                        setValue={(e) => {
-                                            Handle("margin", e.toString(), "number");
-                                            FinalCalculation();
-                                        }}
-                                        className="w-32"
-                                    />
-                                    <NumberBox
-                                        label="Discount (%)"
-                                        disabled={postProperty.isPending}
-                                        value={property.discountPercentage}
-                                        setValue={(e) => {
-                                            Handle("discountPercentage", e.toString(), "number");
-                                            FinalCalculation();
-                                        }}
-                                        className="w-28"
-                                        min={0}
-                                        max={100}
-                                    />
-                                    {property.typeOfSale === "lease" && (
-                                        <NumberBox
-                                            label="Cycle(Months)"
+                            <Card className="ring-1 ring-gray-200 bg-gray-50 dark:ring-gray-700 dark:bg-gray-900">
+                                <CardContent>
+                                    <div className="flex flex-wrap gap-3 justify-center">
+                                        <InputBox
                                             disabled={postProperty.isPending}
-                                            value={property.leaseCycle}
-                                            setValue={(e) => Handle("leaseCycle", e.toString(), "number")}
-                                            className="w-28"
+                                            label="Initial Investment"
+                                            type="number"
+                                            identify="initialInvestment"
+                                            value={property.initialInvestment.toString()}
+                                            setValue={(e) => {
+                                                Handle("initialInvestment", e.target.value, e.target.type);
+                                                FinalCalculation();
+                                            }}
+                                            className="w-40"
                                         />
-                                    )}
-                                    <SelectorBox
-                                        options={typeOfSaleOP}
-                                        label="Type of Sale"
-                                        identify="typeOfSale"
-                                        value={property.typeOfSale}
-                                        setValue={(e) => {
-                                            HandleSel("typeOfSale", e);
-                                            FinalCalculation();
-                                        }}
-                                        isDisable={postProperty.isPending}
-                                        ClassName="w-20"
-                                        defaultValue="sell"
-                                    />
-                                </div>
+                                        <NumberBox
+                                            label="Margin (%)"
+                                            disabled={postProperty.isPending}
+                                            value={property.margin}
+                                            setValue={(e) => {
+                                                Handle("margin", e.toString(), "number");
+                                                FinalCalculation();
+                                            }}
+                                            className="w-32"
+                                        />
+                                        <NumberBox
+                                            label="Discount (%)"
+                                            disabled={postProperty.isPending}
+                                            value={property.discountPercentage}
+                                            setValue={(e) => {
+                                                Handle("discountPercentage", e.toString(), "number");
+                                                FinalCalculation();
+                                            }}
+                                            className="w-28"
+                                            min={0}
+                                            max={100}
+                                        />
+                                        {property.typeOfSale === "lease" && (
+                                            <NumberBox
+                                                label="Cycle(Months)"
+                                                disabled={postProperty.isPending}
+                                                value={property.leaseCycle}
+                                                setValue={(e) => Handle("leaseCycle", e.toString(), "number")}
+                                                className="w-28"
+                                            />
+                                        )}
+                                        <SelectorBox
+                                            options={typeOfSaleOP}
+                                            label="Type of Sale"
+                                            identify="typeOfSale"
+                                            value={property.typeOfSale}
+                                            setValue={(e) => {
+                                                HandleSel("typeOfSale", e);
+                                                FinalCalculation();
+                                            }}
+                                            isDisable={postProperty.isPending}
+                                            ClassName="w-28"
+                                            defaultValue="sell"
+                                        />
+                                    </div>
 
-                                {/* Financial Summary Output */}
-                                <div className="pt-2">
-                                    {typeOfSaleMode()}
-                                </div>
+                                    {/* Financial Summary Output */}
+                                    <div className="pt-2">
+                                        {typeOfSaleMode()}
+                                    </div>
 
-                                <div className='flex flex-row-reverse'>
-                                    <Button className="ml-auto w-32" onClick={() => FinalCalculation()}>
-                                        Recalculate
-                                    </Button>
-                                </div>
+                                    <div className='flex flex-row-reverse'>
+                                        <Button size={"lg"} className="ml-auto w-32" onClick={() => FinalCalculation()}>
+                                            Recalculate
+                                        </Button>
+                                    </div>
 
 
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
 
-
-
                     {/* Final Submission */}
-                    <div className="flex justify-end w-full max-w-2xl">
+                    <div className="">
                         <Button
                             onClick={handleSubmit}
                             disabled={postProperty.isPending}
