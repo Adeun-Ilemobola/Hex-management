@@ -23,6 +23,9 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
+  if (request.nextUrl.pathname.startsWith('/') && !sessionCookie) {
+    return NextResponse.next();
+  }
 
   if (sessionCookie && (!authPage || !protectedPage)) {
   return NextResponse.redirect(new URL("/home", request.url));

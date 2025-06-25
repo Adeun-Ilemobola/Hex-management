@@ -35,6 +35,30 @@ model User {
 
   @@unique([email])
   @@map("user")
+  Subscription Subscription[]
+}
+
+
+model Subscription {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+
+  stripeCustomerId   String
+  stripeSubscriptionId String
+  priceId            String           // Stripe Price ID
+  status             String           // active | past_due | canceled | incomplete, etc.
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+
+  cancelAtPeriodEnd  Boolean          @default(false)
+  canceledAt         DateTime?        // optional, if user cancels
+
+  planTier           String           // "Free" | "Deluxe" | "Premium", etc.
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 }
 
 model Session {
