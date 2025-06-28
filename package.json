@@ -51,6 +51,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
     "recharts": "^2.15.3",
+    "resend": "^4.6.0",
     "sonner": "^2.0.3",
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.0",
