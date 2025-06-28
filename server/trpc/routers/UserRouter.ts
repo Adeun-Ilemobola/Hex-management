@@ -5,6 +5,8 @@ import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertieSchema } from '@/lib/Zod';
 import { stripe } from '@/lib/stripe';
+import { TRPCError } from "@trpc/server";
+
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
         .input(z.object({
@@ -131,72 +133,87 @@ export const PropertiesRouter = createTRPCRouter({
     makeSubscription: protectedProcedure
         .input(z.object({ tier: z.enum(["Free", "Deluxe", "Premium"]) }))
         .mutation(async ({ ctx, input }) => {
+            const user = ctx.session?.user;
+            if (!user) {
+                console.warn("[makeSubscription] not signed in, tier=", input.tier);
+                // you can either throw or return a shaped error
+                throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+            }
+
+            const userId = user.id;
+            const Prices: Record<"Free" | "Deluxe" | "Premium", string> = {
+                Free: "",
+                Deluxe: "price_1ResmhK8EHOHCxifrI6DH4UB",
+                Premium: "price_1ResmJK8EHOHCxifsX0Xqte3‹",
+            };
+
             try {
-                if (!ctx.session) {
-                    return { url: null, message: "Not signed in" };
-                }
-
-                const userId = ctx.session.user.id;
-                const Prices = {
-                    Free: "price_1ResnWK8EHOHCxifhUdc04tE",
-                    Deluxe: "price_1ResmhK8EHOHCxifrI6DH4UB",
-                    Premium: "price_1ResmJK8EHOHCxifsX0Xqte3‹"
-                }
-
+                // ─── FREE TIER ─────────────────────────────────────────────
                 if (input.tier === "Free") {
-                    // a) See if they have an active paid sub
+                    // cancel any active paid subs
                     const paidSub = await ctx.prisma.subscription.findFirst({
-                        where: { isActive: true, userId, status: "active", planTier: { in: ["Deluxe", "Premium"] } }
+                        where: {
+                            userId,
+                            isActive: true,
+                            status: "active",
+                            planTier: { in: ["Deluxe", "Premium"] },
+                        },
                     });
 
-
-                    // b) Cancel it on Stripe (if one exists)
                     if (paidSub?.stripeSubscriptionId) {
                         await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
-                        // And mark it cancelled in your DB
                         await ctx.prisma.subscription.update({
                             where: { id: paidSub.id },
-                            data: { status: "canceled", isActive: false, canceledAt: new Date() }
+                            data: {
+                                status: "canceled",
+                                isActive: false,
+                                canceledAt: new Date(),
+                            },
                         });
                     }
 
-
-                    // 3) Create a new Free subscription record
+                    // create local free‐plan record
                     await ctx.prisma.subscription.create({
                         data: {
                             userId,
                             planTier: "Free",
                             status: "active",
                             isActive: true,
-                            // For a free plan, there's no Stripe IDs or periods
-                           
                         },
                     });
 
-
-                    return { url: null, message: "Subscribed to Free tier" };
+                    return { url: null, message: "Now on Free tier." };
                 }
 
-                // 2) Handle Paid tiers
+                // ─── PAID TIERS ─────────────────────────────────────────────
                 const priceId = Prices[input.tier];
-                // Create a Stripe Checkout session
+                if (!priceId) {
+                    console.error("[makeSubscription] missing priceId for tier", input.tier);
+                    throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid plan selected" });
+                }
+
                 const session = await stripe.checkout.sessions.create({
                     mode: "subscription",
                     payment_method_types: ["card"],
                     line_items: [{ price: priceId, quantity: 1 }],
-                    customer_email: ctx.session.user.email,
+                    customer_email: user.email,
                     success_url: `${process.env.NEXTAUTH_URL}/account?success=true`,
                     cancel_url: `${process.env.NEXTAUTH_URL}/account?canceled=true`,
                 });
 
-                // Return the Stripe URL to your frontend
-                return { url: session.url!, message: "Redirecting to checkout" };
-
-
-            } catch (error) {
-
+                return { url: session.url!, message: "Redirecting to Stripe checkout…" };
+            } catch (err: any) {
+                console.error("[makeSubscription] error processing", {
+                    userId,
+                    tier: input.tier,
+                    error: err,
+                });
+                // surface the message so your client onError can toast it
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: err?.message ?? "Subscription service unavailable",
+                });
             }
-
         })
 
 

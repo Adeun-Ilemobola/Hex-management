@@ -15,15 +15,16 @@ interface SubscriptionCardProp {
     tier: "Free" | "Deluxe" | "Premium";
     benefits: string[];
     isCurrent: boolean;
-    onSellect:(id:string)=>void
+   
 }
 
 export default function SubscriptionCard({
-    data,
+    data, onSelect
 }: {
     data: SubscriptionCardProp;
+     onSelect:(id:"Free" | "Deluxe" | "Premium")=>void
 }) {
-    const { price, isCurrent, isMonthly, tier, benefits , onSellect } = data;
+    const { price, isCurrent, isMonthly, tier, benefits  } = data;
     // Ring color for Deluxe
     const deluxeRing =
         tier === "Deluxe"
@@ -83,7 +84,7 @@ export default function SubscriptionCard({
             <CardFooter className="flex justify-center mt-2">
                 <Button
                     disabled={isCurrent}
-                    onClick={()=>onSellect(tier)}
+                    onClick={()=>onSelect(tier)}
                     variant={isCurrent ? "outline" : "secondary"}
                     className={`w-full py-2 rounded-xl font-semibold text-base transition
             ${isCurrent

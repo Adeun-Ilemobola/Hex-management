@@ -15,7 +15,7 @@ import { Button } from './ui/button'
 import { useRouter } from 'next/navigation'
 
 
-export function Nav({ session , SignOut }: { session: Session | null , SignOut:()=>void }) {
+export function Nav({ session, SignOut }: { session: Session | null, SignOut: () => void }) {
     const rount = useRouter()
 
     return (
@@ -35,22 +35,23 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
 
                 {session &&
                     (<>
-                     <UserCard
-                      id={session.user.id}
-                      name={session.user.name}
-                      Logout={SignOut}
-                      img={session.user.image ? session.user.image : undefined}
-                        go={() => rount.push("/")}
-                     />
+                        <UserCard
+                            id={session.user.id}
+                            name={session.user.name}
+                            Logout={SignOut}
+                            img={session.user.image ? session.user.image : undefined}
+                            go={() => rount.push("/")}
+                            sub={() => rount.push("/home/subscription")}
+                        />
                     </>)
 
                 }
 
                 {!session &&
                     (<>
-                      <Button  className=' ml-auto' onClick={()=>rount.push("/login")}>
-                        Login
-                      </Button>
+                        <Button className=' ml-auto' onClick={() => rount.push("/login")}>
+                            Login
+                        </Button>
                     </>)
 
                 }
@@ -64,35 +65,35 @@ export function Nav({ session , SignOut }: { session: Session | null , SignOut:(
 
 
 
-export default function UserCard({go,    img  , Logout ,name}:{name:string , img:string | undefined  ,  id:string , Logout:()=>void , go:()=>void }) {
-   
-   
+export default function UserCard({ go, img, Logout, name , sub }: { name: string, img: string | undefined, id: string, Logout: () => void, go: () => void, sub:() => void } ) {
+
+
     return (
 
 
-            <DropdownMenu  >
-                <DropdownMenuTrigger asChild className='' >
-                    <Avatar  className=' ml-auto h-12 w-12 rounded-lg'>
-                        <AvatarImage src={img} />
-                        <AvatarFallback>{name.substring(0 ,1)}</AvatarFallback>
-                    </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuLabel>My Account {name}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem>Subscription</DropdownMenuItem>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuItem variant={"destructive"} onClick={()=>{
-                        Logout();
-                        go();
-                        }}>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+        <DropdownMenu  >
+            <DropdownMenuTrigger asChild className='' >
+                <Avatar className=' ml-auto h-12 w-12 rounded-lg'>
+                    <AvatarImage src={img} />
+                    <AvatarFallback>{name.substring(0, 1)}</AvatarFallback>
+                </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuLabel>My Account {name}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {sub()}}>Subscription</DropdownMenuItem>
+                <DropdownMenuItem>Team</DropdownMenuItem>
+                <DropdownMenuItem variant={"destructive"} onClick={() => {
+                    Logout();
+                    go();
+                }}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
 
 
 
-      
+
     )
 }
 

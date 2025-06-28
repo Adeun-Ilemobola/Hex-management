@@ -53,11 +53,7 @@ export default function Page() {
   return (
     <div className='relative flex flex-row gap-4 items-center justify-center   min-h-screen p-14  overflow-hidden'>
 
-      {subscriptionPlans.map((plan, i) => (
-        <SubscriptionCard key={i} data={plan} />
-      ))}
-
-
+     
 
 
     </div>
