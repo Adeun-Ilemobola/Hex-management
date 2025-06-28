@@ -36,19 +36,19 @@ export type NumberBoxProps = {
 type InputType = React.HTMLInputTypeAttribute
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string | React.ReactNode;
-  type: InputType;
+  type?: InputType;
   placeholder?: string;
   disabled?: boolean;
   value: string;
   setValue?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  identify: string;
+  identify?: string;
   className?: string;
 }
 type SelectorBoxProps = {
   label: string | React.ReactNode;
-  setValue: (value: string, identify: string) => void;
+  setValue: (value: string) => void;
   value: string;
-  identify: string;
+  identify?: string;
   ClassName?: string;
   isDisable: boolean;
   options: { value: string; label: string }[];
@@ -85,7 +85,7 @@ export function SelectorBox({ label, setValue, value, identify, ClassName, optio
         {label}
       </Label>
 
-      <Select onValueChange={(value) => { setValue(value, identify) }} disabled={isDisable} defaultValue={defaultValue} >
+      <Select onValueChange={(value) => { setValue(value) }} disabled={isDisable} defaultValue={defaultValue} >
         <SelectTrigger className="">
           <SelectValue placeholder={value.length < 1 ? "None" : value} />
         </SelectTrigger>
