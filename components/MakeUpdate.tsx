@@ -10,6 +10,7 @@ import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { Button } from './ui/button'
+import { DeleteImages, UploadImageList } from '@/lib/supabase'
 
 interface MakeUpdateProps {
     id?: string
@@ -144,22 +145,61 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
         val.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
     // submit handler
-    const handleSubmit = async () => {
-        if (!Session.data?.user?.id) return toast.error('Please log in.')
+      async function handleSubmit() {
+        if (Session.data?.user?.id === undefined) {
+            toast.error("User session not found. Please log in.");
+            return;
+        }
+        console.log("Submitting property data:", property);
+        let uploadedImages: FileUploadResult[] = [];
         try {
-            const validated = await propertieSchema.safeParseAsync({
+            const validatedProperty = await propertieSchema.safeParseAsync({
                 ...property,
-                ownerName: Session.data.user.name,
-                contactInfo: Session.data.user.email,
-            })
-            if (!validated.success) {
-                validated.error.errors.forEach(e => toast.error(`${e.path.join('.')}: ${e.message}`))
-                return
+                ownerName: Session.data?.user?.name,
+                contactInfo: Session.data?.user?.email,
+            });
+            //
+            if (!validatedProperty.success) {
+                validatedProperty.error.errors.forEach(err => {
+                    toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
+                }
+                );
+                return;
             }
-            await postProperty.mutateAsync({ data: validated.data })
-            toast.success('Property saved.')
-        } catch (err: any) {
-            toast.error(err.message || 'Error')
+            // Prevent duplications uploads
+            const imagesToUpload = property.imageUrls.filter(img => !img.supabaseID || img.supabaseID === "");
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
+
+            console.log("Uploading property:", validatedProperty.data);
+            const post = await postProperty.mutateAsync({
+                data: {
+                    ...validatedProperty.data,
+                    imageUrls: [...uploadedImages, ...property.imageUrls.filter(img => img.supabaseID && img.supabaseID !== "")],
+                }
+            });
+
+            console.log("Post response:", post);
+            if (post.success) {
+                setProperty(defaultProperty);
+                if (getProperty.data) {
+                    toast.success("Property updated successfully!");
+                }
+            } else {
+                toast.error("Failed to update property.");
+                await DeleteImages(uploadedImages.map(img => img.supabaseID));
+            }
+        } catch (error) {
+            if (uploadedImages.length > 0) {
+                await DeleteImages(uploadedImages.map(img => img.supabaseID));
+            }
+            if (error instanceof Error) {
+
+                console.log("Error in handleSubmit:", error);
+                toast.error(error.message);
+            } else {
+                console.log("Unexpected error:", error);
+                toast.error("An unexpected error occurred.");
+            }
         }
     }
 
@@ -190,35 +230,35 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
                             value={property.numBedrooms}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('numBedrooms', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                            className="w-28"
                         />
                         <NumberBox
                             label="Bathrooms"
                             value={property.numBathrooms}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('numBathrooms', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                           className="w-28"
                         />
                         <NumberBox
                             label="Lot Size"
                             value={property.lotSize}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('lotSize', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                            className="w-28"
                         />
                         <NumberBox
                             label="Year Built"
                             value={property.yearBuilt}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('yearBuilt', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                            className="w-32"
                         />
                         <NumberBox
                             label="Sq. Footage"
                             value={property.squareFootage}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('squareFootage', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                             className="w-28"
                         />
                         <SelectorBox
                             label="Property Type"
@@ -255,7 +295,7 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
                             value={property.initialInvestment}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('initialInvestment', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                            className="w-52"
                             max={9999999999999}
                         />
                         <NumberBox
@@ -263,14 +303,14 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
                             value={property.margin}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('margin', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                           className="w-28"
                         />
                         <NumberBox
                             label="Discount (%)"
                             value={property.discountPercentage}
                             disabled={postProperty.isPending}
                             setValue={val => handleField('discountPercentage', val, 'number')}
-                            className="flex-1 min-w-[140px]"
+                            className="w-28"
                         />
                         {property.typeOfSale === 'lease' && (
                             <NumberBox
@@ -278,7 +318,7 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
                                 value={property.leaseCycle}
                                 disabled={postProperty.isPending}
                                 setValue={val => handleField('leaseCycle', val, 'number')}
-                                className="flex-1 min-w-[140px]"
+                                className="w-28"
                             />
                         )}
                         <SelectorBox

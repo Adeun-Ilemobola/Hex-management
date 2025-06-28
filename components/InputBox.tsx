@@ -1,5 +1,5 @@
-import React from 'react'
-import { Label } from './ui/label'
+import React from 'react';
+import { Label } from './ui/label';
 import clsx from 'clsx';
 import { Input } from './ui/input';
 import {
@@ -9,18 +9,23 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 import { Switch } from './ui/switch';
-import { Minus, Plus } from "lucide-react";
-import { Input as AriaInput, Button, Group, NumberField, Label as AriaLabel } from "react-aria-components";
-
+import { Minus, Plus } from 'lucide-react';
+import {
+  Input as AriaInput,
+  Button,
+  Group,
+  NumberField,
+  Label as AriaLabel,
+} from 'react-aria-components';
 
 type SwitchBoxProp = {
-  value: boolean,
-  setValue: (oldvalue: boolean) => void,
+  value: boolean;
+  setValue: (oldvalue: boolean) => void;
   label: string | React.ReactNode;
   className?: string;
-}
+};
 
 export type NumberBoxProps = {
   label: string | React.ReactNode;
@@ -33,7 +38,7 @@ export type NumberBoxProps = {
   step?: number;
 };
 
-type InputType = React.HTMLInputTypeAttribute
+type InputType = React.HTMLInputTypeAttribute;
 interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string | React.ReactNode;
   type?: InputType;
@@ -53,12 +58,22 @@ type SelectorBoxProps = {
   isDisable: boolean;
   options: { value: string; label: string }[];
   defaultValue?: string;
+};
 
-}
-export default function InputBox({ label, type, placeholder, disabled = false, setValue, value, identify, className, ...all }: InputBoxProps) {
+export default function InputBox({
+  label,
+  type,
+  placeholder,
+  disabled = false,
+  setValue,
+  value,
+  identify,
+  className,
+  ...all
+}: InputBoxProps) {
   return (
-    <div className={clsx("flex flex-col gap-1", className)}>
-      <Label htmlFor={identify} className="text-[1em] font-medium ">
+    <div className={clsx('flex flex-col space-y-1 w-full', className)}>
+      <Label htmlFor={identify} className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
         {label}
       </Label>
       <Input
@@ -70,24 +85,38 @@ export default function InputBox({ label, type, placeholder, disabled = false, s
         value={value}
         onChange={(e) => setValue && setValue(e)}
         size={45}
+        className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100'
         {...all}
-
       />
-
     </div>
-  )
+  );
 }
 
-export function SelectorBox({ label, setValue, value, identify, ClassName, options, isDisable , defaultValue="None" }: SelectorBoxProps) {
+export function SelectorBox({
+  label,
+  setValue,
+  value,
+  identify,
+  ClassName,
+  options,
+  isDisable,
+  defaultValue = 'None',
+}: SelectorBoxProps) {
   return (
-    <div className={clsx("flex flex-col gap-1", ClassName)}>
-      <Label htmlFor={identify} className="text-[1em] font-medium ">
+    <div className={clsx('flex flex-col space-y-1 w-full', ClassName)}>
+      <Label htmlFor={identify} className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
         {label}
       </Label>
 
-      <Select onValueChange={(value) => { setValue(value) }} disabled={isDisable} defaultValue={defaultValue} >
-        <SelectTrigger className="">
-          <SelectValue placeholder={value.length < 1 ? "None" : value} />
+      <Select
+        onValueChange={(val) => setValue(val)}
+        disabled={isDisable}
+        defaultValue={defaultValue}
+      >
+        <SelectTrigger className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100'>
+          <SelectValue
+            placeholder={value.length < 1 ? defaultValue : value}
+          />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -99,30 +128,33 @@ export function SelectorBox({ label, setValue, value, identify, ClassName, optio
           </SelectGroup>
         </SelectContent>
       </Select>
-
     </div>
-  )
+  );
 }
 
-export function SwitchBox({ value, setValue, className, label,  }: SwitchBoxProp) {
+export function SwitchBox({ value, setValue, className, label }: SwitchBoxProp) {
   return (
-    <div className={clsx(" flex gap-1", className)}>
-      <Label>{label}</Label>
-      <Switch checked={value} onCheckedChange={(e) => setValue(e)} />
-
+    <div className={clsx('flex items-center space-x-2', className)}>
+      <Label className='text-sm font-medium text-gray-700 dark:text-gray-200'>
+        {label}
+      </Label>
+      <Switch
+        checked={value}
+        onCheckedChange={(e) => setValue(e)}
+        className='data-[state=checked]:bg-indigo-600 data-[state=checked]:hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500'
+      />
     </div>
-  )
+  );
 }
-
 
 export function NumberBox({
-  label = "Number input with plus/minus buttons",
+  label = 'Number input with plus/minus buttons',
   value,
   setValue,
   min = 1,
   max = 999999,
   step = 1,
-  className = "",
+  className = '',
   disabled = false,
 }: NumberBoxProps) {
   return (
@@ -133,31 +165,32 @@ export function NumberBox({
       step={step}
       onChange={setValue}
       isDisabled={disabled}
-      className={clsx("" , 
-        className, 
-      )}
     >
-      <div className="space-y-2">
-        <AriaLabel className="text-sm font-medium text-foreground">
+      {/* Outer wrapper: controls width, allows shrinking in parent flex */}
+      <div className={clsx('flex flex-col space-y-1 min-w-0', className)}>
+        <AriaLabel className="text-sm font-semibold text-gray-700 dark:text-gray-200">
           {label}
         </AriaLabel>
-        <Group className="relative inline-flex h-9 w-full items-center overflow-hidden whitespace-nowrap rounded-md border bg-background  text-foreground shadow-sm">
+
+        {/* Frame: fills wrapper width, allows inner items to shrink */}
+        <Group className="inline-flex items-center w-full min-w-0 rounded-lg border border-gray-300 bg-white shadow-sm dark:bg-gray-800 dark:border-gray-600">
           <Button
             slot="decrement"
-            className="-ms-px flex aspect-square h-[inherit] items-center justify-center rounded-sm border-none px-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             isDisabled={disabled || value <= min}
           >
             <Minus size={16} strokeWidth={2} aria-hidden="true" />
           </Button>
+
+          {/* Flexible input: shrinks below content width */}
           <AriaInput
-            className="flex text-center h-9 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm shadow-black/5 transition-shadow placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50"
-            
+            className="flex-1 min-w-0 text-center px-3 py-2 text-sm border-none bg-transparent focus:outline-none"
             disabled={disabled}
           />
-          {/* The increment button is placed after the input field */}
+
           <Button
             slot="increment"
-            className="-me-px flex aspect-square h-[inherit] items-center justify-center rounded-sm border-none px-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             isDisabled={disabled || value >= max}
           >
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
