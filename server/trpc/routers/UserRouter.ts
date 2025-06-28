@@ -1,9 +1,10 @@
 //UserRouter
 
-import {  z } from 'zod';
+import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertieSchema } from '@/lib/Zod';
+import { stripe } from '@/lib/stripe';
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
         .input(z.object({
@@ -75,34 +76,34 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .input(z.object({ data: propertieSchema,}))
+        .input(z.object({ data: propertieSchema, }))
         .mutation(async ({ input, ctx }) => {
             try {
-                const { data} = input;
+                const { data } = input;
                 const { imageUrls, videoTourUrl, ...rest } = data;
-          
-                    const newProperty = await prisma.propertie.create({
-                        data: {
-                            ...rest,
-                            userId: ctx.user.id,
-                            videoTourUrl: undefined,
-                           
-                        }
-                    });
-                    if (!newProperty) {
-                        return {
-                            message: "Failed to create property new property was not created",
-                            success: false,
-                            data: null
-                        }
+
+                const newProperty = await prisma.propertie.create({
+                    data: {
+                        ...rest,
+                        userId: ctx.user.id,
+                        videoTourUrl: undefined,
+
                     }
-                    const addNewImageUrls = await prisma.image.createMany({
-                        data: imageUrls.map((img) => ({
-                            ...img,
-                            propertyId: newProperty.id,
-                        })),
-                    })
-                
+                });
+                if (!newProperty) {
+                    return {
+                        message: "Failed to create property new property was not created",
+                        success: false,
+                        data: null
+                    }
+                }
+                const addNewImageUrls = await prisma.image.createMany({
+                    data: imageUrls.map((img) => ({
+                        ...img,
+                        propertyId: newProperty.id,
+                    })),
+                })
+
                 return {
                     message: "Property processed successfully",
                     success: true,
@@ -124,6 +125,80 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+
+
+    makeSubscription: protectedProcedure
+        .input(z.object({ tier: z.enum(["Free", "Deluxe", "Premium"]) }))
+        .mutation(async ({ ctx, input }) => {
+            try {
+                if (!ctx.session) {
+                    return { url: null, message: "Not signed in" };
+                }
+
+                const userId = ctx.session.user.id;
+                const Prices = {
+                    Free: "price_1ResnWK8EHOHCxifhUdc04tE",
+                    Deluxe: "price_1ResmhK8EHOHCxifrI6DH4UB",
+                    Premium: "price_1ResmJK8EHOHCxifsX0Xqte3‹"
+                }
+
+                if (input.tier === "Free") {
+                    // a) See if they have an active paid sub
+                    const paidSub = await ctx.prisma.subscription.findFirst({
+                        where: { isActive: true, userId, status: "active", planTier: { in: ["Deluxe", "Premium"] } }
+                    });
+
+
+                    // b) Cancel it on Stripe (if one exists)
+                    if (paidSub?.stripeSubscriptionId) {
+                        await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
+                        // And mark it cancelled in your DB
+                        await ctx.prisma.subscription.update({
+                            where: { id: paidSub.id },
+                            data: { status: "canceled", isActive: false, canceledAt: new Date() }
+                        });
+                    }
+
+
+                    // 3) Create a new Free subscription record
+                    await ctx.prisma.subscription.create({
+                        data: {
+                            userId,
+                            planTier: "Free",
+                            status: "active",
+                            isActive: true,
+                            // For a free plan, there's no Stripe IDs or periods
+                           
+                        },
+                    });
+
+
+                    return { url: null, message: "Subscribed to Free tier" };
+                }
+
+                // 2) Handle Paid tiers
+                const priceId = Prices[input.tier];
+                // Create a Stripe Checkout session
+                const session = await stripe.checkout.sessions.create({
+                    mode: "subscription",
+                    payment_method_types: ["card"],
+                    line_items: [{ price: priceId, quantity: 1 }],
+                    customer_email: ctx.session.user.email,
+                    success_url: `${process.env.NEXTAUTH_URL}/account?success=true`,
+                    cancel_url: `${process.env.NEXTAUTH_URL}/account?canceled=true`,
+                });
+
+                // Return the Stripe URL to your frontend
+                return { url: session.url!, message: "Redirecting to checkout" };
+
+
+            } catch (error) {
+
+            }
+
+        })
+
 
 
 

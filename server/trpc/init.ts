@@ -1,5 +1,6 @@
 
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 
@@ -10,7 +11,8 @@ export const createTRPCContext = async (opts: { req: Request }) => {
     headers: await headers(), 
   });
 
-  return { session };
+
+  return { session , prisma };
 };
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 

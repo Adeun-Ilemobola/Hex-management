@@ -35,7 +35,7 @@ model User {
 
   @@unique([email])
   @@map("user")
-  Subscription Subscription[]
+  Subscriptions Subscription[]
 }
 
 
@@ -44,13 +44,14 @@ model Subscription {
   userId             String
   user               User     @relation(fields: [userId], references: [id])
 
-  stripeCustomerId   String
-  stripeSubscriptionId String
-  priceId            String           // Stripe Price ID
+  stripeCustomerId   String?
+  stripeSubscriptionId String?
+  priceId            String ?          // Stripe Price ID
   status             String           // active | past_due | canceled | incomplete, etc.
+  isActive           Boolean @default(false)
 
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
 
   cancelAtPeriodEnd  Boolean          @default(false)
   canceledAt         DateTime?        // optional, if user cancels
