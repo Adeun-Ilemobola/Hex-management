@@ -35,6 +35,9 @@ export async function middleware(request: NextRequest) {
   if (!sessionCookie && !authPage && protectedPage) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+   if (pathName.startsWith("/api/webhooks/stripe")) {
+    return NextResponse.next();
+  }
 
   
 

@@ -6,22 +6,24 @@ import { stripe } from "@/lib/stripe";       // your initialized Stripe client
 export const config = {
     api: { bodyParser: false },               // disable Next.js’s default parser
 };
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
     // 1) Grab raw body and signature
-    const buf = await req.arrayBuffer();
-    const body = Buffer.from(buf);
     const signature = req.headers.get("stripe-signature")!;
+    const textBody = await req.text();
+
 
     // 2) Verify the webhook signature
     let event: Stripe.Event;
     try {
         event = stripe.webhooks.constructEvent(
-            body,
+            textBody,
             signature,
             process.env.STRIPE_WEBHOOK_SECRET!
         );
     } catch (err: any) {
+        console.error("⚠️  Signature verification failed:", err.message);
         return NextResponse.json(
             { error: `Webhook signature verification failed: ${err.message}` },
             { status: 400 }
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
 
             // Get the first subscription item
             const item = subscription.items.data[0];
+            const product = item.price.product as Stripe.Product;
 
             // Deactivate any old subs
             await prisma.subscription.updateMany({
@@ -72,8 +75,9 @@ export async function POST(req: NextRequest) {
                     canceledAt: subscription.canceled_at
                         ? new Date(subscription.canceled_at * 1000)
                         : null,
-                    planTier: item.price.nickname || "unknown",
+                    planTier: product.name,
                     isActive: true,
+                    
                 },
             });
         }

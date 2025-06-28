@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "echo STRIPE_WEBHOOK_SECRET=$(stripe listen --print-secret) > .env.local && stripe listen --forward-to localhost:3000/api/webhooks/stripe & next dev",
     "dev-no-turbopack": "next dev ",
     "build": "prisma generate && next build",
     "start": "next start",

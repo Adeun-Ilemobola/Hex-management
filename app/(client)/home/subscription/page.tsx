@@ -46,23 +46,19 @@ const subscriptionPlans = [
 export default function SubscriptionPage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const subscriptionMutation = api.Propertie.makeSubscription.useMutation({
-    onSuccess(data) {
-      if (data?.url) {
-        window.location.href = data.url;
+    onSuccess({ url, message }) {
+      if (url) {
+        window.location.href = url;
       } else {
-        console.log(data?.message);
-        
-        toast.error('Subscription failed.');
+        toast.success(message);
       }
     },
-    onError() {
-      toast.error('Subscription failed.');
-       console.log(data?.message);
-
+    onError(err) {
+      toast.error(err.message);
     },
   });
 
-  function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium')  {
+  function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium') {
     subscriptionMutation.mutate({ tier });
   };
 

@@ -143,8 +143,8 @@ export const PropertiesRouter = createTRPCRouter({
             const userId = user.id;
             const Prices: Record<"Free" | "Deluxe" | "Premium", string> = {
                 Free: "",
-                Deluxe: "price_1ResmhK8EHOHCxifrI6DH4UB",
-                Premium: "price_1ResmJK8EHOHCxifsX0Xqte3‹",
+                Deluxe: "price_1ResTb2c20NQVeDjj0lmeLk1",
+                Premium: "price_1ResU72c20NQVeDjSFUqPejn",
             };
 
             try {
