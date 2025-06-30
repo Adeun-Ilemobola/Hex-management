@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const Rount = {
   auth: ["/login", "/register", "/"],
-  main: ["/home"  ,"test"],
+  main: ["/home"  ,"/test"],
 };
 
 export async function middleware(request: NextRequest) {
@@ -20,6 +20,10 @@ export async function middleware(request: NextRequest) {
     sessionCookie,
     pathName,
   });
+
+   if (pathName.startsWith("/api/webhooks/stripe")) {
+    return NextResponse.next();
+  }
   if (request.nextUrl.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
@@ -35,9 +39,7 @@ export async function middleware(request: NextRequest) {
   if (!sessionCookie && !authPage && protectedPage) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
-   if (pathName.startsWith("/api/webhooks/stripe")) {
-    return NextResponse.next();
-  }
+  
 
   
 

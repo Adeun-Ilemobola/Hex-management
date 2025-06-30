@@ -1,3 +1,4 @@
+import PropertyModification from "@/components/(propertyFragments)/PropertyModification";
 import MakeUpdate from "@/components/MakeUpdate";
 
 export default async function Page({
@@ -12,7 +13,7 @@ export default async function Page({
 
     return (
         <div className='relative flex flex-col  min-h-screen  overflow-hidden '>
-            <MakeUpdate id={id} />
+            <PropertyModification id={id || ""} />
         </div>
     )
 }

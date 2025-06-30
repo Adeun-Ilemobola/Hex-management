@@ -45,7 +45,7 @@ const subscriptionPlans = [
 
 export default function SubscriptionPage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
-  const subscriptionMutation = api.Propertie.makeSubscription.useMutation({
+  const subscriptionMutation = api.makeSubscription.useMutation({
     onSuccess({ url, message }) {
       if (url) {
         window.location.href = url;

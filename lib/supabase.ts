@@ -1,6 +1,7 @@
 // lib/supabase.ts
 import { createClient } from '@supabase/supabase-js'
 import { Base64FileResult, base64ToBlob, FileUploadResult } from './utils'
+import { ImageInput } from './Zod'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -14,7 +15,7 @@ function sanitizeFilename(name: string): string {
         .replace(/[^a-zA-Z0-9._-]/g, ""); // remove invalid characters
 }
 
-export function UploadImage(file: Base64FileResult, userID: string): Promise<FileUploadResult> {
+export function UploadImage(file: FileUploadResult, userID: string): Promise<FileUploadResult> {
     return new Promise(async (resolve, reject) => {
 
         if (!file) {
@@ -46,7 +47,7 @@ export function UploadImage(file: Base64FileResult, userID: string): Promise<Fil
             size: file.size,
             type: file.type,
             lastModified: file.lastModified,
-            Thumbnail: file.Thumbnail,
+            thumbnail: file.thumbnail,
             supabaseID: uploadData.path
 
         });
@@ -64,7 +65,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     return result;
 }
 
-export function UploadImageList(files: Base64FileResult[], userID: string): Promise<FileUploadResult[]> {
+export function UploadImageList(files: FileUploadResult[], userID: string): Promise<FileUploadResult[]> {
     return new Promise(async (resolve, reject) => {
         const uploadedImages: FileUploadResult[] = [];
 

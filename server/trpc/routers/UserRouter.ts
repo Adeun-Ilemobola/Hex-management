@@ -3,9 +3,8 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
-import { propertieSchema } from '@/lib/Zod';
-import { stripe } from '@/lib/stripe';
-import { TRPCError } from "@trpc/server";
+import { propertySchema, investmentBlockSchema } from '@/lib/Zod';
+
 
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
@@ -29,7 +28,8 @@ export const PropertiesRouter = createTRPCRouter({
                         })
                     },
                     include: {
-                        imageUrls: true,
+                        images: true,
+                        investBlock: true
                     }
                 }
             )
@@ -39,13 +39,15 @@ export const PropertiesRouter = createTRPCRouter({
                 }
             }
             const cleanP = getP.map(item => {
+
+                const { investBlock } = item
                 return {
                     id: item.id,
-                    img: item.imageUrls.length === 0 ? undefined : item.imageUrls[0].url,
+                    img: item.images.length === 0 ? undefined : item.images[0].url,
                     name: item.name,
                     address: item.address,
                     status: item.status as string,
-                    saleStatus: item.typeOfSale
+                    saleStatus: investBlock?.typeOfSale as string
                 }
             })
 
@@ -78,43 +80,42 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .input(z.object({ data: propertieSchema, }))
+        .input(z.object({ property: propertySchema }))
         .mutation(async ({ input, ctx }) => {
             try {
-                const { data } = input;
-                const { imageUrls, videoTourUrl, ...rest } = data;
+                const {externalInvestors , investmentBlock, images, ...rest } = input.property;
+            
 
-                const newProperty = await prisma.propertie.create({
+                const makeP = await ctx.prisma.propertie.create({
                     data: {
                         ...rest,
                         userId: ctx.user.id,
-                        videoTourUrl: undefined,
+                        images: {
+                            createMany: {
+                                data: [...images]
+                            }
+                        },
+                        ...(investmentBlock && {
+                            investBlock:{
+                                create:{
+                                    ...investmentBlock,
+                                    ...(externalInvestors.length >0 && {
+                                        externalInvestors:{
+                                            createMany:{
+                                                data:[...externalInvestors]
+                                            }
+                                        }
+
+                                    } )
+                                    
+                                }
+                            }
+                        })
 
                     }
-                });
-                if (!newProperty) {
-                    return {
-                        message: "Failed to create property new property was not created",
-                        success: false,
-                        data: null
-                    }
-                }
-                const addNewImageUrls = await prisma.image.createMany({
-                    data: imageUrls.map((img) => ({
-                        ...img,
-                        propertyId: newProperty.id,
-                    })),
                 })
 
-                return {
-                    message: "Property processed successfully",
-                    success: true,
-                    data: {
-                        ...rest,
-                        imageUrls,
-                        videoTourUrl
-                    }
-                }
+
 
             } catch (error) {
                 console.error("Error in postPropertie:", error);
@@ -127,100 +128,6 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
-
-
-
-    makeSubscription: protectedProcedure
-        .input(z.object({ tier: z.enum(["Free", "Deluxe", "Premium"]) }))
-        .mutation(async ({ ctx, input }) => {
-            const user = ctx.session?.user;
-            if (!user) {
-                console.warn("[makeSubscription] not signed in, tier=", input.tier);
-                // you can either throw or return a shaped error
-                throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
-            }
-
-            const userId = user.id;
-            const Prices: Record<"Free" | "Deluxe" | "Premium", string> = {
-                Free: "",
-                Deluxe: "price_1ResTb2c20NQVeDjj0lmeLk1",
-                Premium: "price_1ResU72c20NQVeDjSFUqPejn",
-            };
-
-            try {
-                // ─── FREE TIER ─────────────────────────────────────────────
-                if (input.tier === "Free") {
-                    // cancel any active paid subs
-                    const paidSub = await ctx.prisma.subscription.findFirst({
-                        where: {
-                            userId,
-                            isActive: true,
-                            status: "active",
-                            planTier: { in: ["Deluxe", "Premium"] },
-                        },
-                    });
-
-                    if (paidSub?.stripeSubscriptionId) {
-                        await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
-                        await ctx.prisma.subscription.update({
-                            where: { id: paidSub.id },
-                            data: {
-                                status: "canceled",
-                                isActive: false,
-                                canceledAt: new Date(),
-                            },
-                        });
-                    }
-
-                    // create local free‐plan record
-                    await ctx.prisma.subscription.create({
-                        data: {
-                            userId,
-                            planTier: "Free",
-                            status: "active",
-                            isActive: true,
-                        },
-                    });
-
-                    return { url: null, message: "Now on Free tier." };
-                }
-
-                // ─── PAID TIERS ─────────────────────────────────────────────
-                const priceId = Prices[input.tier];
-                if (!priceId) {
-                    console.error("[makeSubscription] missing priceId for tier", input.tier);
-                    throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid plan selected" });
-                }
-
-                const session = await stripe.checkout.sessions.create({
-                    mode: "subscription",
-                    payment_method_types: ["card"],
-                    line_items: [{ price: priceId, quantity: 1 }],
-                    customer_email: user.email,
-                    success_url: `${process.env.NEXTAUTH_URL}/account?success=true`,
-                    cancel_url: `${process.env.NEXTAUTH_URL}/account?canceled=true`,
-                });
-
-                return { url: session.url!, message: "Redirecting to Stripe checkout…" };
-            } catch (err: any) {
-                console.error("[makeSubscription] error processing", {
-                    userId,
-                    tier: input.tier,
-                    error: err,
-                });
-                // surface the message so your client onError can toast it
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: err?.message ?? "Subscription service unavailable",
-                });
-            }
-        })
-
-
-
-
-
-
 
 
 });

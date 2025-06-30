@@ -12,6 +12,11 @@ import { FileUploadResult } from '@/lib/utils'
 import { Button } from './ui/button'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
 
+
+// propertyModification
+// propertyGIF
+// propertyIF
+// 
 interface MakeUpdateProps {
     id?: string
 }
@@ -58,10 +63,11 @@ export default function MakeUpdate({ id }: MakeUpdateProps) {
         const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle, } = property;
         let result = 0;
         let duration = 0;
+        let markedUpPrice = 0;
 
         if (typeOfSale === 'sell') {
             // 1) compute markup
-            const markedUpPrice = initialInvestment * (1 + margin / 100);
+             markedUpPrice = initialInvestment * (1 + margin / 100);
             // 2) apply discount to the marked-up price
             result = markedUpPrice * (1 - discountPercentage / 100);
             // one‐time sale → 1 payment

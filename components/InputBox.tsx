@@ -73,7 +73,7 @@ export default function InputBox({
 }: InputBoxProps) {
   return (
     <div className={clsx('flex flex-col space-y-1 w-full', className)}>
-      <Label htmlFor={identify} className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
+      <Label htmlFor={identify} className='text-sm font-semibold '>
         {label}
       </Label>
       <Input
@@ -85,7 +85,7 @@ export default function InputBox({
         value={value}
         onChange={(e) => setValue && setValue(e)}
         size={45}
-        className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100'
+        className='w-full rounded-lg'
         {...all}
       />
     </div>
@@ -104,7 +104,7 @@ export function SelectorBox({
 }: SelectorBoxProps) {
   return (
     <div className={clsx('flex flex-col space-y-1 w-full', ClassName)}>
-      <Label htmlFor={identify} className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
+      <Label htmlFor={identify} className='text-sm font-semibold'>
         {label}
       </Label>
 
@@ -113,7 +113,7 @@ export function SelectorBox({
         disabled={isDisable}
         defaultValue={defaultValue}
       >
-        <SelectTrigger className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100'>
+        <SelectTrigger className='w-full rounded-lg'>
           <SelectValue
             placeholder={value.length < 1 ? defaultValue : value}
           />
@@ -135,13 +135,13 @@ export function SelectorBox({
 export function SwitchBox({ value, setValue, className, label }: SwitchBoxProp) {
   return (
     <div className={clsx('flex items-center space-x-2', className)}>
-      <Label className='text-sm font-medium text-gray-700 dark:text-gray-200'>
+      <Label className='text-sm font-medium'>
         {label}
       </Label>
       <Switch
         checked={value}
         onCheckedChange={(e) => setValue(e)}
-        className='data-[state=checked]:bg-indigo-600 data-[state=checked]:hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500'
+        className='0'
       />
     </div>
   );
@@ -168,12 +168,12 @@ export function NumberBox({
     >
       {/* Outer wrapper: controls width, allows shrinking in parent flex */}
       <div className={clsx('flex flex-col space-y-1 min-w-0', className)}>
-        <AriaLabel className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <AriaLabel className="text-sm font-semibold ">
           {label}
         </AriaLabel>
 
         {/* Frame: fills wrapper width, allows inner items to shrink */}
-        <Group className="inline-flex items-center w-full min-w-0 rounded-lg border border-gray-300 bg-white shadow-sm dark:bg-gray-800 dark:border-gray-600">
+        <Group className="inline-flex items-center w-full min-w-0 rounded-lg border">
           <Button
             slot="decrement"
             className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"

@@ -23,7 +23,7 @@ export interface FileUploadResult {
   size: number; // in bytes
   type: string;
   lastModified: number;
-  Thumbnail:boolean
+  thumbnail:boolean
 }
 
 
@@ -39,7 +39,7 @@ export const toB64 = (file: File): Promise<FileUploadResult> => {
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-        Thumbnail:false,
+        thumbnail:false,
         supabaseID: "",
 
       });

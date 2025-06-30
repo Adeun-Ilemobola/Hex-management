@@ -15,8 +15,20 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum InvestmentType {
+  INDIVIDUAL
+  POOLED
+  TIC
+}
+
+enum SaleType {
+  SELL
+  RENT
+  LEASE
+}
+
 model User {
-  id            String      @id
+  id            String         @id
   name          String
   email         String
   emailVerified Boolean
@@ -32,70 +44,93 @@ model User {
   sessions      Session[]
   accounts      Account[]
   properties    propertie[]
+  Subscriptions Subscription[]
 
   @@unique([email])
   @@map("user")
-  Subscriptions Subscription[]
 }
 
+model externalInvestor {
+  id                     String  @id @default(uuid())
+  name                   String
+  email                  String @unique
+  contributionPercentage Float // how much percentage does this user provide for the investment?
+  returnPercentage       Float // the percentage returns for the investor
+  isInternal             Boolean // is this user exist in our system or is an external user?
+  accessRevoked          Boolean // the ability to revoke this user from being a partner
+  dollarValueReturn      Float // the external investors return percentage in a dollar value
+
+  investmentBlockId String
+  investmentBlock   investmentBlock @relation(fields: [investmentBlockId], references: [id])
+}
+
+model investmentBlock {
+  id               String         @id @default(uuid())
+  //  General information that all type of investment will have
+  typeOfInvestment InvestmentType @default(INDIVIDUAL) // Pooled / TIC , this are going to be the first two the rest will take more time to implement
+
+  // this will be the coin investment 
+
+  initialInvestment Float // How much money did the user buy this property?
+  margin            Float // Profit percentage Based off the initial investment
+  typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
+  saleDuration      Int?     @default(0) // duration for how long to get my money back from the investment
+
+  // ------------------ Lease -------------------------
+  leaseCycle Float?  @default(0.0)
+  leaseType  String? @default("Month") // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
+
+  finalResult Float @default(0.0) // The result for the investment
+
+  discountPercentage Float? @default(0) // Discount percentage for the property, if applicable
+
+  propertieid       String             @unique
+  propertie         propertie          @relation(fields: [propertieid], references: [id])
+  externalInvestors externalInvestor[]
+}
 
 model Subscription {
-  id                 String   @id @default(uuid())
-  userId             String
-  user               User     @relation(fields: [userId], references: [id])
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  stripeCustomerId   String?
+  stripeCustomerId     String?
   stripeSubscriptionId String?
-  priceId            String ?          // Stripe Price ID
-  status             String           // active | past_due | canceled | incomplete, etc.
-  isActive           Boolean @default(false)
+  priceId              String? // Stripe Price ID
+  status               String // active | past_due | canceled | incomplete, etc.
+  isActive             Boolean @default(false)
 
   currentPeriodStart DateTime?
   currentPeriodEnd   DateTime?
 
-  cancelAtPeriodEnd  Boolean          @default(false)
-  canceledAt         DateTime?        // optional, if user cancels
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime? // optional, if user cancels
 
-  planTier           String           // "Free" | "Deluxe" | "Premium", etc.
+  planTier String // "Free" | "Deluxe" | "Premium", etc.
 
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-}
-
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([token])
-  @@map("session")
-}
-
-model image{
-  id String @id @default(uuid())
-  name String // The name of the image file
-  url String // The URL of the image
-  size Int // Size of the image in bytes
-  type String // Type of the image (e.g., "jpg", "png", "gif")
-  lastModified BigInt // Last modified timestamp in milliseconds since epoch
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Thumbnail Boolean // Whether this image is a thumbnail or not
-  supabaseID String // The ID of the image in Supabase storage, if applicable
+}
+
+model image {
+  id           String   @id @default(uuid())
+  name         String // The name of the image file
+  url          String // The URL of the image
+  size         Int // Size of the image in bytes
+  type         String // Type of the image (e.g., "jpg", "png", "gif")
+  lastModified BigInt // Last modified timestamp in milliseconds since epoch
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  thumbnail    Boolean // Whether this image is a thumbnail or not
+  supabaseID   String // The ID of the image in Supabase storage, if applicable
 
   // Relationships
-  propertyId String?
-  property   propertie? @relation(fields: [propertyId], references: [id])
+  propertyId String
+  property   propertie @relation(fields: [propertyId], references: [id])
 }
 
 model propertie {
-  id String @id @default(uuid())
+  id            String  @id @default(uuid())
   name          String
   address       String // The exact location with the ZIP Code and the general address
   description   String? // General description of the property.
@@ -104,47 +139,34 @@ model propertie {
   numBedrooms   Int? // Common requirement for housing.
   numBathrooms  Int? // Same as above.
 
-
-   // Amenities and Features
+  // Amenities and Features
   hasGarage Boolean? // Quick way to check for popular amenities.
   hasGarden Boolean?
   hasPool   Boolean?
   amenities String[] // List of amenities (e.g., ["Elevator", "Gym", "Fireplace"]).
 
-  lotSize      Float? // Size of the property land, in square meters or feet.
-  propertyType String? // House, Apartment, Condo, Commercial, etc.
-  status       String? @default("active") // active, pending, sold, etc.
-  ownerName    String // Who currently owns the property.
-  contactInfo  String // Contact details for inquiries.
-
-  thobNialImgId String?
-
-  initialInvestment Float // How much money did the user buy this property?
-  margin            Float // Profit percentage Based off the initial investment
-  typeOfSale        String @default("sell") // Rent , Sell , Lease
-  saleDuration      Int?   @default(0) // duration for how long to get my money back from the investment
-
-  // ------------------ Lease -------------------------
-  leaseCycle  Float? @default(0.0)
-  leaseType  String? @default("Month")  // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
-
-  finalResult Float @default(0.0) // The result for the investment
-
-  discountPercentage Float? @default(0) // Discount percentage for the property, if applicable
-
+  lotSize       Float? // Size of the property land, in square meters or feet.
+  propertyType  String? // House, Apartment, Condo, Commercial, etc.
+  status        String? @default("active") // active, pending, sold, etc.
+  ownerName     String // Who currently owns the property.
+  contactInfo   String // Contact details for inquiries.
   leavingstatus String? @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
   // Media
-  imageUrls    image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
-  videoTourUrl String? // Optional video tour.
+  images     image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
+  videoTourUrl  String? // Optional video tour.
+  thobNialImgId String?
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  accessCode String @db.VarChar(12) // this code is generated by the user that created the property I need to be used for other external users to access the property
+
   // Relationships
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  investBlock investmentBlock?
 }
 
 model Account {
@@ -175,4 +197,19 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
 }
