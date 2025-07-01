@@ -103,7 +103,7 @@ export function SelectorBox({
   defaultValue = 'None',
 }: SelectorBoxProps) {
   return (
-    <div className={clsx('flex flex-col space-y-1 w-full', ClassName)}>
+    <div className={clsx('flex flex-col space-y-1 ', ClassName)}>
       <Label htmlFor={identify} className='text-sm font-semibold'>
         {label}
       </Label>

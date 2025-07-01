@@ -13,7 +13,7 @@ export interface Base64FileResult {
   size: number; // in bytes
   type: string;
   lastModified: number;
-  Thumbnail:boolean
+  thumbnail:boolean
 }
 
 export interface FileUploadResult {

@@ -46,6 +46,11 @@ model User {
   properties    propertie[]
   Subscriptions Subscription[]
 
+
+  rooms    ChatRoomMember[]
+  messages Message[]
+  images   ChatImage[]
+
   @@unique([email])
   @@map("user")
 }
@@ -53,7 +58,7 @@ model User {
 model externalInvestor {
   id                     String  @id @default(uuid())
   name                   String
-  email                  String @unique
+  email                  String  @unique
   contributionPercentage Float // how much percentage does this user provide for the investment?
   returnPercentage       Float // the percentage returns for the investor
   isInternal             Boolean // is this user exist in our system or is an external user?
@@ -87,6 +92,7 @@ model investmentBlock {
   propertieid       String             @unique
   propertie         propertie          @relation(fields: [propertieid], references: [id])
   externalInvestors externalInvestor[]
+  @@unique([id])
 }
 
 model Subscription {
@@ -152,7 +158,7 @@ model propertie {
   contactInfo   String // Contact details for inquiries.
   leavingstatus String? @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
   // Media
-  images     image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
+  images        image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
   videoTourUrl  String? // Optional video tour.
   thobNialImgId String?
 
@@ -212,4 +218,57 @@ model Session {
 
   @@unique([token])
   @@map("session")
+}
+
+model ChatRoom {
+  id           String           @id @default(uuid())
+  title        String[] // this will be an arry of the two users name so you can switch depends on who is viewing it
+  participants ChatRoomMember[]
+
+  chats Message[]
+
+  @@unique([id])
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  room      ChatRoom    @relation(fields: [roomId], references: [id])
+  roomId    String
+  author    User        @relation(fields: [authorId], references: [id])
+  authorId  String
+  text      String?
+  createdAt DateTime    @default(now())
+  images    ChatImage[]
+}
+
+model ChatRoomMember {
+  id       String   @id @default(uuid())
+  room     ChatRoom @relation(fields: [roomId], references: [id])
+  roomId   String
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  joinedAt DateTime @default(now())
+
+  @@unique([roomId, userId])
+}
+
+model ChatImage {
+  id           String   @id @default(uuid())
+  name         String // The name of the image file
+  url          String // The URL of the image
+  size         Int // Size of the image in bytes
+  type         String // Type of the image (e.g., "jpg", "png", "gif")
+  lastModified BigInt // Last modified timestamp in milliseconds since epoch
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  thumbnail    Boolean // Whether this image is a thumbnail or not
+  supabaseID   String // The ID of the image in Supabase storage, if applicable
+
+  ChatRoomID  String // what chat room owns this image?
+  chatOwnerID String // what user posted image
+
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String  
+  owner     User    @relation(fields: [ownerId], references: [id])
+  ownerId   String  
 }

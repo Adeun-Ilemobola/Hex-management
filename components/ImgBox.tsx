@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Button } from './ui/button';
-import { Base64FileResult, toB64 } from '@/lib/utils';
+import { Base64FileResult, FileUploadResult, toB64 } from '@/lib/utils';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { Lightbulb, LightbulbOff, ScanEye, Trash2, Upload } from 'lucide-react';
@@ -18,10 +18,10 @@ interface ImgBoxProps {
 
 interface ImgBoxListProps {
   disabled?: boolean;
-  fileList: Base64FileResult[];
+  fileList: FileUploadResult[];
   className?: string;
   SetMainImg: (index: number) => void;
-  setData: (list: Base64FileResult[]) => void;
+  setData: (list: FileUploadResult[]) => void;
   del: (id: number) => void
 }
 
@@ -79,7 +79,7 @@ export default function ImgBox({ disabled, fileList, Class, SetMainImg, setData 
               }}
               className={clsx(
                 'relative h-28 w-40 shrink-0 rounded-lg overflow-hidden ring-2 transition-all duration-200 cursor-pointer hover:ring-indigo-500/40',
-                file.Thumbnail ? 'ring-green-400' : 'ring-indigo-600/65'
+                file.thumbnail ? 'ring-green-400' : 'ring-indigo-600/65'
               )}
             >
               <Image
@@ -149,7 +149,7 @@ export function ImgBoxList({ disabled, fileList, className, SetMainImg, setData,
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3 border-b  border-b-indigo-300">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
           {fileList.length}
         </h2>
@@ -157,10 +157,10 @@ export function ImgBoxList({ disabled, fileList, className, SetMainImg, setData,
           onClick={openFileX}
           variant="outline"
           size="icon"
-          className="hover:bg-muted"
+          className=""
           disabled={isDisabled}
         >
-          <Upload className="animate-pulse" />
+          <Upload className="animate-pulse " strokeWidth={2.5}  color='#312c85' />
         </Button>
       </div>
 
@@ -171,10 +171,10 @@ export function ImgBoxList({ disabled, fileList, className, SetMainImg, setData,
             <div
               key={i}
               className={clsx(
-                "flex items-center justify-between p-4 rounded-2xl shadow transition ring-1",
-                file.Thumbnail
+                "flex items-center justify-between p-2 rounded-xl shadow transition ring-1",
+                file.thumbnail
                   ? "bg-accent/10 ring-accent/50 hover:bg-accent/20 hover:ring-accent-foreground"
-                  : "bg-amber-300/55 dark:bg-amber-900/40 ring-amber-600/50 hover:bg-amber-300/80 hover:ring-amber-700/60",
+                  : "bg-emerald-300/55 dark:bg-emerald-900/40 ring-emerald-600/50 hover:bg-emerald-300/80 hover:ring-emerald-700/60",
                 !isDisabled && "cursor-pointer",
                 isDisabled && "opacity-70"
               )}
@@ -197,11 +197,11 @@ export function ImgBoxList({ disabled, fileList, className, SetMainImg, setData,
                   }}
                   className={clsx(
                     "p-1 rounded-full transition",
-                    !isDisabled && "hover:bg-muted"
+                    !isDisabled && "hover:bg-blue-500/50"
                   )}
                   disabled={isDisabled}
                 >
-                  {file.Thumbnail ? (
+                  {file.thumbnail ? (
                     <Lightbulb className="text-yellow-500" />
                   ) : (
 
@@ -224,7 +224,7 @@ export function ImgBoxList({ disabled, fileList, className, SetMainImg, setData,
           ))
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <span className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 opacity-30">
+            <span className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-100 to-indigo-300 opacity-50">
               No images uploaded
             </span>
           </div>

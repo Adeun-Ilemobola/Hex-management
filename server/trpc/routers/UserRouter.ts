@@ -83,8 +83,7 @@ export const PropertiesRouter = createTRPCRouter({
         .input(z.object({ property: propertySchema }))
         .mutation(async ({ input, ctx }) => {
             try {
-                const {externalInvestors , investmentBlock, images, ...rest } = input.property;
-            
+                const { externalInvestors, investmentBlock, images, ...rest } = input.property;
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
@@ -96,24 +95,39 @@ export const PropertiesRouter = createTRPCRouter({
                             }
                         },
                         ...(investmentBlock && {
-                            investBlock:{
-                                create:{
+                            investBlock: {
+                                create: {
                                     ...investmentBlock,
-                                    ...(externalInvestors.length >0 && {
-                                        externalInvestors:{
-                                            createMany:{
-                                                data:[...externalInvestors]
+                                    ...(externalInvestors.length > 0 && {
+                                        externalInvestors: {
+                                            createMany: {
+                                                data: [...externalInvestors]
                                             }
                                         }
 
-                                    } )
-                                    
+                                    })
+
                                 }
                             }
                         })
 
                     }
-                })
+                });
+
+                if (!makeP) {
+                    return {
+                        message: "Failed to process property XXXXXX",
+                        success: false,
+                        data: null
+                    }
+
+                }
+
+                 return {
+                    message: "successfully created property listing",
+                    success: true,
+                    data: makeP
+                }
 
 
 

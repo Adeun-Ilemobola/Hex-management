@@ -9,16 +9,58 @@ import { defaultExternalInvestorInput, defaultInvestmentBlockInput, defaultPrope
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
+import PropertyGIF from './PropertyGIF'
+import { ImgBoxList } from '../ImgBox'
+import PropertyIF from './propertyIF'
 
 export default function PropertyModification({ id }: { id: string }) {
     const Session = authClient.useSession()
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
     const postProperty = api.Propertie.postPropertie.useMutation()
-    
+
     const [section, Setsection] = useState(1)
+    const [stopProses, setStopProses] = useState(false)
     const [propertyInfo, setPropertyInfo] = useState<PropertyInput>(defaultPropertyInput)
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput>(defaultExternalInvestorInput)
+
+
+
+    function validation() {
+
+        const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
+        const validatedProperty = propertySchema.safeParse({
+            ...propertyInfo,
+            ownerName: Session.data?.user?.name,
+            contactInfo: Session.data?.user?.email,
+            ...(section === 3 && {
+                investmentBlock: vInvestmentBlock.data
+            })
+
+        });
+
+        //
+        if (!validatedProperty.success) {
+            validatedProperty.error.errors.forEach(err => {
+                toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
+            }
+            );
+            return null
+
+        }
+
+        if (section === 3 && !vInvestmentBlock.success) {
+            vInvestmentBlock.error.errors.forEach(err => {
+                toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
+            }
+            );
+            return null
+
+        }
+
+        return validatedProperty.data
+
+    }
 
 
 
@@ -30,43 +72,26 @@ export default function PropertyModification({ id }: { id: string }) {
         }
         let uploadedImages: FileUploadResult[] = [];
         try {
-             const vInvestmentBlock = await investmentBlockSchema.safeParseAsync(investmentBlock)
-            const validatedProperty = await propertySchema.safeParseAsync({
-                ...propertyInfo,
-                ownerName: Session.data?.user?.name,
-                contactInfo: Session.data?.user?.email,
-                investmentBlock:vInvestmentBlock.data
-                
-            });
-           
-            //
-            if (!validatedProperty.success) {
-                validatedProperty.error.errors.forEach(err => {
-                    toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
-                }
-                );
-                return;
+
+
+
+            const data = validation()
+            if (!data) {
+                return
             }
 
-            if (!vInvestmentBlock.success) {
-                vInvestmentBlock.error.errors.forEach(err => {
-                    toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
-                }
-                );
-                return;
-            }
             // Prevent duplications uploads
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
             uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
             const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
 
-            console.log("Uploading property:", validatedProperty.data);
+            console.log("Uploading property:", data);
             const post = await postProperty.mutateAsync({
-               property: {
-                ...validatedProperty.data,
-                images:[...uploadedImages , ...uploadedImageToCL]
-               },
-              
+                property: {
+                    ...data,
+                    images: [...uploadedImages, ...uploadedImageToCL]
+                },
+
             });
 
             console.log("Post response:", post);
@@ -98,39 +123,7 @@ export default function PropertyModification({ id }: { id: string }) {
 
 
 
-    function ViewSwitcher() {
 
-        if (section === 1) {
-            return (
-                <div className=' bg-pink-500 flex-1'>
-                    General information of the property
-
-                </div>
-            )
-
-        } else if (section === 2) {
-            return (
-                <div>
-                    Investment type individual or pool or other types of things
-
-                </div>
-            )
-
-        } else if (section === 3) {
-
-            return (
-                <div>
-                    Summary of the investment and creation of it
-
-
-                </div>
-            )
-
-        } else {
-            return null
-        }
-
-    }
 
 
     return (
@@ -138,9 +131,74 @@ export default function PropertyModification({ id }: { id: string }) {
             <Nav SignOut={authClient.signOut} session={Session.data} />
             <div className=' flex flex-col flex-1'>
 
-                <div className=' flex w-full flex-1 bg-amber-500'>
+                <div className=' flex w-full flex-1 '>
 
-                    <ViewSwitcher />
+                    {section === 1 && (
+                        <div className=' flex flex-1 flex-col gap-3'>
+                            <div className=' flex-1 flex flex-col gap-4 p-1.5 items-center'>
+                                <div className=' flex flex-col gap-0.5 p-1'>
+                                    <PropertyGIF disable={postProperty.isPending} setPropertyInfo={setPropertyInfo} propertyInfo={propertyInfo} />
+                                </div>
+
+                                <ImgBoxList
+                                    className=' w-[67rem]!'
+                                    fileList={propertyInfo.images}
+                                    disabled={false}
+                                    setData={list => setPropertyInfo(prev => ({ ...prev, images: [...prev.images, ...list] }))}
+                                    SetMainImg={idx => {
+                                        setPropertyInfo(pre => ({
+                                            ...pre,
+                                            images: [
+                                                ...pre.images.map((item, i) => {
+                                                    idx === i ? item.thumbnail = true : item.thumbnail = false;
+                                                    return item
+                                                })
+                                            ]
+                                        }))
+
+                                    }}
+                                    del={(id) => {
+                                        setPropertyInfo(pre => ({
+                                            ...pre,
+                                            images: [
+                                                ...pre.images.filter((item, i) => {
+                                                    if (i !== id) {
+                                                        return item
+                                                    }
+                                                })
+                                            ]
+                                        }))
+
+                                    }}
+
+
+                                />
+
+                            </div>
+
+                        </div>
+                    )}
+
+
+                    {section === 2 && (
+                        <div className=' flex flex-1 flex-col gap-6 justify-center items-center'>
+                            Investment type individual or pool or other types of things
+                        </div>
+                    )}
+
+
+                    {section === 3 && (
+                        <div className=' flex flex-1 flex-col gap-3'>
+                           
+                           <div className=' flex-1 flex flex-col'>
+                            <PropertyIF setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock}/>
+
+                           </div>
+
+                        </div>
+                    )}
+
+
 
                 </div>
 
@@ -159,18 +217,26 @@ export default function PropertyModification({ id }: { id: string }) {
 
                     <Button
                         className=' ml-auto text-2xl font-bold'
-                        disabled={section === 3}
+
                         size={"lg"}
                         onClick={() => {
                             if (section !== 3) {
                                 if (section === 1) {
-
+                                    const data = validation()
+                                    if (!data) { return; }
                                 }
 
                                 Setsection(pre => ++pre)
+                            } else {
+                                handleSubmit()
+
                             }
                         }}
-                    >Next</Button>
+                    >
+                        {section === 3 ? "submit" : "Next"}
+
+
+                    </Button>
 
                 </div>
 

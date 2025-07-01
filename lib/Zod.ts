@@ -220,7 +220,7 @@ export const investmentBlockSchema = z
       .describe("Computed ROI or payout"),
     propertyId: z
       .string()
-      .uuid("Must be a valid Property UUID"),
+      .uuid("Must be a valid Property UUID").optional(),
   })
   .superRefine((data, ctx) => {
     // rent or lease require higher minimums
