@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
 
   },
   images: {
-    domains: ['etfqwejgpqszeglrqaza.supabase.co', 'cdn.shadcn.com', "images.unsplash.com"],
+    domains: ['etfqwejgpqszeglrqaza.supabase.co', 'cdn.shadcn.com', "images.unsplash.com" , "via.placeholder.com"],
     remotePatterns: [
       {
         protocol: 'https',

@@ -120,7 +120,7 @@ export const zodRegisterSchema = z
 // ─── ENUMS ──────────────────────────────────────────────────────────────────────
 //
 export const InvestmentTypeEnum = z.enum(["INDIVIDUAL", "POOLED", "TIC"]);
-export const SaleTypeEnum = z.enum(["SELL", "RENT", "LEASE"]);
+
 export const PropertyTypeEnum = z.enum([
   "House",
   "Apartment",
@@ -128,6 +128,7 @@ export const PropertyTypeEnum = z.enum([
   "Commercial",
   "Other",
 ]);
+export const SaleTypeEnum = z.enum(["SELL", "RENT", "LEASE"]);
 export const StatusEnum = z.enum(["active", "pending", "sold"]);
 export const LeavingStatusEnum = z.enum([
   "active",
@@ -451,3 +452,98 @@ export const defaultSubscriptionInput: SubscriptionInput = {
   planTier: "Free",
 };
 
+
+
+
+
+
+import type { PropertyCardProp } from '@/components/(propertyFragments)/propertyCard';
+
+// mock data array
+export const sampleProperties: PropertyCardProp["data"][] = [
+  {
+    id: "prop-001",
+    img: "https://via.placeholder.com/300x200?text=House+1",
+    name: "Maple Grove Estate",
+    address: "123 Maple St, Vancouver, BC",
+    status: "active",
+    saleStatus: "SELL",
+  },
+  {
+    id: "prop-002",
+    img: "https://via.placeholder.com/300x200?text=Condo+2",
+    name: "Downtown Skyloft",
+    address: "456 Granville Ave, Vancouver, BC",
+    status: "pending",
+    saleStatus: "RENT",
+  },
+  {
+    id: "prop-003",
+    img: "https://via.placeholder.com/300x200?text=Townhouse+3",
+    name: "Riverside Townhomes",
+    address: "789 River Rd, Richmond, BC",
+    status: "sold",
+    saleStatus: "SELL",
+  },
+  {
+    id: "prop-004",
+    name: "Forest Heights Cabin",
+    address: "12 Pine Needle Dr, Squamish, BC",
+    status: "active",
+    saleStatus: "LEASE",
+  },
+  {
+    id: "prop-005",
+    img: "https://via.placeholder.com/300x200?text=Luxury+Villa",
+    name: "Seaside Luxury Villa",
+    address: "34 Oceanview Blvd, West Vancouver, BC",
+    status: "pending",
+    saleStatus: "SELL",
+  },
+  {
+    id: "prop-006",
+    img: "https://via.placeholder.com/300x200?text=Loft+6",
+    name: "Granite Loft Suites",
+    address: "56 Coal Harbour, Vancouver, BC",
+    status: "active",
+    saleStatus: "RENT",
+  },
+  {
+    id: "prop-007",
+    name: "Countryside Bungalow",
+    address: "78 Meadow Ln, Langley, BC",
+    status: "sold",
+    saleStatus: "SELL",
+  },
+  {
+    id: "prop-008",
+    img: "https://via.placeholder.com/300x200?text=Modern+Flat",
+    name: "Highland Modern Flat",
+    address: "90 Mountain Rd, Whistler, BC",
+    status: "active",
+    saleStatus: "LEASE",
+  },
+  {
+    id: "prop-009",
+    img: "https://via.placeholder.com/300x200?text=Studio+9",
+    name: "Harbourfront Studio",
+    address: "101 Water St, Victoria, BC",
+    status: "pending",
+    saleStatus: "RENT",
+  },
+  {
+    id: "prop-010",
+    name: "Lakeview Cottage",
+    address: "202 Lakeshore Dr, Kelowna, BC",
+    status: "sold",
+    saleStatus: "LEASE",
+  },
+  {
+    id: "prop-011",
+    img: "https://via.placeholder.com/300x200?text=Penthouse+11",
+    name: "Summit Penthouse",
+    address: "303 Skyline Blvd, North Vancouver, BC",
+    status: "active",
+    saleStatus: "SELL",
+  },
+];

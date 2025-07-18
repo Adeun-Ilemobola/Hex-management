@@ -5,13 +5,13 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { MapPin, Eye, Heart, Edit, Trash2 } from "lucide-react";
 
-interface PropertyCardProp {
+ export interface PropertyCardProp {
   data: {
     img?: string;
     name: string;
     address: string;
-    status: string;
-    saleStatus: string;
+    status: "active" | "pending" | "sold";
+    saleStatus: "SELL" | "RENT" | "LEASE";
     id: string;
   };
   mode?: boolean;
@@ -19,6 +19,81 @@ interface PropertyCardProp {
 
 export default function PropertyCard({ data, mode }: PropertyCardProp) {
   const { img, name, address, saleStatus, status, id } = data;
+
+  // Status styling based on enum values
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'active':
+        return {
+          bg: 'bg-green-50 dark:bg-green-900/20',
+          text: 'text-green-700 dark:text-green-400',
+          border: 'border-green-200 dark:border-green-700/30',
+          dot: 'bg-green-500',
+          label: 'Active'
+        };
+      case 'pending':
+        return {
+          bg: 'bg-amber-50 dark:bg-amber-900/20',
+          text: 'text-amber-700 dark:text-amber-400',
+          border: 'border-amber-200 dark:border-amber-700/30',
+          dot: 'bg-amber-500',
+          label: 'Pending'
+        };
+      case 'sold':
+        return {
+          bg: 'bg-gray-50 dark:bg-gray-900/20',
+          text: 'text-gray-700 dark:text-gray-400',
+          border: 'border-gray-200 dark:border-gray-700/30',
+          dot: 'bg-gray-500',
+          label: 'Sold'
+        };
+      default:
+        return {
+          bg: 'bg-gray-50 dark:bg-gray-900/20',
+          text: 'text-gray-700 dark:text-gray-400',
+          border: 'border-gray-200 dark:border-gray-700/30',
+          dot: 'bg-gray-500',
+          label: status
+        };
+    }
+  };
+
+  // Sale type styling
+  const getSaleTypeStyles = (saleStatus: string) => {
+    switch (saleStatus) {
+      case 'SELL':
+        return {
+          bg: 'bg-blue-50 dark:bg-blue-900/20',
+          text: 'text-blue-700 dark:text-blue-400',
+          border: 'border-blue-200 dark:border-blue-700/30',
+          label: 'For Sale'
+        };
+      case 'RENT':
+        return {
+          bg: 'bg-purple-50 dark:bg-purple-900/20',
+          text: 'text-purple-700 dark:text-purple-400',
+          border: 'border-purple-200 dark:border-purple-700/30',
+          label: 'For Rent'
+        };
+      case 'LEASE':
+        return {
+          bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+          text: 'text-emerald-700 dark:text-emerald-400',
+          border: 'border-emerald-200 dark:border-emerald-700/30',
+          label: 'For Lease'
+        };
+      default:
+        return {
+          bg: 'bg-gray-50 dark:bg-gray-900/20',
+          text: 'text-gray-700 dark:text-gray-400',
+          border: 'border-gray-200 dark:border-gray-700/30',
+          label: saleStatus
+        };
+    }
+  };
+
+  const statusStyles = getStatusStyles(status);
+  const saleTypeStyles = getSaleTypeStyles(saleStatus);
 
   return (
     <Linker id={id} mode={mode === undefined ? true : mode}>
@@ -53,17 +128,17 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
               </div>
             </div>
           )}
-
+          
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
+          
           {/* Top badges */}
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
             <Badge
               variant="outline"
-              className="bg-white/95 dark:bg-gray-900/95 text-gray-700 dark:text-gray-300 border-white/20 dark:border-gray-700/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium shadow-sm"
+              className={`${saleTypeStyles.bg} ${saleTypeStyles.text} ${saleTypeStyles.border} backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium shadow-sm`}
             >
-              {status}
+              {saleTypeStyles.label}
             </Badge>
             {!mode && (
               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -81,7 +156,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate leading-tight">
             {name}
           </h1>
-
+          
           {/* Address */}
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
