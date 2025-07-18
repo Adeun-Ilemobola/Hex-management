@@ -27,20 +27,11 @@ export function UploadImage(file: FileUploadResult, userID: string): Promise<Fil
             return;
         }
         const path = `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
-
         const { data: uploadData, error } = await supabase.storage.from("img").upload(path, base64ToBlob(file.url, file.type));
         if (error) {
             throw new Error(`Upload failed: ${error.message}`);
         }
         const publicUrl = supabase.storage.from("img").getPublicUrl(uploadData.path).data.publicUrl;
-
-        console.log({
-            path,
-            uploadData,
-            publicUrl,
-    
-        });
-
         resolve({
             name: file.name,
             url: publicUrl,

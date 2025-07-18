@@ -24,13 +24,13 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
                     label="Name"
                     value={propertyInfo.name}
                     disabled={disable}
-                    setValue={e => handleField('name', e.target.value)}
+                    onChange={e => handleField('name', e)}
                 />
                 <InputBox
                     label="Address"
                     value={propertyInfo.address}
                     disabled={disable}
-                    setValue={e => handleField('address', e.target.value)}
+                    onChange={e => handleField('address', e)}
                 />
             </div>
             <div className="flex flex-wrap gap-2 mt-4">

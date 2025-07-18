@@ -30,13 +30,10 @@ export default function SocialSignOn() {
                 },
                 {
                     onSuccess() {
-
-                        toast.success(` successfully signed in with ${data}`)
+                        toast.success("Login successful with " + data);
                     },
                     onError(context) {
-                        console.log(context);
-                        toast.success(` Field to signIn in with ${data}`)   
-                        
+                        toast.error(context.error.message)       
                     },
                 }
             )

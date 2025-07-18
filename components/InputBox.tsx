@@ -1,4 +1,6 @@
+"use client"
 import React from 'react';
+
 import { Label } from './ui/label';
 import clsx from 'clsx';
 import { Input } from './ui/input';
@@ -11,14 +13,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from './ui/switch';
-import { Minus, Plus } from 'lucide-react';
+import { Eye, EyeClosed, Minus, Plus } from 'lucide-react';
 import {
   Input as AriaInput,
-  Button,
+  Button as AriaButton,
   Group,
   NumberField,
   Label as AriaLabel,
 } from 'react-aria-components';
+import { Button } from './ui/button';
+import MultipleSelector from './MultipleSelector';
+import { Textarea } from './ui/textarea';
 
 type SwitchBoxProp = {
   value: boolean;
@@ -38,16 +43,19 @@ export type NumberBoxProps = {
   step?: number;
 };
 
-type InputType = React.HTMLInputTypeAttribute;
-interface InputBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string | React.ReactNode;
-  type?: InputType;
-  placeholder?: string;
-  disabled?: boolean;
-  value: string;
-  setValue?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  identify?: string;
-  className?: string;
+export interface InputBoxProps {
+    placeholder?: string;
+    value?: string;
+    onChange?: (value: string) => void;
+    className?: string;
+    type?: string;
+    disabled?: boolean;
+    maxLength?: number;
+    readOnly?: boolean;
+    inputRef?: React.RefObject<HTMLInputElement>;
+    label?: string | React.ReactNode;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+
 }
 type SelectorBoxProps = {
   label: string | React.ReactNode;
@@ -60,36 +68,36 @@ type SelectorBoxProps = {
   defaultValue?: string;
 };
 
-export default function InputBox({
-  label,
-  type,
-  placeholder,
-  disabled = false,
-  setValue,
-  value,
-  identify,
-  className,
-  ...all
-}: InputBoxProps) {
-  return (
-    <div className={clsx('flex flex-col space-y-1 w-full', className)}>
-      <Label htmlFor={identify} className='text-sm font-semibold '>
-        {label}
-      </Label>
-      <Input
-        id={identify}
-        name={identify}
-        type={type}
-        placeholder={placeholder}
-        disabled={disabled}
-        value={value}
-        onChange={(e) => setValue && setValue(e)}
-        size={45}
-        className='w-full rounded-lg'
-        {...all}
-      />
-    </div>
-  );
+export default function InputBox({ className, value, onChange, label, disabled ,type , ...other }: InputBoxProps) {
+    const [showPassword, setShowPassword] = React.useState(false);
+    return (
+        <div className={clsx("flex flex-col gap-2.5 justify-center min-w-20", className)}>
+            {label && <Label  className=" ml-1">{label}</Label>}
+            <div className=' flex flex-row  gap-2'>
+                <Input
+                value={value}
+                onChange={(e) => onChange?.(e.target.value)}
+                disabled={disabled}
+                type={type === 'password' ? (showPassword ? "text" : "password"): type || 'text'}
+                {...other}
+            />
+                {type === 'password' && (
+                    <Button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        variant={"secondary"}
+
+                        size={"icon"}
+                       
+                    >
+                        {showPassword ? ( <EyeClosed  />): (<Eye />)}
+                    </Button>
+                )}
+            </div>
+            
+
+        </div>
+    )
 }
 
 export function SelectorBox({
@@ -174,13 +182,13 @@ export function NumberBox({
 
         {/* Frame: fills wrapper width, allows inner items to shrink */}
         <Group className="inline-flex items-center w-full min-w-0 rounded-lg border">
-          <Button
+          <AriaButton
             slot="decrement"
             className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             isDisabled={disabled || value <= min}
           >
             <Minus size={16} strokeWidth={2} aria-hidden="true" />
-          </Button>
+          </AriaButton>
 
           {/* Flexible input: shrinks below content width */}
           <AriaInput
@@ -188,15 +196,85 @@ export function NumberBox({
             disabled={disabled}
           />
 
-          <Button
+          <AriaButton
             slot="increment"
             className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             isDisabled={disabled || value >= max}
           >
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
-          </Button>
+          </AriaButton>
         </Group>
       </div>
     </NumberField>
   );
+}
+
+
+
+
+
+export function MultiSelectorBox({
+    className,
+    value,
+    onChange,
+    label,
+    options,
+    disabled,
+    placeholder = "Select options",
+}: {
+    className?: string;
+    value?: string[];
+    onChange?: (value: string[]) => void;
+    label?: string | React.ReactNode;
+    options: { value: string; label: string }[];
+    disabled?: boolean;
+    placeholder?: string;
+}) {
+    return (
+        <div className={clsx("flex flex-col gap-1 justify-center min-w-20", className)}>
+            {label && <Label className="ml-1">{label}</Label>}
+           <MultipleSelector
+                value={value?.map(v => ({ value: v, label: v }))}
+                onChange={(selected) => onChange?.(selected.map(s => s.value))}
+                options={options}
+                disabled={disabled}
+                creatable
+                placeholder={placeholder}
+                emptyIndicator={<p className="text-gray-500 text-sm">
+                    No options available. Please add some.
+                </p>}
+           />
+        </div>
+       
+    );
+}
+
+export function TextAreaBox({
+    className,
+    value,
+    onChange,
+    label,
+    disabled,
+    placeholder = "Enter text here...",
+}: {
+    className?: string;
+    value?: string;
+    onChange?: (value: string) => void;
+    label?: string | React.ReactNode;
+    disabled?: boolean;
+    placeholder?: string;
+}) {
+    return (
+        <div className={clsx("flex flex-col gap-1 justify-center min-w-20", className)}>
+            {label && <Label className="ml-1">{label}</Label>}
+            <Textarea
+                value={value}
+                onChange={(e) => onChange?.(e.target.value)}
+                disabled={disabled}
+                placeholder={placeholder}
+                className='w-full flex-1 resize-none'
+              
+            />
+        </div>
+    );
 }

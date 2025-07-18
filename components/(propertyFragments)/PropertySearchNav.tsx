@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/select"
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
-import { PackagePlus } from 'lucide-react'
+import { PackagePlus, SearchCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import InputBtu from '../InputBtu'
 interface PropertySearchNavProps {
     onSubmit: (data: { status: string, searchText: string }) => void
     changeMode ?: (mode: boolean) => void
@@ -37,24 +38,15 @@ export default function PropertySearchNav({ onSubmit , changeMode ,mode }: Prope
     })
     return (
         <div className=' flex flex-row-reverse gap-2 w-full h-12 items-center '>
-            <Button className=' mr-1.5' onClick={() => {
-                onSubmit(search)
-                setSearch({
-                    status: "",
-                    searchText: ""
+           <InputBtu
+            onSubmit={(value) => {
+                onSubmit({ status: search.status, searchText: value })
+              
+            }}
+            icon={<SearchCheck className="h-5 w-5" />}
+            
 
-                })
-
-            }}>
-                Search
-            </Button>
-            <Input
-                placeholder='Search by name'
-                className=' w-[290px]'
-                value={search.searchText}
-                onChange={(e) => setSearch(pre => ({ ...pre, searchText: e.target.value }))}
-
-            />
+           />
             <Select value={search.status} defaultValue={search.status} onValueChange={(e) => setSearch(pre => ({ ...pre, status: e }))}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Status" />

@@ -22,25 +22,38 @@ export default function Page() {
 
     const LoginMut = useMutation({
         mutationFn: async (loginData: z.infer<typeof zodLoginSchema>) => {
-            await authClient.signIn.email({
+            toast.loading('Signing in...' , { id: 'signin' });
+            try {
+               const res =  await authClient.signIn.email({
                 password: loginData.password,
                 email: loginData.email,
+                callbackURL: "/home",
                 fetchOptions: {
-                    onSuccess(ctx) {
-                        console.log(ctx);
-                        toast.success('Login successful');
-                        router.push("/")
-                    },
-                    onError(context) {
-                        console.log(context);
-                        toast.error("Invalid credentials or server error.");
-                    },
+                    onSuccess: () => {
+                        toast.success('Login successful', { id: 'signin' });
+                    }
+                   
                 }
             })
+            if (res.error) {
+                toast.error(res.error.message || 'Login failed');
+                console.log(res.error);
+               return
+            } 
+            
+            if (res.data) {
+                toast.success('Login successful', { id: 'signin' });
+            }
+            return
+                
+            } catch (error) {
+               toast.error(`Login failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                console.log(error);
+                
+            }
+            
         },
-        onError: (error) => {
-            toast.error(error.message || 'Login failed');
-        }
+       
     });
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -71,25 +84,27 @@ export default function Page() {
                 <CardHeader>
                     <CardTitle className="text-center  text-3xl">Login</CardTitle>
                 </CardHeader>
-                <CardContent className="">
-                    <form className="flex flex-col w-full items-center justify-center gap-3" onSubmit={handleSubmit}>
+                <CardContent className="min-w-[23rem] ">
+                    <form className="flex flex-1 flex-col w-full items-center justify-center gap-3" onSubmit={handleSubmit}>
                         <InputBox
                             label="Email"
                             type="email"
                             placeholder="Enter your email"
                             disabled={LoginMut.isPending}
-                            setValue={handleChange}
+                            onChange={(e) => setLoginInfo({ ...loginInfo, email: e })}
                             value={loginInfo.email}
-                            identify="email"
+                            className='w-full'
+                           
                         />
                         <InputBox
                             label="Password"
                             type="password"
                             placeholder="Enter your password"
                             disabled={LoginMut.isPending}
-                            setValue={handleChange}
+                            onChange={(e) => setLoginInfo({ ...loginInfo, password: e })}
                             value={loginInfo.password}
-                            identify="password"
+                            className='w-full'
+                           
                         />
                         <Button type='submit' size={"lg"} disabled={LoginMut.isPending} >
                             Login
@@ -98,7 +113,7 @@ export default function Page() {
                 </CardContent>
 
                 <CardFooter>
-                    <div className=' flex flex-row gap-1.5 justify-center'>
+                    <div className=' flex items-center justify-center flex-row gap-2  w-full'>
                         <SocialSignOn />
 
                     </div>
