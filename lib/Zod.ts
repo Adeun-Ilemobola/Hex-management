@@ -176,7 +176,7 @@ export const externalInvestorSchema = z
     dollarValueReturn: z.number().nonnegative(),
     investmentBlockId: z
       .string()
-      .uuid("Must be a valid InvestmentBlock UUID"),
+      .default(""),
   })
   .strict();
 

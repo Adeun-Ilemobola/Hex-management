@@ -137,17 +137,17 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
             <Badge
               variant="outline"
-              className={`${saleTypeStyles.bg} ${saleTypeStyles.text} ${saleTypeStyles.border} backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium shadow-sm`}
+              className={`${statusStyles.bg} ${statusStyles.text} ${statusStyles.border} backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium shadow-sm`}
             >
-              {saleTypeStyles.label}
+              {statusStyles.label}
             </Badge>
-            {!mode && (
+            {/* {!mode && (
               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="p-2 bg-white/90 dark:bg-gray-900/90 rounded-full shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors">
                   <Heart className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                 </button>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

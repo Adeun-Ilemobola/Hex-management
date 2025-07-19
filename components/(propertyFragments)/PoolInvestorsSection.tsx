@@ -1,7 +1,10 @@
 import { DollarSign, Edit2, Mail, TrendingUp, User, Users, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { Button } from '../ui/button'
-import { defaultInvestmentBlockInput, ExternalInvestorInput } from '@/lib/Zod'
+import { defaultInvestmentBlockInput, ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
+import { set } from 'date-fns';
+import { toast } from 'sonner';
+import { api } from '@/lib/trpc';
 
 
 interface propertyIFProps {
@@ -14,7 +17,21 @@ interface propertyIFProps {
 }
 export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
+    const [showInvestorMod, setShowInvestorMod] = useState(false)
+    const  updateExternalInvestorMut =api.Propertie.updataExternalInvestor.useMutation({
+        onMutate(data) {
+            toast.loading("Updating Investors" , { id: "update" });
+        },
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message , { id: "update" });
+            } else {
+                toast.error(data.message , { id: "update" });
+            }
+        }
+    })
 
+    
     const addNewInvestor = () => {
         const newInvestor: ExternalInvestorInput = {
             name: "",
@@ -28,19 +45,34 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
             id: "",
         };
        setInvestor(newInvestor)
+       setShowInvestorMod(true)
     }
     function SubmintInvestors() {
         // add the new investor to the list
+        const  vInvestor = externalInvestorSchema.safeParse(investor)
+
+        if (!vInvestor.success) {
+            if(vInvestor.error.errors.length > 0) {
+                vInvestor.error.errors.forEach(err => {
+                    toast.error(`Error in ${err.path.join(",")}: ${err.message}`);
+                }
+                );
+            }
+            return
+        }
+
+
         if (investor && investor.id.length <= 0 && investor.investmentBlockId.length <= 0) {
             setMebers(prev => [...prev, investor]);
             setInvestor(null)
-
             return
         }
 
         // update the existing investor
         if (investor && (investor.id.length > 0 || investor.investmentBlockId.length > 0)) {
-            alert("Please fill out all required fields")
+            updateExternalInvestorMut.mutate({
+                externalInvestors: investor
+            })
             return
         }
          
@@ -218,4 +250,12 @@ function InvestorCard({
             </div>
         </div>
     );
+}
+
+
+
+function InvestorConfig({ investor, setInvestor }:{investor: ExternalInvestorInput , setInvestor: React.Dispatch<React.SetStateAction<ExternalInvestorInput>>}) {
+
+
+    
 }

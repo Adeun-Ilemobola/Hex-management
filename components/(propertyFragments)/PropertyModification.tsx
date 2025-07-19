@@ -81,19 +81,23 @@ export default function PropertyModification({ id }: { id: string }) {
     const [stopProses, setStopProses] = useState(false)
     const [propertyInfo, setPropertyInfo] = useState<PropertyInput>(defaultPropertyInput)
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
-    const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>(fakeInvestors)
+    const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
 
     const postProperty = api.Propertie.postPropertie.useMutation({
         onSuccess(data, variables) {
 
             if (data && data.success) {
                 toast.success(data.message, { id: "create" });
+                setPropertyInfo(defaultPropertyInput)
+                setInvestmentBlock(defaultInvestmentBlockInput)
+                setExternalInvestor([])
+
 
             } else {
                 toast.error(data.message, { id: "create" });
                 if (variables && variables.property && variables.property.images && variables.property.images.length > 0) {
-                    const imagesToDelete = variables.property.images.map(img => img.supabaseID)
-                    .filter(imgID => imgID !== "" && imgID !== undefined);
+                    const imagesToDelete = variables.property.images.map(img => img.supabaseID as string)
+                        .filter(imgID => imgID !== "" && imgID !== undefined);
                     DeleteImages(imagesToDelete)
 
                 }
@@ -102,11 +106,6 @@ export default function PropertyModification({ id }: { id: string }) {
         },
         onMutate(data) {
             toast.loading("Creating property...", { id: "create" });
-            const imagesToDelete = data.property.images.map(img => img.supabaseID)
-            .filter(imgID => imgID !== "" && imgID !== undefined);
-            DeleteImages(imagesToDelete)
-
-
         },
     })
 
@@ -295,7 +294,7 @@ export default function PropertyModification({ id }: { id: string }) {
                 },
                 investmentBlock: {
                     ...investmentBlock,
-                    externalInvestors: [...externalInvestor]
+                    externalInvestors: [...externalInvestor.filter(inv => inv.id.length === 0 && inv.investmentBlockId.length === 0)]
                 }
 
             });
@@ -328,55 +327,54 @@ export default function PropertyModification({ id }: { id: string }) {
             <div className=' flex flex-col flex-1'>
 
                 <div className=' flex w-full flex-1 '>
-
                     {section === 1 && (
-                        <div className=' flex flex-1 flex-col gap-3'>
-                            <div className=' flex-1 flex flex-col gap-4 p-1.5 items-center'>
-                                <div className=' flex flex-col gap-0.5 p-1'>
+                        <div className=' flex flex-1  '>
+                            <div className=' flex-1 flex flex-row gap-1 p-1 items-center justify-center'>
+                                <div className=' flex flex-col gap-0.5 p-1.5'>
                                     <PropertyGIF disable={postProperty.isPending} setPropertyInfo={setPropertyInfo} propertyInfo={propertyInfo} />
                                 </div>
 
-                                <ImgBoxList
-                                    className=' w-[67rem]!'
-                                    fileList={propertyInfo.images}
-                                    disabled={false}
-                                    setData={list => setPropertyInfo(prev => ({ ...prev, images: [...prev.images, ...list] }))}
-                                    SetMainImg={idx => {
-                                        setPropertyInfo(pre => ({
-                                            ...pre,
-                                            images: [
-                                                ...pre.images.map((item, i) => {
-                                                    idx === i ? item.thumbnail = true : item.thumbnail = false;
-                                                    return item
-                                                })
-                                            ]
-                                        }))
-
-                                    }}
-                                    del={(id) => {
-                                        setPropertyInfo(pre => ({
-                                            ...pre,
-                                            images: [
-                                                ...pre.images.filter((item, i) => {
-                                                    if (i !== id) {
+                                <div className=' flex flex-col gap-0.5 p-1'>
+                                    <ImgBoxList
+                                        className=' w-[67rem]!'
+                                        fileList={propertyInfo.images}
+                                        disabled={false}
+                                        setData={list => setPropertyInfo(prev => ({ ...prev, images: [...prev.images, ...list] }))}
+                                        SetMainImg={idx => {
+                                            setPropertyInfo(pre => ({
+                                                ...pre,
+                                                images: [
+                                                    ...pre.images.map((item, i) => {
+                                                        idx === i ? item.thumbnail = true : item.thumbnail = false;
                                                         return item
-                                                    }
-                                                })
-                                            ]
-                                        }))
+                                                    })
+                                                ]
+                                            }))
+                                        }}
+                                        del={(id) => {
+                                            setPropertyInfo(pre => ({
+                                                ...pre,
+                                                images: [
+                                                    ...pre.images.filter((item, i) => {
+                                                        if (i !== id) {
+                                                            return item
+                                                        }
+                                                    })
+                                                ]
+                                            }))
 
-                                    }}
+                                        }}
 
+                                    />
+                                    <TextAreaBox
+                                        value={propertyInfo.description}
+                                        onChange={val => setPropertyInfo(pre => ({ ...pre, description: val }))}
+                                        label="Description"
+                                        disabled={false}
+                                        className='w-full h-[20rem]   resize-none'
+                                    />
+                                </div>
 
-                                />
-
-                                <TextAreaBox
-                                    value={propertyInfo.description}
-                                    onChange={val => setPropertyInfo(pre => ({ ...pre, description: val }))}
-                                    label="Description"
-                                    disabled={false}
-                                    className='w-full  flex-1 resize-none'
-                                />
 
                             </div>
 

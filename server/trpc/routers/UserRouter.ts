@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
-import { propertySchema, investmentBlockSchema } from '@/lib/Zod';
+import { propertySchema, investmentBlockSchema, externalInvestorSchema } from '@/lib/Zod';
 
 
 export const PropertiesRouter = createTRPCRouter({
@@ -80,11 +80,12 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .input(z.object({ property: propertySchema , investmentBlock: investmentBlockSchema}))
+        .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             try {
                 const { images, ...rest } = input.property;
                 const { externalInvestors, ...investmentBlock } = input.investmentBlock
+                const { id, propertyId , ...cleanInvestmentBlock} = investmentBlock;
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
@@ -95,17 +96,21 @@ export const PropertiesRouter = createTRPCRouter({
                                 data: [...images]
                             }
                         },
-                        ...(investmentBlock && {
+                        ...(cleanInvestmentBlock && {
                             investBlock: {
                                 create: {
-                                    ...investmentBlock,
+                                    ...cleanInvestmentBlock,
                                     ...(externalInvestors.length > 0 && {
                                         externalInvestors: {
                                             createMany: {
-                                                data: [...externalInvestors]
+                                                data: [...externalInvestors.map(item => {
+                                                    const { investmentBlockId , id, ...rest } = item
+                                                    return {
+                                                        ...rest, 
+                                                    }
+                                                })],
                                             }
                                         }
-
                                     })
 
                                 }
@@ -124,7 +129,7 @@ export const PropertiesRouter = createTRPCRouter({
 
                 }
 
-                 return {
+                return {
                     message: "successfully created property listing",
                     success: true,
                     data: makeP
@@ -136,6 +141,46 @@ export const PropertiesRouter = createTRPCRouter({
                 console.error("Error in postPropertie:", error);
                 return {
                     message: "Failed to process property XXXXXX",
+                    success: false,
+                    data: null
+                }
+
+            }
+
+        }),
+
+
+    updataExternalInvestor: protectedProcedure
+        .input(z.object({ externalInvestors: externalInvestorSchema }))
+        .mutation(async ({ input, ctx }) => {
+            try {
+                const { externalInvestors } = input;
+                const updataData = await ctx.prisma.externalInvestor.update({
+                    where: {
+                        id: externalInvestors.id,
+                        investmentBlockId: externalInvestors.investmentBlockId
+                    },
+                    data: {
+                        ...externalInvestors
+                    }
+                })
+                if (!updataData) {
+                    return {
+                        message: "Failed to process property externalInvestors",
+                        success: false,
+                        data: null
+                    }
+                }
+                return {
+                    message: "successfully updated external investor",
+                    success: true,
+                    data: updataData
+                }
+
+            } catch (error) {
+                console.error("Error in updataExternalInvestor:", error);
+                return {
+                    message: "Failed to process property externalInvestors",
                     success: false,
                     data: null
                 }
