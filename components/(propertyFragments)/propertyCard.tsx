@@ -10,8 +10,8 @@ import { MapPin, Eye, Heart, Edit, Trash2 } from "lucide-react";
     img?: string;
     name: string;
     address: string;
-    status: "active" | "pending" | "sold";
-    saleStatus: "SELL" | "RENT" | "LEASE";
+    status: "active" | "pending" | "sold" | string;
+    saleStatus: "SELL" | "RENT" | "LEASE" | string;
     id: string;
   };
   mode?: boolean;
@@ -108,6 +108,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
           transition-all duration-500 ease-out
           overflow-hidden cursor-pointer
           hover:-translate-y-1
+          shrink-0
         `}
       >
         {/* Image Container */}

@@ -17,7 +17,7 @@ export default function Home() {
 
         <div className="flex flex-1 gap-2.5 justify-center items-center">
           {sampleProperties.map((data) => (
-            <PropertyCard key={data.id} data={data} mode={false} />
+            <PropertyCard key={data.id} data={data} mode={true} />
           ))}
 
         </div>

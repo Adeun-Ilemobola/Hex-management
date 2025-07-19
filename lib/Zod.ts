@@ -157,6 +157,7 @@ export const imageSchema = z.object({
 //
 export const externalInvestorSchema = z
   .object({
+    id: z.string().default(""),
     name: z.string().min(2, "Name is required."),
     email: z.string().email("Valid email required."),
     contributionPercentage: z
@@ -184,6 +185,7 @@ export const externalInvestorSchema = z
 //
 export const investmentBlockSchema = z
   .object({
+    id: z.string().default(""),
     typeOfInvestment: InvestmentTypeEnum.default("INDIVIDUAL"),
     initialInvestment: z
       .number()
@@ -221,10 +223,42 @@ export const investmentBlockSchema = z
       .describe("Computed ROI or payout"),
     propertyId: z
       .string()
-      .uuid("Must be a valid Property UUID").optional(),
+      .default(""),
+    externalInvestors: z.array(externalInvestorSchema),
+
   })
   .superRefine((data, ctx) => {
     // rent or lease require higher minimums
+     const { initialInvestment, margin } = data;
+      if (
+        data.initialInvestment !== initialInvestment
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["investmentBlock", "initialInvestment"],
+          message:
+            "investmentBlock.initialInvestment must match top-level initialInvestment.",
+        });
+      }
+      if (data.margin !== margin) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["investmentBlock", "margin"],
+          message:
+            "investmentBlock.margin must match top-level margin.",
+        });
+      }
+
+      if (data.typeOfInvestment === "POOLED") {
+        // 1) require at least two investors
+        if (data.externalInvestors.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["investmentBlock", "externalInvestors"],
+            message: "Pooled investments require at least two external investors.",
+          });
+        }
+      }
     if (data.typeOfSale === "RENT" || data.typeOfSale === "LEASE") {
       if (data.initialInvestment <= 1000) {
         ctx.addIssue({
@@ -299,50 +333,11 @@ export const propertySchema = z
       .string()
       .length(12, "Access code must be exactly 12 characters."),
     // Nested relationship inputs:
-    investmentBlock: investmentBlockSchema.optional(),
-    externalInvestors: z.array(externalInvestorSchema),
+  
     images: z.array(imageSchema),
     videoTourUrl: z.string().url("Invalid URL").optional().nullable(),
   })
-  .superRefine((data, ctx) => {
-
-    const invs = data.externalInvestors || [];
-    // ensure investmentBlock matches the top-level fields if provided
-    if (data.investmentBlock) {
-      const { initialInvestment, margin } = data.investmentBlock;
-      if (
-        data.investmentBlock.initialInvestment !== initialInvestment
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["investmentBlock", "initialInvestment"],
-          message:
-            "investmentBlock.initialInvestment must match top-level initialInvestment.",
-        });
-      }
-      if (data.investmentBlock.margin !== margin) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["investmentBlock", "margin"],
-          message:
-            "investmentBlock.margin must match top-level margin.",
-        });
-      }
-
-      if (data.investmentBlock.typeOfInvestment === "POOLED") {
-        // 1) require at least two investors
-        if (invs.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["investmentBlock", "externalInvestors"],
-            message: "Pooled investments require at least two external investors.",
-          });
-        }
-      }
-
-
-    }
-  });
+ 
 
 //
 // ─── SUBSCRIPTION ────────────────────────────────────────────────────────────────
@@ -396,9 +391,10 @@ export const defaultExternalInvestorInput: ExternalInvestorInput = {
   contributionPercentage: 0,
   returnPercentage: 0,
   isInternal: false,
-  accessRevoked: false,
+  accessRevoked: true,
   dollarValueReturn: 0,
   investmentBlockId: "",
+  id: "",
 };
 
 export const defaultInvestmentBlockInput: InvestmentBlockInput = {
@@ -411,7 +407,10 @@ export const defaultInvestmentBlockInput: InvestmentBlockInput = {
   leaseType: "Month",
   discountPercentage: 0,
   finalResult: 0,
+  externalInvestors: [],
   propertyId: "",
+  id: "",
+
 };
 
 export const defaultPropertyInput: PropertyInput = {
@@ -432,8 +431,7 @@ export const defaultPropertyInput: PropertyInput = {
   ownerName: "",
   contactInfo: "",
   accessCode: "",            // e.g. nanoid(12)
-  investmentBlock: undefined,     // or defaultInvestmentBlockInput
-  externalInvestors: [],
+
   images: [],
   videoTourUrl: undefined,
 };

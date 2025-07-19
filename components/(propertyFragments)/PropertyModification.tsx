@@ -1,5 +1,5 @@
 "use client"
-import React, { useMemo, useState } from 'react'
+import React, { use, useCallback, useEffect, useMemo, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
@@ -15,17 +15,100 @@ import { TextAreaBox } from '../InputBox'
 import InvestmentSummary from './InvestmentSummary'
 import InvestmentBlockSection from './InvestmentBlockSection'
 import PoolInvestorsSection from './PoolInvestorsSection'
-
+const fakeInvestors: ExternalInvestorInput[] = [
+    {
+        name: "Sarah Johnson",
+        email: "sarah.johnson@venture.com",
+        contributionPercentage: 25.5,
+        returnPercentage: 15.2,
+        isInternal: false,
+        accessRevoked: false,
+        dollarValueReturn: 127500,
+        investmentBlockId: "inv-001",
+        id: "inv-001",
+    },
+    {
+        name: "Michael Chen",
+        email: "m.chen@investment.group",
+        contributionPercentage: 18.3,
+        returnPercentage: 12.8,
+        isInternal: false,
+        accessRevoked: false,
+        dollarValueReturn: 89200,
+        investmentBlockId: "inv-002",
+        id: "inv-002",
+    },
+    {
+        name: "Emma Rodriguez",
+        email: "emma@capitalfunds.net",
+        contributionPercentage: 22.0,
+        returnPercentage: 14.1,
+        isInternal: true,
+        accessRevoked: false,
+        dollarValueReturn: 108400,
+        investmentBlockId: "inv-003",
+        id: "inv-003",
+    },
+    {
+        name: "David Park",
+        email: "david.park@wealthmgmt.com",
+        contributionPercentage: 15.7,
+        returnPercentage: 11.3,
+        isInternal: false,
+        accessRevoked: false,
+        dollarValueReturn: 76850,
+        investmentBlockId: "inv-004",
+        id: "inv-004",
+    },
+    {
+        name: "Lisa Thompson",
+        email: "lisa.t@privatequity.org",
+        contributionPercentage: 12.2,
+        returnPercentage: 9.8,
+        isInternal: false,
+        accessRevoked: false,
+        dollarValueReturn: 58960,
+        investmentBlockId: "inv-005",
+        id: "inv-005",
+    }
+];
 export default function PropertyModification({ id }: { id: string }) {
     const Session = authClient.useSession()
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
-    const postProperty = api.Propertie.postPropertie.useMutation()
+
 
     const [section, Setsection] = useState(1)
     const [stopProses, setStopProses] = useState(false)
     const [propertyInfo, setPropertyInfo] = useState<PropertyInput>(defaultPropertyInput)
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
-    const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput>(defaultExternalInvestorInput)
+    const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>(fakeInvestors)
+
+    const postProperty = api.Propertie.postPropertie.useMutation({
+        onSuccess(data, variables) {
+
+            if (data && data.success) {
+                toast.success(data.message, { id: "create" });
+
+            } else {
+                toast.error(data.message, { id: "create" });
+                if (variables && variables.property && variables.property.images && variables.property.images.length > 0) {
+                    const imagesToDelete = variables.property.images.map(img => img.supabaseID)
+                    .filter(imgID => imgID !== "" && imgID !== undefined);
+                    DeleteImages(imagesToDelete)
+
+                }
+            }
+
+        },
+        onMutate(data) {
+            toast.loading("Creating property...", { id: "create" });
+            const imagesToDelete = data.property.images.map(img => img.supabaseID)
+            .filter(imgID => imgID !== "" && imgID !== undefined);
+            DeleteImages(imagesToDelete)
+
+
+        },
+    })
 
     const financials = useMemo(() => {
         const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle, } = investmentBlock;
@@ -61,12 +144,17 @@ export default function PropertyModification({ id }: { id: string }) {
         result = Math.round(result * 100) / 100;
 
         // Now compute the other summary values
-        const base =  typeOfSale === 'SELL' ? initialInvestment : typeOfSale === 'RENT' ? initialInvestment / 12 : leaseCycle > 0 ? initialInvestment / leaseCycle : 0;
+        const base = typeOfSale === 'SELL' ? initialInvestment : typeOfSale === 'RENT' ? initialInvestment / 12 : leaseCycle > 0 ? initialInvestment / leaseCycle : 0;
         const marginAmount = base * (margin / 100);
         const discountAmount = (base + marginAmount) * (discountPercentage / 100);
         const netPayment = base + marginAmount - discountAmount;
 
+        // Calculate total profit/return
+        const totalRevenue = typeOfSale === 'SELL' ? result : result * duration;
+        const totalProfit = totalRevenue - initialInvestment;
         return {
+            totalRevenue,
+            totalProfit,
             result,
             duration,
             base,
@@ -81,20 +169,78 @@ export default function PropertyModification({ id }: { id: string }) {
         investmentBlock.discountPercentage,
         investmentBlock.leaseCycle,
     ]);
+    const investorCalculations = useMemo(() => {
+        const totalInvestorPercentage = externalInvestor.reduce(
+            (sum, investor) => sum + (investor.contributionPercentage || 0),
+            0
+        );
+
+        const updatedInvestors = externalInvestor.map(investor => {
+            // Calculate dollar investment amount based on percentage
+            const investmentAmount = (investor.contributionPercentage / 100) * investmentBlock.initialInvestment;
+
+            // Calculate dollar profit share based on their percentage of total profit
+            const investorProfitShare = (investor.contributionPercentage / 100) * financials.totalProfit;
+
+            // Total dollar return is investment + profit share
+            const dollarValueReturn = investmentAmount + investorProfitShare;
+
+            // Calculate return percentage for this investor
+            const returnPercentage = investmentAmount > 0
+                ? (investorProfitShare / investmentAmount) * 100
+                : 0;
+
+            return {
+                ...investor,
+                returnPercentage: Math.round(returnPercentage * 100) / 100,
+                dollarValueReturn: Math.round(dollarValueReturn * 100) / 100,
+            };
+        });
 
 
+        return {
+            totalInvestorPercentage: Math.round(totalInvestorPercentage * 100) / 100,
+            updatedInvestors,
+            remainingPercentage: Math.max(0, 100 - totalInvestorPercentage),
+            isOverInvested: totalInvestorPercentage > 100,
+            remainingDollarAmount: Math.round(((100 - totalInvestorPercentage) / 100) * investmentBlock.initialInvestment * 100) / 100,
+        };
+    }, [externalInvestor, financials.totalProfit, investmentBlock.initialInvestment]);
+
+
+    const updataFinancials = useCallback(() => {
+        const { result, duration, } = financials;
+        setInvestmentBlock(prev => ({
+            ...prev,
+            saleDuration: duration,
+            finalResult: result,
+
+        }))
+    }, [financials])
+
+    const updateExternalInvestor = useCallback(() => {
+        const { updatedInvestors } = investorCalculations;
+        setExternalInvestor(updatedInvestors);
+
+    }, [investorCalculations.updatedInvestors])
+
+
+    useEffect(() => {
+        if (Session.data?.user?.name && Session.data?.user?.email) {
+            const name = Session.data?.user?.name;
+            const email = Session.data?.user?.email;
+            setPropertyInfo(prev => ({ ...prev, ownerName: name, contactInfo: email }));
+        }
+    }, [Session]);
 
 
     function validation() {
         const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
         const validatedProperty = propertySchema.safeParse({
             ...propertyInfo,
-            ownerName: Session.data?.user?.name,
-            contactInfo: Session.data?.user?.email,
             ...(section === 3 && {
                 investmentBlock: vInvestmentBlock.data
             })
-
         });
         if (!validatedProperty.success) {
             validatedProperty.error.errors.forEach(err => {
@@ -113,8 +259,11 @@ export default function PropertyModification({ id }: { id: string }) {
         return validatedProperty.data
     }
 
+    function onEditInvestor(name: string, email: string) {
+        console.log(name, email);
 
 
+    }
 
     async function handleSubmit() {
         if (Session.data?.user?.id === undefined) {
@@ -123,38 +272,34 @@ export default function PropertyModification({ id }: { id: string }) {
         }
         let uploadedImages: FileUploadResult[] = [];
         try {
-
-
-
             const data = validation()
             if (!data) {
                 return
             }
 
+            console.log("externalInvestor", externalInvestor);
+            console.log("investmentBlock", investmentBlock);
+            console.log("propertyInfo", propertyInfo);
+
+
             // Prevent duplications uploads
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
             uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
-            const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
+            // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
 
             console.log("Uploading property:", data);
-            const post = await postProperty.mutateAsync({
+            await postProperty.mutateAsync({
                 property: {
                     ...data,
-                    images: [...uploadedImages, ...uploadedImageToCL]
+                    images: [...uploadedImages]
                 },
+                investmentBlock: {
+                    ...investmentBlock,
+                    externalInvestors: [...externalInvestor]
+                }
 
             });
 
-            console.log("Post response:", post);
-            if (post.success) {
-                setPropertyInfo(defaultPropertyInput);
-                if (getProperty.data) {
-                    toast.success("Property updated successfully!");
-                }
-            } else {
-                toast.error("Failed to update property.");
-                await DeleteImages(uploadedImages.map(img => img.supabaseID));
-            }
         } catch (error) {
             if (uploadedImages.length > 0) {
                 await DeleteImages(uploadedImages.map(img => img.supabaseID));
@@ -242,26 +387,26 @@ export default function PropertyModification({ id }: { id: string }) {
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
                             <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
-                            <PoolInvestorsSection />
+                            <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
                         </div>
                     )}
 
 
                     {section === 3 && (
                         <div className=' flex flex-1 justify-center items-center flex-col gap-3'>
-                           <InvestmentSummary  
-                           investmentBlock={investmentBlock}
-                           financials={{
-                            netPayment: financials.netPayment,
-                            discountAmount: financials.discountAmount,
-                            marginAmount: financials.marginAmount,
-                            base: financials.base,
-                            duration: financials.duration,
-                            result: financials.result
+                            <InvestmentSummary
+                                investmentBlock={investmentBlock}
+                                financials={{
+                                    netPayment: financials.netPayment,
+                                    discountAmount: financials.discountAmount,
+                                    marginAmount: financials.marginAmount,
+                                    base: financials.base,
+                                    duration: financials.duration,
+                                    result: financials.result
 
-                           }}
-                           />
-                          
+                                }}
+                            />
+
 
 
                         </div>
@@ -298,6 +443,8 @@ export default function PropertyModification({ id }: { id: string }) {
 
                                 Setsection(pre => ++pre)
                             } else {
+                                updateExternalInvestor()
+                                updataFinancials()
                                 handleSubmit()
 
                             }

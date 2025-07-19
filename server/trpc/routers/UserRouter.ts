@@ -80,10 +80,11 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .input(z.object({ property: propertySchema }))
+        .input(z.object({ property: propertySchema , investmentBlock: investmentBlockSchema}))
         .mutation(async ({ input, ctx }) => {
             try {
-                const { externalInvestors, investmentBlock, images, ...rest } = input.property;
+                const { images, ...rest } = input.property;
+                const { externalInvestors, ...investmentBlock } = input.investmentBlock
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
