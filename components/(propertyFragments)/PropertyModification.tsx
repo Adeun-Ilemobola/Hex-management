@@ -329,14 +329,14 @@ export default function PropertyModification({ id }: { id: string }) {
                 <div className=' flex w-full flex-1 '>
                     {section === 1 && (
                         <div className=' flex flex-1  '>
-                            <div className=' flex-1 flex flex-row gap-1 p-1 items-center justify-center'>
-                                <div className=' flex flex-col gap-0.5 p-1.5'>
+                            <div className=' flex-1 flex flex-row gap-1 p-0.5 items-center justify-center'>
+                                <div className=' flex flex-col gap-0.5 p-1'>
                                     <PropertyGIF disable={postProperty.isPending} setPropertyInfo={setPropertyInfo} propertyInfo={propertyInfo} />
                                 </div>
 
-                                <div className=' flex flex-col gap-0.5 p-1'>
+                                <div className=' flex flex-col gap-0.5 p-1 w-[70%]'>
                                     <ImgBoxList
-                                        className=' w-[67rem]!'
+                                        className='w-full'
                                         fileList={propertyInfo.images}
                                         disabled={false}
                                         setData={list => setPropertyInfo(prev => ({ ...prev, images: [...prev.images, ...list] }))}

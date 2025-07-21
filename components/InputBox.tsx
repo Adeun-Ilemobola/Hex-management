@@ -164,6 +164,7 @@ export function NumberBox({
   step = 1,
   className = '',
   disabled = false,
+
 }: NumberBoxProps) {
   return (
     <NumberField
@@ -174,34 +175,80 @@ export function NumberBox({
       onChange={setValue}
       isDisabled={disabled}
     >
-      {/* Outer wrapper: controls width, allows shrinking in parent flex */}
-      <div className={clsx('flex flex-col space-y-1 min-w-0', className)}>
-        <AriaLabel className="text-sm font-semibold ">
+      {/* Responsive outer wrapper */}
+      <div className={clsx('flex flex-col space-y-2 w-full min-w-0', className)}>
+        <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
           {label}
-        </AriaLabel>
+        </Label>
 
-        {/* Frame: fills wrapper width, allows inner items to shrink */}
-        <Group className="inline-flex items-center w-full min-w-0 rounded-lg border">
+        {/* Responsive frame with proper spacing */}
+        <Group 
+        className={clsx(
+          "inline-flex items-center min-w-0",     // no fat width or bg
+           "border border-input rounded-md",        // your shadcn border token
+          "divide-x divide-input"                  // 1px splits between buttons & input
+         )}
+        >
+          {/* Decrement button - responsive sizing */}
           <AriaButton
-            slot="decrement"
-            className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
-            isDisabled={disabled || value <= min}
+            className={clsx(
+              "flex items-center justify-center transition-colors duration-150",
+              "w-10 h-10 sm:w-12 sm:h-12", // Responsive button size
+              "border-r border-gray-300 dark:border-gray-600",
+              "hover:bg-gray-50 dark:hover:bg-gray-700",
+              "focus:ring-2 focus:ring-indigo-500 focus:ring-inset focus:outline-none",
+              "rounded-l-lg",
+              (disabled || (value !== undefined && value <= min)) && "opacity-50 cursor-not-allowed"
+            )}
+            isDisabled={disabled || (value !== undefined && value <= min)}
+            slot={"decrement"}
           >
-            <Minus size={16} strokeWidth={2} aria-hidden="true" />
+            <Minus 
+              size={14} 
+              strokeWidth={2.5} 
+              className="text-gray-600 dark:text-gray-300" 
+              aria-hidden="true" 
+            />
           </AriaButton>
 
-          {/* Flexible input: shrinks below content width */}
+          {/* Responsive input field */}
           <AriaInput
-            className="flex-1 min-w-0 text-center px-3 py-2 text-sm border-none bg-transparent focus:outline-none"
+           
+            value={value}
+            className={clsx(
+              "flex-1 min-w-0 text-center bg-transparent border-none focus:outline-none",
+              "px-2 sm:px-3 py-2 sm:py-3", // Responsive padding
+              "text-sm sm:text-base font-medium", // Responsive text size
+              "text-gray-900 dark:text-gray-100",
+              "placeholder-gray-400 dark:placeholder-gray-500",
+              disabled && "cursor-not-allowed opacity-50"
+            )}
             disabled={disabled}
+            min={min}
+            max={max}
+            step={step}
           />
 
+          {/* Increment button - responsive sizing */}
           <AriaButton
-            slot="increment"
-            className="flex-none aspect-square items-center justify-center px-2 focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
-            isDisabled={disabled || value >= max}
+            className={clsx(
+              "flex items-center justify-center transition-colors duration-150",
+              "w-10 h-10 sm:w-12 sm:h-12", // Responsive button size
+              "border-l border-gray-300 dark:border-gray-600",
+              "hover:bg-gray-50 dark:hover:bg-gray-700",
+              "focus:ring-2 focus:ring-indigo-500 focus:ring-inset focus:outline-none",
+              "rounded-r-lg",
+              (disabled || (value !== undefined && value >= max)) && "opacity-50 cursor-not-allowed"
+            )}
+            isDisabled={disabled || (value !== undefined && value >= max)}
+            slot={"increment"}
           >
-            <Plus size={16} strokeWidth={2} aria-hidden="true" />
+            <Plus 
+              size={14} 
+              strokeWidth={2.5} 
+              className="text-gray-600 dark:text-gray-300" 
+              aria-hidden="true" 
+            />
           </AriaButton>
         </Group>
       </div>

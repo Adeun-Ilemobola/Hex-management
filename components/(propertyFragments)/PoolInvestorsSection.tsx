@@ -61,7 +61,6 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
             return
         }
 
-
         if (investor && investor.id.length <= 0 && investor.investmentBlockId.length <= 0) {
             setMebers(prev => [...prev, investor]);
             setInvestor(null)

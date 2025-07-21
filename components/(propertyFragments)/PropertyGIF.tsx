@@ -1,4 +1,4 @@
-import { InvestmentBlockInput, PropertyInput } from '@/lib/Zod'
+import {  PropertyInput } from '@/lib/Zod'
 import { nanoid } from 'nanoid'
 
 import React from 'react'
@@ -18,13 +18,13 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-3">
             {/* Basic Information Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold  border-b border-gray-200 pb-2">
+            <div className="space-y-2">
+                <h3 className="text-lg font-semibold  border-b border-gray-200 pb-1.5">
                     Basic Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <InputBox
                         label="Property Name"
                         value={propertyInfo.name}
@@ -45,7 +45,7 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
                 <h3 className="text-lg font-semibold  border-b border-gray-200 pb-2">
                     Property Details
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <NumberBox
                         label="Bedrooms"
                         value={propertyInfo.numBedrooms}
@@ -85,11 +85,11 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
             </div>
 
             {/* Property Type & Status Section */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold  border-b border-gray-200 pb-2">
+            <div className="space-y-3">
+                <h3 className="text-lg font-semibold  border-b border-gray-200 pb-1">
                     Type & Status
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <SelectorBox
                         label="Property Type"
                         options={propertyTypeOP}
@@ -108,11 +108,11 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
             </div>
 
             {/* Features Section */}
-            <div className="space-y-4">
+            <div className="space-y-2">
                 <h3 className="text-lg font-semibold border-b border-gray-200 pb-2">
                     Features
                 </h3>
-                <div className="flex flex-wrap gap-6">
+                <div className="flex flex-wrap gap-4">
                     <SwitchBox
                         label="Pool"
                         value={propertyInfo.hasPool}
@@ -132,11 +132,11 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
             </div>
 
             {/* Access Code Section */}
-            <div className="space-y-4">
+            <div className="space-y-2">
                 <h3 className="text-lg font-semibold  border-gray-200 pb-2">
                     Access Code
                 </h3>
-                <div className="flex items-center gap-4 p-4 bg-yellow-500/5 rounded-lg border border-gray-200/20">
+                <div className="flex items-center gap-2 p-4 bg-yellow-500/5 rounded-lg border border-gray-200/20">
                     <div className="flex-1">
                         <p className="text-sm text-gray-300 mb-1">Current Access Code</p>
                         <p className="text-xl font-mono font-bold tracking-wider text">
