@@ -176,7 +176,7 @@ export function NumberBox({
       isDisabled={disabled}
     >
       {/* Responsive outer wrapper */}
-      <div className={clsx('flex flex-col space-y-2 w-full min-w-0', className)}>
+      <div className={clsx('flex flex-col space-y-2  min-w-20', className)}>
         <Label className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
           {label}
         </Label>
@@ -184,16 +184,18 @@ export function NumberBox({
         {/* Responsive frame with proper spacing */}
         <Group 
         className={clsx(
-          "inline-flex items-center min-w-0",     // no fat width or bg
+           "inline-flex items-stretch h-8 sm:h-10 min-w-0",     // no fat width or bg
            "border border-input rounded-md",        // your shadcn border token
-          "divide-x divide-input"                  // 1px splits between buttons & input
+          "divide-x divide-input" ,                 // 1px splits between buttons & input
+          
+          
          )}
         >
           {/* Decrement button - responsive sizing */}
           <AriaButton
             className={clsx(
               "flex items-center justify-center transition-colors duration-150",
-              "w-10 h-10 sm:w-12 sm:h-12", // Responsive button size
+              "w-10 h-full sm:w-12 ", // Responsive button size
               "border-r border-gray-300 dark:border-gray-600",
               "hover:bg-gray-50 dark:hover:bg-gray-700",
               "focus:ring-2 focus:ring-indigo-500 focus:ring-inset focus:outline-none",
@@ -213,17 +215,17 @@ export function NumberBox({
 
           {/* Responsive input field */}
           <AriaInput
-           
             value={value}
             className={clsx(
-              "flex-1 min-w-0 text-center bg-transparent border-none focus:outline-none",
-              "px-2 sm:px-3 py-2 sm:py-3", // Responsive padding
+              "flex-1 min-w-12 text-center bg-transparent border-none focus:outline-none",
+              "px-1 sm:px-2 py-1 sm:py-2", // Responsive padding
               "text-sm sm:text-base font-medium", // Responsive text size
               "text-gray-900 dark:text-gray-100",
               "placeholder-gray-400 dark:placeholder-gray-500",
-              disabled && "cursor-not-allowed opacity-50"
+              disabled && "cursor-not-allowed opacity-50",
             )}
             disabled={disabled}
+            onChange={(e) => setValue(Number(e.target.value))}
             min={min}
             max={max}
             step={step}
@@ -233,7 +235,7 @@ export function NumberBox({
           <AriaButton
             className={clsx(
               "flex items-center justify-center transition-colors duration-150",
-              "w-10 h-10 sm:w-12 sm:h-12", // Responsive button size
+              "w-10 h-full sm:w-12 ", // Responsive button size
               "border-l border-gray-300 dark:border-gray-600",
               "hover:bg-gray-50 dark:hover:bg-gray-700",
               "focus:ring-2 focus:ring-indigo-500 focus:ring-inset focus:outline-none",

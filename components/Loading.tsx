@@ -10,14 +10,15 @@ const PHRASES = [
   "Serving up your data…",
 ];
 
-export default function Loading({ text }: { text?: string | React.ReactNode }) {
+export default function Loading({ text , full }: { text?: string | React.ReactNode , full?: boolean}) {
   const phrase =
     typeof text === "string" && !text
       ? PHRASES[Math.floor(Math.random() * PHRASES.length)]
       : null;
 
+      const size = full ? "min-w-screen min-h-screen " : " min-w-full min-h-full";
   return (
-    <div className="relative flex-1 flex flex-col items-center justify-center min-h-full w-full py-12">
+    <div className={`flex flex-col items-center justify-center ${size}`}>
       {/* Centered Loader + Glow together */}
       <div className="relative flex items-center justify-center w-32 h-32">
         {/* SVG Halo using shadcn theme colors */}

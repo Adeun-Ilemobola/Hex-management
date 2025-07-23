@@ -15,8 +15,7 @@ interface DropBackProps {
 export default function DropBack({ is, children , isTextMessage }: DropBackProps) {
 
     if (is || isTextMessage?.show) {
-        return (<Loading text={isTextMessage?.data} /> )
-
+        return (<Loading text={isTextMessage?.data} full /> )
     }
     return (
         <>

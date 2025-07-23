@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
-import { propertySchema, investmentBlockSchema, externalInvestorSchema } from '@/lib/Zod';
+import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput } from '@/lib/Zod';
 
 
 export const PropertiesRouter = createTRPCRouter({
@@ -188,6 +188,50 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+
+
+        getUserProfle: protectedProcedure
+        .query(async ({ ctx }) => {
+            const user = await ctx.prisma.user.findUnique({
+                where: {
+                    id: ctx.user.id
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    name: true,
+                    phoneNumber: true,
+                    address: true,
+                    city: true,
+                    state: true,
+                    zipCode: true,
+                    country: true,
+                    image: true ,  
+                    emailVerified: true
+
+                }
+            })
+
+            if (!user) {
+                return null
+            }
+
+            const newUser:UserInput = {
+                email: user?.email as string,
+                name: user?.name as string,
+                phoneNumber: user?.phoneNumber as string,
+                address: user?.address as string,
+                city: user?.city as string,
+                state: user?.state as string,
+                zipCode: user?.zipCode as string,
+                country: user?.country as string,
+                image: user?.image as string,
+                emailVerified: user?.emailVerified as boolean
+                
+            }
+            return newUser
+        }), 
 
 
 });

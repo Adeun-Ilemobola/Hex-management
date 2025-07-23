@@ -45,7 +45,7 @@ export default function Page() {
                 {
                     onSuccess: () => {
                         toast.error("successfully signed up");
-                        router.push("/Home")
+                        router.push("/home")
                     },
                     onError(context) {
                         console.log("onError context -- " ,context);
@@ -71,14 +71,7 @@ export default function Page() {
             console.error('Error fetching country data:', error);
         }
     })
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const { name, value, type } = e.target;
-        setRegisterInfo((prev) => ({
-            ...prev,
-            [name]: type === 'checkbox' ? e.target.checked : value
-        }))
-    }
-
+    
     function setCountry(e: string, identify: string) {
         console.log(
             identify
@@ -125,17 +118,17 @@ export default function Page() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                            <InputBox disabled={registerMut.isPending} label='Name' type="text" identify="name" value={registerInfo.name} setValue={handleChange} placeholder="Name" />
-                            <InputBox disabled={registerMut.isPending} label='Email' type="email" identify="email" value={registerInfo.email} setValue={handleChange} placeholder="Email" />
-                            <InputBox disabled={registerMut.isPending} label='Password' type="password" identify="password" value={registerInfo.password} setValue={handleChange} placeholder="Password" />
-                            <InputBox disabled={registerMut.isPending} label='confirm Password' type="password" identify="confirmPassword" value={registerInfo.confirmPassword} setValue={handleChange} placeholder="Confirm Password" />
-                            <InputBox disabled={registerMut.isPending} label='phone Number' type="text" identify="phoneNumber" value={registerInfo.phoneNumber} setValue={handleChange} placeholder="Phone Number" />
+                            <InputBox disabled={registerMut.isPending} label='Name' type="text"  value={registerInfo.name} onChange={(e) => setRegisterInfo((prev) => ({ ...prev, name: e }))} placeholder="Name" />
+                            <InputBox disabled={registerMut.isPending} label='Email' type="email"  value={registerInfo.email} onChange={(e) => setRegisterInfo((prev) => ({ ...prev, email: e }))} placeholder="Email" />
+                            <InputBox disabled={registerMut.isPending} label='Password' type="password"  value={registerInfo.password} onChange={(e) => setRegisterInfo((prev) => ({ ...prev, password: e }))} placeholder="Password" />
+                            <InputBox disabled={registerMut.isPending} label='confirm Password' type="password" value={registerInfo.confirmPassword} onChange={(e) => setRegisterInfo((prev) => ({ ...prev, confirmPassword: e }))} placeholder="Confirm Password" />
+                            <InputBox disabled={registerMut.isPending} label='phone Number' type="text"  value={registerInfo.phoneNumber} onChange={(e) => setRegisterInfo((prev) => ({ ...prev, phoneNumber: e }))} placeholder="Phone Number" />
 
                             <SelectorBox
                                 isDisable={registerMut.isPending}
                                 label='country'
                                 identify="country"
-                                value={registerInfo.country} setValue={setCountry}
+                                value={registerInfo.country} setValue={(e) => setCountry(e, "country")}
                                 options={
                                     [
                                         { value: "None", label: "None" },

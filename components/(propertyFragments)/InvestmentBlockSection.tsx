@@ -43,7 +43,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                         value={investmentBlock.margin}
                         disabled={disable}
                         setValue={(val: number) => handleField('margin', val, 'number')}
-                        className="w-28"
+                        className="w-30"
                     />
                     <NumberBox
                         label="Discount (%)"

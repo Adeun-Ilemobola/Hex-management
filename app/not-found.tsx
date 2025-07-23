@@ -21,7 +21,7 @@ export default function NotFound() {
       <Card className="relative z-10 w-full max-w-md rounded-2xl shadow-md bg-card/95 border border-border flex flex-col items-center gap-2">
         <CardContent className="flex flex-col items-center justify-center py-12 px-6 space-y-4">
           <span className="flex items-center justify-center relative">
-            {/* Fun SVG Ghost */}
+            {/*  SVG Ghost */}
             <Ghost size={80} className="text-primary opacity-90 drop-shadow-lg animate-float" />
             <Sparkles size={28} className="absolute -top-4 -right-3 text-accent animate-bounce" />
           </span>

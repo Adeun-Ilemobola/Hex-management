@@ -363,7 +363,24 @@ export const subscriptionSchema = z
 
 
 
+  export const userSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  emailVerified: z.boolean(),
+  image: z.string().url("Image must be a valid URL").optional(),
+  phoneNumber: z.string(),
+  address: z.string(),
+  zipCode: z.string(),
+  city: z.string(),
+  state: z.string(),
+  country: z.string(),
+});
 
+
+
+
+
+export type UserInput = z.infer<typeof userSchema>;
 export type ImageInput = z.infer<typeof imageSchema>;
 export type ExternalInvestorInput = z.infer<typeof externalInvestorSchema>;
 export type InvestmentBlockInput = z.infer<typeof investmentBlockSchema>;
@@ -374,6 +391,18 @@ export type SubscriptionInput = z.infer<typeof subscriptionSchema>;
 // ─── Defaults ──────────────────────────────────────────────────────────────────
 
 
+export const defaultUserInput: UserInput = {
+  name: "",
+  email: "",
+  emailVerified: false,
+  image: "",
+  phoneNumber: "",
+  address: "",
+  zipCode: "",
+  city: "",
+  state: "",
+  country: "",
+};
 
 export const defaultImageInput: ImageInput = {
   name: "",

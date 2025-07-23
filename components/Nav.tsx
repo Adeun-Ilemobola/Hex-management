@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from './ui/button'
 import { useRouter } from 'next/navigation'
+import CustomSVG from './Icon/logo'
+import Link from 'next/link'
 
 
 export function Nav({ session, SignOut }: { session: Session | null, SignOut: () => void }) {
@@ -23,6 +25,21 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
 
             {/* logo and name  */}
             <div className=' flex w-[25%] items-center'>
+                <Link href="/">
+                    <div className="flex items-center gap-0.5 ml-4">
+                        {/* 32px icon (w-8 h-8) to match 30px type (text-3xl) */}
+                        <CustomSVG
+                            size={32}
+                            className="w-8 h-8 stroke-blue-800 stroke-2 fill-transparent"
+                        />
+                        <span className="text-3xl font-semibold font-sans">
+                            ex
+                        </span>
+                    </div>
+                </Link>
+
+
+
 
             </div>
 
@@ -65,7 +82,7 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
 
 
 
-export default function UserCard({ go, img, Logout, name , sub }: { name: string, img: string | undefined, id: string, Logout: () => void, go: () => void, sub:() => void } ) {
+export default function UserCard({ go, img, Logout, name, sub }: { name: string, img: string | undefined, id: string, Logout: () => void, go: () => void, sub: () => void }) {
 
 
     return (
@@ -81,8 +98,10 @@ export default function UserCard({ go, img, Logout, name , sub }: { name: string
             <DropdownMenuContent>
                 <DropdownMenuLabel>My Account {name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {sub()}}>Subscription</DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href={`/home/Settings`}>Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { sub() }}>Subscription</DropdownMenuItem>
                 <DropdownMenuItem>Team</DropdownMenuItem>
                 <DropdownMenuItem variant={"destructive"} onClick={() => {
                     Logout();

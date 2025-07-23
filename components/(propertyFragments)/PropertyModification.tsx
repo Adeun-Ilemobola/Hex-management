@@ -326,7 +326,7 @@ export default function PropertyModification({ id }: { id: string }) {
             <Nav SignOut={authClient.signOut} session={Session.data} />
             <div className=' flex flex-col flex-1'>
 
-                <div className=' flex w-full flex-1 '>
+                <div className=' flex w-full flex-1 overflow-auto '>
                     {section === 1 && (
                         <div className=' flex flex-1  '>
                             <div className=' flex-1 flex flex-row gap-1 p-0.5 items-center justify-center'>
@@ -423,6 +423,8 @@ export default function PropertyModification({ id }: { id: string }) {
                             if (section !== 1) {
                                 Setsection(pre => --pre)
                             }
+                            updateExternalInvestor()
+                                updataFinancials()
                         }}
                         variant={"ghost"}
                     >Back</Button>
