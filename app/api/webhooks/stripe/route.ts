@@ -45,6 +45,25 @@ export async function POST(req: NextRequest) {
             });
             if (!user) return NextResponse.json({ received: true });
 
+            //get the plan  old subscription
+            const oldSub = await prisma.subscription.findFirst({
+                where: { userId: user.id, isActive: true },
+            });
+
+            if (oldSub && oldSub.stripeSubscriptionId) {
+                // Cancel the old subscription
+                await stripe.subscriptions.cancel(oldSub.stripeSubscriptionId);
+                await prisma.subscription.update({
+                    where: { id: oldSub.id },
+                    data: {
+                        isActive: false,
+                        canceledAt: new Date(),
+                        status: "canceled",
+                    },
+                });
+            }
+        
+
             // Retrieve the Stripe.Subscription (full object)
             const subscription = await stripe.subscriptions.retrieve(
                 subscriptionId
@@ -74,9 +93,10 @@ export async function POST(req: NextRequest) {
                     cancelAtPeriodEnd: subscription.cancel_at_period_end,
                     canceledAt: subscription.canceled_at
                         ? new Date(subscription.canceled_at * 1000)
-                        : null,
-                    planTier: product.name,
+                        : undefined,
                     isActive: true,
+                    planTier:product.name || "premium",
+                   
                     
                 },
             });

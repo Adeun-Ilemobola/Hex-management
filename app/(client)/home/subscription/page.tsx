@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 const subscriptionPlans = [
   {
     tier: 'Free' as const,
+    value: 'Free',
     price: 0,
     isMonthly: true,
     isCurrent: true,
@@ -17,6 +18,7 @@ const subscriptionPlans = [
   },
   {
     tier: 'Deluxe' as const,
+    value: 'deluxe',
     price: 12,
     isMonthly: true,
     isCurrent: false,
@@ -29,6 +31,7 @@ const subscriptionPlans = [
   },
   {
     tier: 'Premium' as const,
+    value: 'premium',
     price: 25,
     isMonthly: true,
     isCurrent: false,
@@ -45,6 +48,8 @@ const subscriptionPlans = [
 
 export default function SubscriptionPage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const [subscriptionList, setSubscriptionList] = React.useState(subscriptionPlans);
+  const getUserPlan = api.user.getUserPlan.useQuery()
   const subscriptionMutation = api.makeSubscription.useMutation({
     onSuccess({ url, message }) {
       if (url) {
@@ -57,6 +62,16 @@ export default function SubscriptionPage() {
       toast.error(err.message);
     },
   });
+
+  React.useEffect(() => {
+    if (getUserPlan.data) {
+      console.log(getUserPlan.data);
+      
+      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.value === getUserPlan.data.data.planTier )})));
+    }
+
+   
+  }, [getUserPlan.data]);
 
   function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium') {
     subscriptionMutation.mutate({ tier });
@@ -75,7 +90,7 @@ export default function SubscriptionPage() {
         </header>
 
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {subscriptionPlans.map((plan) => (
+          {subscriptionList.map((plan) => (
             <SubscriptionCard
               key={plan.tier}
               data={plan}

@@ -231,47 +231,19 @@ function getWelcomeEmailHtml(userName: string): { subject: string, html: string 
   }
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
-const templates = {
+export const templates = {
   VerifyEmail: getVerifyEmailHtml,
   ResetPassword: getResetPasswordEmailHtml,
   Welcome: getWelcomeEmailHtml,
 };
 
-type TemplateType = keyof typeof templates;
+export type TemplateType = keyof typeof templates;
 
 interface SendEmailParams {
   template: TemplateType;
   to: string;
   params: any;
   from?: string;
-}
-
-export async function SendEmail({ template, to, params, from = "onboarding@resend.dev" }: SendEmailParams) {
-  try {
-    const { subject, html } = templates[template](params);
-
-    // if (process.env.NODE_ENV === "development") {
-    //   // —— Ethereal path —— 
-    //   const transporter = await createDevTransport();
-    //   const info = await transporter.sendMail({ from, to, subject, html });
-
-    //   // Prints a clickable preview link in your console
-    //   const previewUrl = nodemailer.getTestMessageUrl(info);
-    //   console.log("📬 Ethereal Preview URL:", previewUrl);
-    //   return info;
-    // }
-
-    return await resend.emails.send({
-      from,
-      to,
-      subject,
-      html
-    });
-
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw new Error("Email sending failed");
-  }
 }

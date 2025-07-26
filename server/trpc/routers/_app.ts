@@ -1,12 +1,18 @@
 import { z } from 'zod';
 
-import { protectedProcedure, createTRPCRouter } from '../init';
+import { protectedProcedure, createTRPCRouter , baseProcedure } from '../init';
 import { PropertiesRouter } from './UserRouter';
 import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
+import { Resend } from 'resend';
+import {templates, TemplateType} from '@/lib/reSend';
+import { userCongiRouter } from './userCongi';
+//import { headers } from "next/headers";
+
 export const appRouter = createTRPCRouter({
 
   Propertie: PropertiesRouter,
+  user:userCongiRouter,
 
   // Add other routers here as needed
   makeSubscription: protectedProcedure
@@ -76,8 +82,8 @@ export const appRouter = createTRPCRouter({
           payment_method_types: ["card"],
           line_items: [{ price: priceId, quantity: 1 }],
           customer_email: user.email,
-          success_url: `${process.env.NEXTAUTH_URL}/account?success=true`,
-          cancel_url: `${process.env.NEXTAUTH_URL}/account?canceled=true`,
+          success_url: `${process.env.NEXTAUTH_URL}/home/account?success=true`,
+          cancel_url: `${process.env.NEXTAUTH_URL}/home/account?canceled=true`,
         });
 
         return { url: session.url!, message: "Redirecting to Stripe checkout…" };
@@ -93,8 +99,7 @@ export const appRouter = createTRPCRouter({
           message: err?.message ?? "Subscription service unavailable",
         });
       }
-    })
-
+    }),
 
 
 });

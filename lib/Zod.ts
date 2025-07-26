@@ -367,7 +367,7 @@ export const subscriptionSchema = z
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email format"),
   emailVerified: z.boolean(),
-  image: z.string().url("Image must be a valid URL").optional(),
+  image: z.string().url("Image must be a valid URL").optional().nullable(),
   phoneNumber: z.string(),
   address: z.string(),
   zipCode: z.string(),

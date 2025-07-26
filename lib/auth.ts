@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from '@/lib/prisma';
-import { SendEmail } from "./reSend";
+import { api } from "./trpc";
+import { sendEmail } from "@/server/actions/sendEmail";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -50,21 +51,15 @@ export const auth = betterAuth({
 
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }) => {
-    console.log({
-      user,
-      url,
-      token
-    });
-    ;
-      
-    const res =  await SendEmail({
-        template: "VerifyEmail",
-        to: user.email,
-        params: {
-          verifyUrl: url
-        }
-      })
+    sendVerificationEmail: async ({ user, url, token }) => {  
+    const res =  await sendEmail({
+      templateText: "VerifyEmail",
+      to: user.email,
+      params: {
+        url,
+        token
+      }
+    })
 
       console.log(res);
 
@@ -75,7 +70,12 @@ export const auth = betterAuth({
     
 
   },
-
+   account: {
+        accountLinking: {
+            enabled: true,
+            trustedProviders: ["google", "github"]
+        }
+    },
 
 
 });

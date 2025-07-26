@@ -8,11 +8,11 @@ import { headers } from 'next/headers';
 
 export const createTRPCContext = async (opts: { req: Request }) => {
   const session = await auth.api.getSession({
-    headers: await headers(), 
+     headers: opts.req.headers,
   });
 
 
-  return { session , prisma };
+  return { session , prisma , req: opts.req };
 };
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 

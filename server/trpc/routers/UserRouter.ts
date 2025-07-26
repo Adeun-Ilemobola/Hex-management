@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
-import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput } from '@/lib/Zod';
+import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema } from '@/lib/Zod';
 
 
 export const PropertiesRouter = createTRPCRouter({
@@ -232,6 +232,44 @@ export const PropertiesRouter = createTRPCRouter({
             }
             return newUser
         }), 
+
+
+        updateUserProfle: protectedProcedure
+        .input(z.object({ user: userSchema }))
+        .mutation(async ({ input, ctx }) => {
+            try {
+                const { user } = input;
+                const updataData = await ctx.prisma.user.update({
+                    where: {
+                        id: ctx.user.id
+                    },
+                    data: {
+                        ...user
+                    }
+                })
+                if (!updataData) {
+                    return {
+                        message: "Failed to process property externalInvestors",
+                        success: false,
+                        data: null
+                    }
+                }
+                return {
+                    message: "successfully updated external investor",
+                    success: true,
+                    data: updataData
+                }
+
+            } catch (error) {
+                console.error("Error in updataExternalInvestor:", error);
+                return {
+                    message: "Failed to process property externalInvestors",
+                    success: false,
+                    data: null
+                }   
+            }
+
+        }),
 
 
 });

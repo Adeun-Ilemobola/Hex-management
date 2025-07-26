@@ -37,7 +37,7 @@ export default function PropertySearchNav({ onSubmit , changeMode ,mode }: Prope
         searchText: ""
     })
     return (
-        <div className=' flex flex-row-reverse gap-2 w-full h-12 items-center '>
+        <div className=' flex flex-row-reverse gap-2 w-full h-12 items-center pr-2 '>
            <InputBtu
             onSubmit={(value) => {
                 onSubmit({ status: search.status, searchText: value })
