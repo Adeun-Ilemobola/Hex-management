@@ -152,6 +152,13 @@ export const imageSchema = z.object({
   supabaseID: z.string().default(""),
 });
 
+
+
+export const messageSchema = z.object({
+  message: z.string().min(1, "Message is required."),
+  file: z.array(imageSchema).optional(),
+});
+
 //
 // ─── EXTERNAL INVESTOR ───────────────────────────────────────────────────────────
 //

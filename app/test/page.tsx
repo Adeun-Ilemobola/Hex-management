@@ -1,9 +1,11 @@
 "use client"
+import ChatBox from '@/components/(ChatFragments)/ChatBox';
+import ChatSend from '@/components/(ChatFragments)/ChatSend';
 import CustomSVG from '@/components/Icon/logo';
 import { ImgBoxList } from '@/components/ImgBox';
 import showToastSystem from '@/components/toastSystem';
 import { Button } from '@/components/ui/button';
-import { Base64FileResult } from '@/lib/utils';
+import { Base64FileResult, FileUploadResult } from '@/lib/utils';
 import React, { useState } from 'react'
 
 // Fake data for all tiers
@@ -11,29 +13,32 @@ import React, { useState } from 'react'
 
 
 export default function Page() {
-  const [imageUrls, setImageUrls] = useState<Base64FileResult[]>([]);
 
 
-  function handleImageUrlsChange() {
-    showToastSystem({
-       title: "Storage Full!",
-      description: "Your storage is 95% full. Consider upgrading to continue uploading files.",
-      buttonText: "View Plans",
-      buttonIcon: true,
-      action: () => {
-        console.log('View Plans clicked');
-        // Navigate to plans page
-      }
-     
-    })
-    
-  }
+  const [message, setMessage] = useState<{ message: string, file: FileUploadResult[] }[]>([]);
+
 
 
   return (
     <div className='relative flex flex-row gap-4 p-4  min-h-screen items-center justify-center  overflow-hidden'>
 
-      <Button onClick={() => handleImageUrlsChange()}>Click</Button>
+
+      <div className='flex flex-col gap-4 w-64'>
+        {message.map((data, index) => (
+          <ChatBox key={index} id={data.message} text={data.message} img={data.file} />
+        ))}
+
+
+      </div>
+
+
+      <ChatSend sendMessage={(data) => {
+        console.log(data)
+        setMessage(prev => [...prev, { message: data.message, file: data.file }]);
+
+      }} />
+
+      {/* <Button onClick={() => handleImageUrlsChange()}>Click</Button>
 <CustomSVG size={40} className="fill-transparent stroke-blue-800 stroke-2" />
 <CustomSVG size={40} className="fill-blue-800" />
 <CustomSVG size={40} className="fill-blue-600 stroke-blue-800 stroke-1" />
@@ -60,11 +65,11 @@ export default function Page() {
 
 <CustomSVG size={67} gradientFrom="#f59e0b" gradientTo="#d97706" gradientId="gradient1" />
 <CustomSVG size={67} gradientFrom="#10b981" gradientTo="#059669" gradientId="gradient2" />
-<CustomSVG size={67} gradientFrom="#3b82f6" gradientTo="#1e40af" gradientId="gradient3" />
+<CustomSVG size={67} gradientFrom="#3b82f6" gradientTo="#1e40af" gradientId="gradient3" /> */}
 
 
 
-      
+
 
     </div>
   )
