@@ -13,6 +13,12 @@ export async function middleware(request: NextRequest) {
     authPage,
     sessionCookie,
     pathName,
+     NODE_ENV: process.env.NODE_ENV,
+  BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+  AUTH_ORIGIN: process.env.AUTH_ORIGIN,
+  NEXT_PUBLIC_TRPC_URL: process.env.NEXT_PUBLIC_TRPC_URL,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL
   });
   // Handle Stripe webhook
   if (pathName.startsWith("/api/webhooks/stripe")) {
