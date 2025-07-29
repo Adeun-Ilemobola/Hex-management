@@ -93,7 +93,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
   };
 
   const statusStyles = getStatusStyles(status);
-  const saleTypeStyles = getSaleTypeStyles(saleStatus);
+  // const saleTypeStyles = getSaleTypeStyles(saleStatus);
 
   return (
     <Linker id={id} mode={mode === undefined ? true : mode}>

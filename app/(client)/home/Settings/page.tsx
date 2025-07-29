@@ -66,15 +66,7 @@ export default function Page() {
       toast.error(error.message, { id: "updatePass" });
     }
   });
-  const listMutate = useMutation({
-    mutationFn: async () => {
-      const accounts = await authClient.listAccounts();
-      console.log(accounts);
-
-      return accounts
-    }
-  })
-
+ 
 
   const makeUpdate = api.Propertie.updateUserProfle.useMutation({
     onMutate() {

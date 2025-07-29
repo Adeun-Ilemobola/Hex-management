@@ -22,11 +22,14 @@ export async function POST(req: NextRequest) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET!
         );
-    } catch (err: any) {
-        console.error("⚠️  Signature verification failed:", err.message);
+    } catch (err: unknown) {
+        const error = err as Error;
+        console.error("⚠️  Signature verification failed:", error.message);
         return NextResponse.json(
-            { error: `Webhook signature verification failed: ${err.message}` },
-            { status: 400 }
+            {
+                error: `Webhook signature verification failed: ${error.message}`,
+                status: 400,
+            }
         );
     }
 
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
                     },
                 });
             }
-        
+
 
             // Retrieve the Stripe.Subscription (full object)
             const subscription = await stripe.subscriptions.retrieve(
@@ -95,9 +98,9 @@ export async function POST(req: NextRequest) {
                         ? new Date(subscription.canceled_at * 1000)
                         : undefined,
                     isActive: true,
-                    planTier:product.name || "premium",
-                   
-                    
+                    planTier: product.name || "premium",
+
+
                 },
             });
         }

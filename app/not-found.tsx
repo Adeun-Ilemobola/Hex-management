@@ -32,8 +32,8 @@ export default function NotFound() {
             <h2 className="text-xl font-bold text-foreground">Page Not Found</h2>
           </div>
           <p className="text-center text-muted-foreground mb-2 max-w-xs">
-            Oops! We couldn't find the page you’re looking for.<br />
-            Maybe it’s lost in the cloud, or just taking a break.
+            Oops! We couldn't find the page you looking for<br />
+            Maybe it lost in the cloud, or just taking a break
           </p>
           <Link href="/" className="w-full mt-4">
             <Button

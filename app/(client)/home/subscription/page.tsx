@@ -47,7 +47,7 @@ const subscriptionPlans = [
 ];
 
 export default function SubscriptionPage() {
-  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const {  isPending: sessionLoading } = authClient.useSession();
   const [subscriptionList, setSubscriptionList] = React.useState(subscriptionPlans);
   const getUserPlan = api.user.getUserPlan.useQuery()
   const subscriptionMutation = api.makeSubscription.useMutation({
@@ -77,7 +77,7 @@ export default function SubscriptionPage() {
     subscriptionMutation.mutate({ tier });
   };
 
-  const isPending = sessionLoading || subscriptionMutation.isPending;
+  const isPending = sessionLoading || subscriptionMutation.isPending || getUserPlan.isPending || getUserPlan.isFetching;
 
   return (
     <DropBack is={isPending}>
