@@ -5,14 +5,20 @@ import { sendEmail } from "@/server/actions/sendEmail";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.NEXTAUTH_URL,  
+  baseURL: process.env.NEXTAUTH_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
   emailAndPassword: {
     enabled: true,
   },
-   
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://hex-management.vercel.app", // ✅ Production URL
+    "https://hex-management-7t951livfx-adeuns-projects-408b65cf.vercel.app",
+     process.env.NEXTAUTH_URL as string || "http://localhost:3000",
+  ],
+
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -50,15 +56,15 @@ export const auth = betterAuth({
 
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }) => {  
-    const res =  await sendEmail({
-      templateText: "VerifyEmail",
-      to: user.email,
-      params: {
-        url,
-        token
-      }
-    })
+    sendVerificationEmail: async ({ user, url, token }) => {
+      const res = await sendEmail({
+        templateText: "VerifyEmail",
+        to: user.email,
+        params: {
+          url,
+          token
+        }
+      })
 
       console.log(res);
 
@@ -66,15 +72,15 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 3600, // 1 hour
-    
+
 
   },
-   account: {
-        accountLinking: {
-            enabled: true,
-            trustedProviders: ["google", "github"]
-        }
-    },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "github"]
+    }
+  },
 
 
 });
