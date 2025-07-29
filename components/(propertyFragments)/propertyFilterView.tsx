@@ -1,6 +1,5 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
 import React , {useState} from 'react'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'

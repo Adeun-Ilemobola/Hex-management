@@ -1,11 +1,11 @@
 "use client"
-import React, { use, useCallback, useEffect, useMemo, useState } from 'react'
+import React, {  useCallback, useEffect, useMemo, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
 import { Nav } from '../Nav'
 import { Button } from '../ui/button'
-import { defaultExternalInvestorInput, defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, PropertyInput, propertySchema } from '@/lib/Zod'
+import {  defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, PropertyInput, propertySchema } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
@@ -15,70 +15,70 @@ import { TextAreaBox } from '../InputBox'
 import InvestmentSummary from './InvestmentSummary'
 import InvestmentBlockSection from './InvestmentBlockSection'
 import PoolInvestorsSection from './PoolInvestorsSection'
-const fakeInvestors: ExternalInvestorInput[] = [
-    {
-        name: "Sarah Johnson",
-        email: "sarah.johnson@venture.com",
-        contributionPercentage: 25.5,
-        returnPercentage: 15.2,
-        isInternal: false,
-        accessRevoked: false,
-        dollarValueReturn: 127500,
-        investmentBlockId: "inv-001",
-        id: "inv-001",
-    },
-    {
-        name: "Michael Chen",
-        email: "m.chen@investment.group",
-        contributionPercentage: 18.3,
-        returnPercentage: 12.8,
-        isInternal: false,
-        accessRevoked: false,
-        dollarValueReturn: 89200,
-        investmentBlockId: "inv-002",
-        id: "inv-002",
-    },
-    {
-        name: "Emma Rodriguez",
-        email: "emma@capitalfunds.net",
-        contributionPercentage: 22.0,
-        returnPercentage: 14.1,
-        isInternal: true,
-        accessRevoked: false,
-        dollarValueReturn: 108400,
-        investmentBlockId: "inv-003",
-        id: "inv-003",
-    },
-    {
-        name: "David Park",
-        email: "david.park@wealthmgmt.com",
-        contributionPercentage: 15.7,
-        returnPercentage: 11.3,
-        isInternal: false,
-        accessRevoked: false,
-        dollarValueReturn: 76850,
-        investmentBlockId: "inv-004",
-        id: "inv-004",
-    },
-    {
-        name: "Lisa Thompson",
-        email: "lisa.t@privatequity.org",
-        contributionPercentage: 12.2,
-        returnPercentage: 9.8,
-        isInternal: false,
-        accessRevoked: false,
-        dollarValueReturn: 58960,
-        investmentBlockId: "inv-005",
-        id: "inv-005",
-    }
-];
+// const fakeInvestors: ExternalInvestorInput[] = [
+//     {
+//         name: "Sarah Johnson",
+//         email: "sarah.johnson@venture.com",
+//         contributionPercentage: 25.5,
+//         returnPercentage: 15.2,
+//         isInternal: false,
+//         accessRevoked: false,
+//         dollarValueReturn: 127500,
+//         investmentBlockId: "inv-001",
+//         id: "inv-001",
+//     },
+//     {
+//         name: "Michael Chen",
+//         email: "m.chen@investment.group",
+//         contributionPercentage: 18.3,
+//         returnPercentage: 12.8,
+//         isInternal: false,
+//         accessRevoked: false,
+//         dollarValueReturn: 89200,
+//         investmentBlockId: "inv-002",
+//         id: "inv-002",
+//     },
+//     {
+//         name: "Emma Rodriguez",
+//         email: "emma@capitalfunds.net",
+//         contributionPercentage: 22.0,
+//         returnPercentage: 14.1,
+//         isInternal: true,
+//         accessRevoked: false,
+//         dollarValueReturn: 108400,
+//         investmentBlockId: "inv-003",
+//         id: "inv-003",
+//     },
+//     {
+//         name: "David Park",
+//         email: "david.park@wealthmgmt.com",
+//         contributionPercentage: 15.7,
+//         returnPercentage: 11.3,
+//         isInternal: false,
+//         accessRevoked: false,
+//         dollarValueReturn: 76850,
+//         investmentBlockId: "inv-004",
+//         id: "inv-004",
+//     },
+//     {
+//         name: "Lisa Thompson",
+//         email: "lisa.t@privatequity.org",
+//         contributionPercentage: 12.2,
+//         returnPercentage: 9.8,
+//         isInternal: false,
+//         accessRevoked: false,
+//         dollarValueReturn: 58960,
+//         investmentBlockId: "inv-005",
+//         id: "inv-005",
+//     }
+// ];
 export default function PropertyModification({ id }: { id: string }) {
     const Session = authClient.useSession()
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
 
 
     const [section, Setsection] = useState(1)
-    const [stopProses, setStopProses] = useState(false)
+    // const [stopProses, setStopProses] = useState(false)
     const [propertyInfo, setPropertyInfo] = useState<PropertyInput>(defaultPropertyInput)
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
@@ -104,7 +104,7 @@ export default function PropertyModification({ id }: { id: string }) {
             }
 
         },
-        onMutate(data) {
+        onMutate() {
             toast.loading("Creating property...", { id: "create" });
         },
     })
@@ -256,12 +256,6 @@ export default function PropertyModification({ id }: { id: string }) {
             return null
         }
         return validatedProperty.data
-    }
-
-    function onEditInvestor(name: string, email: string) {
-        console.log(name, email);
-
-
     }
 
     async function handleSubmit() {

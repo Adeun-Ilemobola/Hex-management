@@ -3,7 +3,7 @@ import React from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { MapPin, Eye, Heart, Edit, Trash2 } from "lucide-react";
+import { MapPin, Eye, Edit, Trash2 } from "lucide-react";
 
  export interface PropertyCardProp {
   data: {

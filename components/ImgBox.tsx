@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Base64FileResult, FileUploadResult, toB64 } from '@/lib/utils';
 import clsx from 'clsx';
 import Image from 'next/image';
-import { Lightbulb, LightbulbOff, ScanEye, Trash2, Upload } from 'lucide-react';
+import { Lightbulb, LightbulbOff, Trash2, Upload } from 'lucide-react';
 import showToastSystem from './toastSystem';
 import { toast } from 'sonner';
 

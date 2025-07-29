@@ -18,10 +18,12 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
     const  updateExternalInvestorMut =api.Propertie.updataExternalInvestor.useMutation({
-        onMutate(data) {
+        onMutate() {
             toast.loading("Updating Investors" , { id: "update" });
         },
         onSuccess(data) {
+            console.log(showInvestorMod);
+            
             if (data && data.success) {
                 toast.success(data.message , { id: "update" });
             } else {
@@ -44,7 +46,7 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
             id: "",
         };
        setInvestor(newInvestor)
-       setShowInvestorMod(true)
+       setShowInvestorMod(false)
     }
     function SubmintInvestors() {
         // add the new investor to the list
@@ -100,6 +102,7 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
                         className="text-sm font-medium"
                         onClick={() => {
                             console.log('add investors')
+                            SubmintInvestors()
                         }}
                     >
                         Add Investors
@@ -114,12 +117,15 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
                             <InvestorCard
                                 key={index}
                                 member={member}
-                                index={index}
+                                
                                 onEdit={() => {
                                     console.log('edit investors')
+                                    setInvestor(member)
+                                    setShowInvestorMod(true)
                                 }}
                                 onRemove={() => {
                                     console.log('remove investors')
+                                    removeInvestor(index)
                                 }}
                             />
                         ))}
@@ -159,12 +165,12 @@ function EmptyState({ onAddInvestor }: { onAddInvestor: () => void }) {
 // Individual Investor Card Component
 function InvestorCard({ 
     member, 
-    index, 
+    
     onEdit, 
     onRemove 
 }: { 
     member: ExternalInvestorInput; 
-    index: number; 
+   
     onEdit: () => void; 
     onRemove: () => void; 
 }) {
@@ -252,8 +258,8 @@ function InvestorCard({
 
 
 
-function InvestorConfig({ investor, setInvestor }:{investor: ExternalInvestorInput , setInvestor: React.Dispatch<React.SetStateAction<ExternalInvestorInput>>}) {
+// function InvestorConfig({ investor, setInvestor }:{investor: ExternalInvestorInput , setInvestor: React.Dispatch<React.SetStateAction<ExternalInvestorInput>>}) {
 
 
     
-}
+// }

@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { api } from '@/lib/trpc'; 
-import { httpBatchLink, createTRPCClient } from '@trpc/client';
+import { httpBatchLink } from '@trpc/client';
 import { useState } from 'react';
 
 function getBaseUrl() {
