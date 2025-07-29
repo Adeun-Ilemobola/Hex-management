@@ -19,7 +19,7 @@ import {
   Button as AriaButton,
   Group,
   NumberField,
-  Label as AriaLabel,
+ 
 } from 'react-aria-components';
 import { Button } from './ui/button';
 import MultipleSelector from './MultipleSelector';

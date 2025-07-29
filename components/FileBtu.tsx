@@ -1,5 +1,5 @@
 "use client"
-import React , { useState , useRef } from 'react'
+import React , {  useRef } from 'react'
 import { Button } from './ui/button';
 import { FileUploadResult, toB64 } from '@/lib/utils';
 import { FileUp } from 'lucide-react';

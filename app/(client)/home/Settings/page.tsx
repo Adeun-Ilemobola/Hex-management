@@ -11,9 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Mail, AlertTriangle } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { auth } from '@/lib/auth';
 import { z } from 'zod';
-import { headers } from "next/headers";
 
 
 const passworDefault = {

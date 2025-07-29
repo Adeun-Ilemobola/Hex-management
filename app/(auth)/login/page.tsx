@@ -8,12 +8,11 @@ import { useMutation } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import SocialSignOn from '@/components/SocialSignOn'
 
 export default function Page() {
-    const router = useRouter()
+    
 
     const [loginInfo, setLoginInfo] = useState<z.infer<typeof zodLoginSchema>>({
         email: '',
@@ -56,13 +55,7 @@ export default function Page() {
        
     });
 
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const { name, value } = e.target;
-        setLoginInfo((prev) => ({
-            ...prev,
-            [name]: value
-        }))
-    }
+    
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();

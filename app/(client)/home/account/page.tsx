@@ -93,7 +93,7 @@ export default function Page() {
 
         <CardFooter className="flex flex-col gap-3">
           <Button size="lg" className="w-full" onClick={meta.primaryCta.onClick}>
-          {state === 'canceled' ? <RotateCcw className="mr-2 h-4 w-4" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+            {state === 'canceled' ? <RotateCcw className="mr-2 h-4 w-4" /> : <ArrowRight className="mr-2 h-4 w-4" />}
             {meta.primaryCta.label}
           </Button>
 

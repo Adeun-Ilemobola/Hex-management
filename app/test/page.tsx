@@ -1,11 +1,8 @@
 "use client"
 import ChatBox from '@/components/(ChatFragments)/ChatBox';
 import ChatSend from '@/components/(ChatFragments)/ChatSend';
-import CustomSVG from '@/components/Icon/logo';
-import { ImgBoxList } from '@/components/ImgBox';
-import showToastSystem from '@/components/toastSystem';
-import { Button } from '@/components/ui/button';
-import { Base64FileResult, FileUploadResult } from '@/lib/utils';
+
+import {  FileUploadResult } from '@/lib/utils';
 import React, { useState } from 'react'
 
 // Fake data for all tiers

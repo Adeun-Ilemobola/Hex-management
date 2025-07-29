@@ -1,5 +1,4 @@
 import PropertyModification from "@/components/(propertyFragments)/PropertyModification";
-import MakeUpdate from "@/components/MakeUpdate";
 
 export default async function Page({
     searchParams
