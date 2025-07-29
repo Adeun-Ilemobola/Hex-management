@@ -17,7 +17,7 @@ export default function NotFound() {
         <ellipse cx="220" cy="100" rx="80" ry="20" fill="var(--muted)" />
       </svg>
 
-      {/* Card with ghost and 404 */}
+      {/* Card with ghost and 404 ------- */}
       <Card className="relative z-10 w-full max-w-md rounded-2xl shadow-md bg-card/95 border border-border flex flex-col items-center gap-2">
         <CardContent className="flex flex-col items-center justify-center py-12 px-6 space-y-4">
           <span className="flex items-center justify-center relative">

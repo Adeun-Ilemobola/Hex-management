@@ -148,7 +148,7 @@ export default function PropertyModification({ id }: { id: string }) {
         const discountAmount = (base + marginAmount) * (discountPercentage / 100);
         const netPayment = base + marginAmount - discountAmount;
 
-        // Calculate total profit/return
+        // Calculate total profit/return ---------
         const totalRevenue = typeOfSale === 'SELL' ? result : result * duration;
         const totalProfit = totalRevenue - initialInvestment;
         return {
