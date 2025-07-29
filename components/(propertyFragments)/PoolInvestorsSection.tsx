@@ -1,8 +1,7 @@
 import { DollarSign, Edit2, Mail, TrendingUp, User, Users, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { Button } from '../ui/button'
-import { defaultInvestmentBlockInput, ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
-import { set } from 'date-fns';
+import {  ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
 import { toast } from 'sonner';
 import { api } from '@/lib/trpc';
 

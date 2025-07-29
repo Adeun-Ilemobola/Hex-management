@@ -1,6 +1,3 @@
-import { Resend } from 'resend';
-import { createDevTransport } from './devMailer';
-import nodemailer from "nodemailer";
 
 
 // 1. Verify Email - Modern Professional Design
@@ -231,7 +228,6 @@ function getWelcomeEmailHtml(userName: string): { subject: string, html: string 
   }
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export const templates = {
   VerifyEmail: getVerifyEmailHtml,
@@ -241,9 +237,9 @@ export const templates = {
 
 export type TemplateType = keyof typeof templates;
 
-interface SendEmailParams {
-  template: TemplateType;
-  to: string;
-  params: any;
-  from?: string;
-}
+// interface SendEmailParams {
+//   template: TemplateType;
+//   to: string;
+//   params: any;
+//   from?: string;
+// }

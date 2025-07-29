@@ -1,4 +1,4 @@
-// pages/verify-email.tsx or app/verify-email/page.tsx
+"use client";
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

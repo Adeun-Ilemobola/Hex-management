@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
-import { protectedProcedure, createTRPCRouter , baseProcedure } from '../init';
+import { protectedProcedure, createTRPCRouter  } from '../init';
 import { PropertiesRouter } from './UserRouter';
 import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
-import { Resend } from 'resend';
-import {templates, TemplateType} from '@/lib/reSend';
 import { userCongiRouter } from './userCongi';
 //import { headers } from "next/headers";
 
