@@ -339,7 +339,8 @@ export default function PropertyModification({ id }: { id: string }) {
                                                 ...pre,
                                                 images: [
                                                     ...pre.images.map((item, i) => {
-                                                        idx === i ? item.thumbnail = true : item.thumbnail = false;
+                                                        item.thumbnail = idx === i;
+
                                                         return item
                                                     })
                                                 ]

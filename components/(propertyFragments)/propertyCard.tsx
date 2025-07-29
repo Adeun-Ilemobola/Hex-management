@@ -59,38 +59,38 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
   };
 
   // Sale type styling
-  const getSaleTypeStyles = (saleStatus: string) => {
-    switch (saleStatus) {
-      case 'SELL':
-        return {
-          bg: 'bg-blue-50 dark:bg-blue-900/20',
-          text: 'text-blue-700 dark:text-blue-400',
-          border: 'border-blue-200 dark:border-blue-700/30',
-          label: 'For Sale'
-        };
-      case 'RENT':
-        return {
-          bg: 'bg-purple-50 dark:bg-purple-900/20',
-          text: 'text-purple-700 dark:text-purple-400',
-          border: 'border-purple-200 dark:border-purple-700/30',
-          label: 'For Rent'
-        };
-      case 'LEASE':
-        return {
-          bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-          text: 'text-emerald-700 dark:text-emerald-400',
-          border: 'border-emerald-200 dark:border-emerald-700/30',
-          label: 'For Lease'
-        };
-      default:
-        return {
-          bg: 'bg-gray-50 dark:bg-gray-900/20',
-          text: 'text-gray-700 dark:text-gray-400',
-          border: 'border-gray-200 dark:border-gray-700/30',
-          label: saleStatus
-        };
-    }
-  };
+  // const getSaleTypeStyles = (saleStatus: string) => {
+  //   switch (saleStatus) {
+  //     case 'SELL':
+  //       return {
+  //         bg: 'bg-blue-50 dark:bg-blue-900/20',
+  //         text: 'text-blue-700 dark:text-blue-400',
+  //         border: 'border-blue-200 dark:border-blue-700/30',
+  //         label: 'For Sale'
+  //       };
+  //     case 'RENT':
+  //       return {
+  //         bg: 'bg-purple-50 dark:bg-purple-900/20',
+  //         text: 'text-purple-700 dark:text-purple-400',
+  //         border: 'border-purple-200 dark:border-purple-700/30',
+  //         label: 'For Rent'
+  //       };
+  //     case 'LEASE':
+  //       return {
+  //         bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+  //         text: 'text-emerald-700 dark:text-emerald-400',
+  //         border: 'border-emerald-200 dark:border-emerald-700/30',
+  //         label: 'For Lease'
+  //       };
+  //     default:
+  //       return {
+  //         bg: 'bg-gray-50 dark:bg-gray-900/20',
+  //         text: 'text-gray-700 dark:text-gray-400',
+  //         border: 'border-gray-200 dark:border-gray-700/30',
+  //         label: saleStatus
+  //       };
+  //   }
+  // };
 
   const statusStyles = getStatusStyles(status);
   // const saleTypeStyles = getSaleTypeStyles(saleStatus);//ffff
