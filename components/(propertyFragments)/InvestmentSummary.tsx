@@ -2,20 +2,20 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  ShoppingCart, 
-  Home, 
-  FileText, 
-  DollarSign, 
-  TrendingUp, 
-  Percent, 
+import {
+  ShoppingCart,
+  Home,
+  FileText,
+  DollarSign,
+  TrendingUp,
+  Percent,
   Calendar,
   Target,
   LucideIcon
 } from 'lucide-react';
 
 // Type definitions
-type TypeOfSale = "SELL" | "RENT" | "LEASE";
+type TypeOfSale = 'SELL' | 'RENT' | 'LEASE';
 
 interface InvestmentBlock {
   typeOfSale: TypeOfSale;
@@ -50,11 +50,10 @@ interface InvestmentSummaryProps {
   financials: Financials;
 }
 
-const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({ 
-  investmentBlock, 
-  financials 
+const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
+  investmentBlock,
+  financials
 }) => {
-  // Theme configuration for each type
   const getThemeConfig = (type: TypeOfSale): ThemeConfig => {
     switch (type) {
       case 'SELL':
@@ -103,14 +102,13 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
   const theme = getThemeConfig(investmentBlock.typeOfSale);
   const IconComponent = theme.icon;
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (amount: number): string =>
+    new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount);
-  };
 
   const formatPercentage = (value: number): string => `${value}%`;
 
@@ -135,10 +133,24 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
   }
 
   const MetricCard: React.FC<MetricCardProps> = ({ icon: Icon, label, value, isMain = false }) => (
-    <div className={`p-4 rounded-lg ${isMain ? theme.secondary : 'bg-gray-50 dark:bg-gray-800'} ${isMain ? theme.border : 'border-gray-200 dark:border-gray-700'} border`}>
+    <div
+      className={`p-4 rounded-lg ${
+        isMain ? theme.secondary : 'bg-gray-50 dark:bg-gray-800'
+      } ${
+        isMain ? theme.border : 'border-gray-200 dark:border-gray-700'
+      } border`}
+    >
       <div className="flex items-center space-x-3">
-        <div className={`p-2 rounded-full ${isMain ? theme.primary : 'bg-gray-200 dark:bg-gray-700'}`}>
-          <Icon className={`h-4 w-4 ${isMain ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
+        <div
+          className={`p-2 rounded-full ${
+            isMain ? theme.primary : 'bg-gray-200 dark:bg-gray-700'
+          }`}
+        >
+          <Icon
+            className={`h-4 w-4 ${
+              isMain ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+            }`}
+          />
         </div>
         <div>
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</p>
@@ -149,11 +161,11 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header Card */}
-      <Card className={`${theme.border} border-2 dark:bg-gray-900 py-0 overflow-hidden`}>
-        <CardHeader className={`bg-gradient-to-r ${theme.gradient} text-white `}>
-          <div className="flex items-center justify-between p-2">
+    <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+      {/* Header */}
+      <Card className={`${theme.border} border-2 dark:bg-gray-900`}>
+        <CardHeader className={`bg-gradient-to-r ${theme.gradient} text-white`}>
+          <div className="flex flex-wrap items-center justify-between gap-4 p-2">
             <div className="flex items-center space-x-3">
               <IconComponent className="h-8 w-8" />
               <div>
@@ -166,15 +178,17 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
             </Badge>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-6">
-          {/* Main Result */}
+          {/* Final Amount */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <Target className={`h-6 w-6 ${theme.text}`} />
-              <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">Final Amount</span>
+              <span className="text-lg font-semibold text-gray-600 dark:text-gray-400">
+                Final Amount
+              </span>
             </div>
-            <div className={`text-5xl font-bold ${theme.text} mb-2`}>
+            <div className={`text-4xl sm:text-5xl font-bold ${theme.text} mb-2`}>
               {formatCurrency(financials.result)}
             </div>
             {investmentBlock.typeOfSale !== 'SELL' && (
@@ -187,35 +201,18 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
 
           <Separator className="my-6" />
 
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <MetricCard
-              icon={DollarSign}
-              label="Base Amount"
-              value={formatCurrency(financials.base)}
-              isMain={true}
-            />
-            <MetricCard
-              icon={TrendingUp}
-              label="Margin Added"
-              value={formatCurrency(financials.marginAmount)}
-            />
-            <MetricCard
-              icon={Percent}
-              label="Discount Applied"
-              value={formatCurrency(financials.discountAmount)}
-            />
-            <MetricCard
-              icon={Target}
-              label="Net Payment"
-              value={formatCurrency(financials.netPayment)}
-            />
+          {/* Metrics */}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4 mb-6">
+            <MetricCard icon={DollarSign} label="Base Amount" value={formatCurrency(financials.base)} isMain />
+            <MetricCard icon={TrendingUp} label="Margin Added" value={formatCurrency(financials.marginAmount)} />
+            <MetricCard icon={Percent} label="Discount Applied" value={formatCurrency(financials.discountAmount)} />
+            <MetricCard icon={Target} label="Net Payment" value={formatCurrency(financials.netPayment)} />
           </div>
 
-          {/* Breakdown Section */}
+          {/* Breakdown */}
           <div className={`p-4 rounded-lg ${theme.secondary} ${theme.border} border`}>
             <h3 className={`text-lg font-semibold ${theme.text} mb-4`}>Calculation Breakdown</h3>
-            <div className="space-y-3">
+            <div className="space-y-3 text-sm sm:text-base">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Initial Investment:</span>
                 <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(investmentBlock.initialInvestment)}</span>
@@ -240,14 +237,14 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
             </div>
           </div>
 
-          {/* Additional Info for Rent/Lease */}
+          {/* Lease/Rent Specific */}
           {investmentBlock.typeOfSale !== 'SELL' && (
             <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <span className="font-semibold text-gray-700 dark:text-gray-300">Payment Schedule</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600 dark:text-gray-400">Total Payments:</span>
                   <span className="ml-2 font-semibold text-gray-900 dark:text-white">{financials.duration}</span>

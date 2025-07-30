@@ -1,11 +1,11 @@
 "use client"
-import React, {  useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
 import { Nav } from '../Nav'
 import { Button } from '../ui/button'
-import {  defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, PropertyInput, propertySchema } from '@/lib/Zod'
+import { defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, PropertyInput, propertySchema } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
@@ -322,58 +322,62 @@ export default function PropertyModification({ id }: { id: string }) {
 
                 <div className=' flex w-full flex-1 overflow-auto '>
                     {section === 1 && (
-                        <div className=' flex flex-1  '>
-                            <div className=' flex-1 flex flex-row gap-1 p-0.5 items-center justify-center'>
-                                <div className=' flex flex-col gap-0.5 p-1'>
-                                    <PropertyGIF disable={postProperty.isPending} setPropertyInfo={setPropertyInfo} propertyInfo={propertyInfo} />
+                        <div className="flex flex-1 w-full items-center justify-center ">
+                            <div className="flex-1 flex flex-col lg:flex-row gap-3 p-2 items-center justify-center">
+
+                                {/* Property GIF Section */}
+                                <div className="w-full lg:w-[32%] min-w-[320px]">
+                                    <PropertyGIF
+                                        disable={postProperty.isPending}
+                                        setPropertyInfo={setPropertyInfo}
+                                        propertyInfo={propertyInfo}
+                                    />
                                 </div>
 
-                                <div className=' flex flex-col gap-0.5 p-1 w-[70%]'>
+                                {/* Right Panel: Images + Description */}
+                                <div className=" min-w-max flex flex-col gap-3">
+                                    {/* Image Uploader */}
                                     <ImgBoxList
-                                        className='w-full'
+                                        className="w-full"
                                         fileList={propertyInfo.images}
                                         disabled={false}
-                                        setData={list => setPropertyInfo(prev => ({ ...prev, images: [...prev.images, ...list] }))}
-                                        SetMainImg={idx => {
-                                            setPropertyInfo(pre => ({
-                                                ...pre,
-                                                images: [
-                                                    ...pre.images.map((item, i) => {
-                                                        item.thumbnail = idx === i;
-
-                                                        return item
-                                                    })
-                                                ]
+                                        setData={(list) =>
+                                            setPropertyInfo((prev) => ({
+                                                ...prev,
+                                                images: [...prev.images, ...list],
                                             }))
+                                        }
+                                        SetMainImg={(idx) => {
+                                            setPropertyInfo((pre) => ({
+                                                ...pre,
+                                                images: pre.images.map((item, i) => ({
+                                                    ...item,
+                                                    thumbnail: idx === i,
+                                                })),
+                                            }));
                                         }}
                                         del={(id) => {
-                                            setPropertyInfo(pre => ({
+                                            setPropertyInfo((pre) => ({
                                                 ...pre,
-                                                images: [
-                                                    ...pre.images.filter((item, i) => {
-                                                        if (i !== id) {
-                                                            return item
-                                                        }
-                                                    })
-                                                ]
-                                            }))
-
+                                                images: pre.images.filter((_, i) => i !== id),
+                                            }));
                                         }}
-
                                     />
+
+                                    {/* Description Box */}
                                     <TextAreaBox
                                         value={propertyInfo.description}
-                                        onChange={val => setPropertyInfo(pre => ({ ...pre, description: val }))}
+                                        onChange={(val) =>
+                                            setPropertyInfo((pre) => ({ ...pre, description: val }))
+                                        }
                                         label="Description"
                                         disabled={false}
-                                        className='w-full h-[20rem]   resize-none'
+                                        className=" w-full max-w-4xl h-[20rem] resize-none"
                                     />
                                 </div>
-
-
                             </div>
-
                         </div>
+
                     )}
 
 
@@ -419,7 +423,7 @@ export default function PropertyModification({ id }: { id: string }) {
                                 Setsection(pre => --pre)
                             }
                             updateExternalInvestor()
-                                updataFinancials()
+                            updataFinancials()
                         }}
                         variant={"ghost"}
                     >Back</Button>
