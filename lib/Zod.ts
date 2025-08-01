@@ -120,6 +120,7 @@ export const zodRegisterSchema = z
 // ─── ENUMS ──────────────────────────────────────────────────────────────────────
 //
 export const InvestmentTypeEnum = z.enum(["INDIVIDUAL", "POOLED", "TIC"]);
+export type InvestmentTypeEnumType = z.infer<typeof InvestmentTypeEnum>;
 
 export const PropertyTypeEnum = z.enum([
   "House",
@@ -128,8 +129,15 @@ export const PropertyTypeEnum = z.enum([
   "Commercial",
   "Other",
 ]);
+export type PropertyTypeEnumType = z.infer<typeof PropertyTypeEnum>;
+
+
 export const SaleTypeEnum = z.enum(["SELL", "RENT", "LEASE"]);
+export type SaleTypeEnumType = z.infer<typeof SaleTypeEnum>;
+
 export const StatusEnum = z.enum(["active", "pending", "sold"]);
+export type StatusEnumType = z.infer<typeof StatusEnum>;
+
 export const LeavingStatusEnum = z.enum([
   "active",
   "Inactive",
@@ -137,12 +145,15 @@ export const LeavingStatusEnum = z.enum([
   "Developing",
   "Purchase Planning",
 ]);
+export type LeavingStatusEnumType = z.infer<typeof LeavingStatusEnum>;
+
 export const PlanTierEnum = z.enum(["Free", "Deluxe", "Premium"]);
 
 //
 // ─── IMAGE ──────────────────────────────────────────────────────────────────────
 //
 export const imageSchema = z.object({
+  id : z.string().default(""),
   name: z.string().min(1, "Image must have a name."),
   url: z.string().url("Invalid image URL."),
   size: z.number().int().nonnegative("Size must be ≥ 0."),
@@ -298,6 +309,7 @@ export const investmentBlockSchema = z
 //
 export const propertySchema = z
   .object({
+    id: z.string().default(""),
     name: z
       .string()
       .min(2, "Name should be at least 2 characters."),
@@ -383,10 +395,50 @@ export const subscriptionSchema = z
   country: z.string(),
 });
 
+export const PropertyListingSchema = z.object({
+  images: z.array(
+    z.object({
+      url: z.string().url(),      // image URL
+      id: z.string(),             // image ID
+    })
+  ),
+
+  price: z.object({
+    finalResult: z.number(),
+    typeOfSale: z.string(),
+    leaseCycle: z.number().nullable().optional(),
+  }),
+
+  name: z.string(),
+  address: z.string(),
+  id: z.string(),
+
+  description: z.string(),
+  lotSize: z.number(),
+
+  hasGarage: z.boolean(),
+  hasGarden: z.boolean(),
+  hasPool: z.boolean(),
+
+  amenities: z.array(z.string()),
+
+  propertyType: PropertyTypeEnum,
+  status: StatusEnum,
+
+  ownerName: z.string(),
+  contactInfo: z.string().email(),
+
+  numBathrooms: z.number(),
+  numBedrooms: z.number(),
+  yearBuilt: z.number(),
+});
+
+
+  
 
 
 
-
+export type PropertyListingInput = z.infer<typeof PropertyListingSchema>;
 export type UserInput = z.infer<typeof userSchema>;
 export type ImageInput = z.infer<typeof imageSchema>;
 export type ExternalInvestorInput = z.infer<typeof externalInvestorSchema>;
@@ -397,7 +449,31 @@ export type SubscriptionInput = z.infer<typeof subscriptionSchema>;
 
 // ─── Defaults ──────────────────────────────────────────────────────────────────
 
-
+export const defaultPropertyListingInput: PropertyListingInput = {
+  name: "",
+  address: "",
+  description: "",
+  lotSize: 0,
+  hasGarage: false,
+  hasGarden: false,
+  hasPool: false,
+  amenities: [],
+  propertyType: "House",
+  status: "active",
+  ownerName: "",
+  contactInfo: "",
+  numBathrooms: 0,
+  numBedrooms: 0,
+  yearBuilt: 0,
+  images: [],
+  price: {
+    finalResult: 0,
+    typeOfSale: "SELL",
+    leaseCycle: 0,
+  },
+  id: "",
+  
+}
 export const defaultUserInput: UserInput = {
   name: "",
   email: "",
@@ -419,6 +495,7 @@ export const defaultImageInput: ImageInput = {
   lastModified: Date.now(),
   thumbnail: false,
   supabaseID: "",
+  id: "",
 };
 
 export const defaultExternalInvestorInput: ExternalInvestorInput = {
@@ -450,6 +527,7 @@ export const defaultInvestmentBlockInput: InvestmentBlockInput = {
 };
 
 export const defaultPropertyInput: PropertyInput = {
+  id: "",
   name: "",
   address: "",
   description: undefined,

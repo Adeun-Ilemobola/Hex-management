@@ -5,7 +5,7 @@ import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
 import { Nav } from '../Nav'
 import { Button } from '../ui/button'
-import { defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, PropertyInput, propertySchema } from '@/lib/Zod'
+import { defaultInvestmentBlockInput, defaultPropertyInput, ExternalInvestorInput, InvestmentBlockInput, investmentBlockSchema, InvestmentTypeEnumType, PropertyInput, propertySchema, PropertyTypeEnumType, SaleTypeEnumType, StatusEnumType } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
@@ -15,6 +15,7 @@ import { TextAreaBox } from '../InputBox'
 import InvestmentSummary from './InvestmentSummary'
 import InvestmentBlockSection from './InvestmentBlockSection'
 import PoolInvestorsSection from './PoolInvestorsSection'
+import { useSearchParams } from 'next/navigation'
 // const fakeInvestors: ExternalInvestorInput[] = [
 //     {
 //         name: "Sarah Johnson",
@@ -72,9 +73,54 @@ import PoolInvestorsSection from './PoolInvestorsSection'
 //         id: "inv-005",
 //     }
 // ];
-export default function PropertyModification({ id }: { id: string }) {
+export default function PropertyModification() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id") ?? "";
+
     const Session = authClient.useSession()
-    const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
+    const getUserPlan = api.user.getUserPlan.useQuery()
+
+    const getProperty = api.Propertie.getPropertie.useMutation({
+        onSuccess(data) {
+            console.log(data);
+
+            if (data?.value && data.success) {
+                const { externalInvestors, property, investmentBlock, images } = data.value
+                setPropertyInfo({
+                    ...property,
+                    images: images,
+                    status: property.status as StatusEnumType,
+                    propertyType: property.propertyType as PropertyTypeEnumType,
+                    description: property.description as string || "",
+                })
+                if (investmentBlock) {
+                    setExternalInvestor(externalInvestors)
+                    setInvestmentBlock({
+                        ...investmentBlock,
+                        typeOfInvestment: investmentBlock.typeOfInvestment as InvestmentTypeEnumType,
+                        typeOfSale: investmentBlock.typeOfSale as SaleTypeEnumType,
+                        externalInvestors: externalInvestors,
+                        propertyId: property.id as string,
+                        saleDuration: investmentBlock.saleDuration as number,
+                        leaseCycle: investmentBlock.leaseCycle as number,
+                    })
+                }
+
+            } else {
+                toast.error(data?.message, { id: "fetch" });
+            }
+
+        },
+        onError(error) {
+            toast.error(error.message, { id: "fetch" });
+            console.log(error);
+
+        },
+
+
+
+
+    })
 
 
     const [section, Setsection] = useState(1)
@@ -107,6 +153,31 @@ export default function PropertyModification({ id }: { id: string }) {
         onMutate() {
             toast.loading("Creating property...", { id: "create" });
         },
+    })
+    const updateProperty = api.Propertie.updataPropertie.useMutation({
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message, { id: "update" });
+            } else {
+                toast.error(data.message, { id: "update" });
+            }
+        },
+        onMutate() {
+            toast.loading("Updating property...", { id: "update" });
+        },
+    })
+    const delImage = api.Propertie.deleteImage.useMutation({
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message, { id: "delete image" });
+            } else {
+                toast.error(data.message, { id: "delete image" });
+            }
+        },
+        onMutate() {
+            toast.loading("Deleting image...", { id: "delete image" });
+        },
+
     })
 
     const financials = useMemo(() => {
@@ -195,8 +266,6 @@ export default function PropertyModification({ id }: { id: string }) {
                 dollarValueReturn: Math.round(dollarValueReturn * 100) / 100,
             };
         });
-
-
         return {
             totalInvestorPercentage: Math.round(totalInvestorPercentage * 100) / 100,
             updatedInvestors,
@@ -207,31 +276,36 @@ export default function PropertyModification({ id }: { id: string }) {
     }, [externalInvestor, financials.totalProfit, investmentBlock.initialInvestment]);
 
 
-    const updataFinancials = useCallback(() => {
-        const { result, duration, } = financials;
+    useEffect(() => {
+        // 1. Auto-fill ownerName/contactInfo if it's a new property
+        if (id.length === 0 && Session.data?.user?.name && Session.data?.user?.email) {
+            const name = Session.data.user.name;
+            const email = Session.data.user.email;
+            setPropertyInfo(prev => ({
+                ...prev,
+                ownerName: name,
+                contactInfo: email
+            }));
+        }
+
+        // 2. Fetch property from backend if editing
+        if (id.length > 0) {
+            getProperty.mutate({ pID: id });
+        }
+
+        // 3. Update investmentBlock when financials change
+        const { result, duration } = financials;
         setInvestmentBlock(prev => ({
             ...prev,
             saleDuration: duration,
-            finalResult: result,
+            finalResult: result
+        }));
 
-        }))
-    }, [financials])
-
-    const updateExternalInvestor = useCallback(() => {
+        // 4. Update external investor calculations
         const { updatedInvestors } = investorCalculations;
         setExternalInvestor(updatedInvestors);
 
-    }, [investorCalculations.updatedInvestors])
-
-
-    useEffect(() => {
-        if (Session.data?.user?.name && Session.data?.user?.email) {
-            const name = Session.data?.user?.name;
-            const email = Session.data?.user?.email;
-            setPropertyInfo(prev => ({ ...prev, ownerName: name, contactInfo: email }));
-        }
-    }, [Session]);
-
+    }, [Session, id, financials, investorCalculations.updatedInvestors]);
 
     function validation() {
         const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
@@ -270,28 +344,39 @@ export default function PropertyModification({ id }: { id: string }) {
                 return
             }
 
-            console.log("externalInvestor", externalInvestor);
-            console.log("investmentBlock", investmentBlock);
-            console.log("propertyInfo", propertyInfo);
-
-
             // Prevent duplications uploads
+            const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
             uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
+            if (id.length <= 0) {
+                postProperty.mutate({
+                    property: {
+                        ...data,
+                        images: [...uploadedImages]
+                    },
+                    investmentBlock: {
+                        ...investmentBlock,
+                        externalInvestors: [...externalInvestor.filter(inv => inv.id.length === 0 && inv.investmentBlockId.length === 0)]
+                    }
 
-            console.log("Uploading property:", data);
-            await postProperty.mutateAsync({
-                property: {
-                    ...data,
-                    images: [...uploadedImages]
-                },
-                investmentBlock: {
-                    ...investmentBlock,
-                    externalInvestors: [...externalInvestor.filter(inv => inv.id.length === 0 && inv.investmentBlockId.length === 0)]
-                }
+                });
 
-            });
+            } else {
+                updateProperty.mutate({
+                    property: {
+                        ...data,
+                        images: [...uploadedImages, ...uploadedImagesDB],
+
+                    },
+                    investmentBlock: {
+                        ...investmentBlock,
+                        externalInvestors: [...externalInvestor.filter(inv => inv.id.length === 0 && inv.investmentBlockId.length === 0)]
+                    }
+
+                });
+            }
+
 
         } catch (error) {
             if (uploadedImages.length > 0) {
@@ -308,15 +393,8 @@ export default function PropertyModification({ id }: { id: string }) {
         }
     }
 
-
-
-
-
-
-
-
     return (
-        <DropBack is={Session.isPending || getProperty.isPending || postProperty.isPending} >
+        <DropBack is={Session.isPending || getProperty.isPending || postProperty.isPending || getUserPlan.isPending} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
             <div className=' flex flex-col flex-1'>
 
@@ -356,11 +434,14 @@ export default function PropertyModification({ id }: { id: string }) {
                                                 })),
                                             }));
                                         }}
-                                        del={(id) => {
+                                        del={(id, index, supabaseID) => {
                                             setPropertyInfo((pre) => ({
                                                 ...pre,
-                                                images: pre.images.filter((_, i) => i !== id),
+                                                images: pre.images.filter((_, i) => i !== index),
                                             }));
+                                            if (id.length > 0 && supabaseID.length > 0) {
+                                                delImage.mutate({ id: id, supabaseID: supabaseID });
+                                            }
                                         }}
                                     />
 
@@ -422,8 +503,6 @@ export default function PropertyModification({ id }: { id: string }) {
                             if (section !== 1) {
                                 Setsection(pre => --pre)
                             }
-                            updateExternalInvestor()
-                            updataFinancials()
                         }}
                         variant={"ghost"}
                     >Back</Button>
@@ -439,11 +518,9 @@ export default function PropertyModification({ id }: { id: string }) {
                                     const data = validation()
                                     if (!data) { return; }
                                 }
-
                                 Setsection(pre => ++pre)
                             } else {
-                                updateExternalInvestor()
-                                updataFinancials()
+                               
                                 handleSubmit()
 
                             }

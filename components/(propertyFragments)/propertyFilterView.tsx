@@ -65,7 +65,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
                 />
 
                 {/* list  of card  */}
-                <div className=' flex flex-row p-2.5 shrink-0 gap-2.5'>
+                <div className=' flex-1 flex flex-row flex-wrap justify-center p-2.5 shrink-0 gap-2.5'>
                     {getProperties?.data && (getProperties.data as CleanProperty[]).map((item , i)=>{
                         return(<PropertyCard mode={isEdit} key={i} data={{
                             id: item.id,

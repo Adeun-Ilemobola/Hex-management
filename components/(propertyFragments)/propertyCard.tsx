@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { MapPin, Eye, Edit, Trash2 } from "lucide-react";
 
- export interface PropertyCardProp {
+export interface PropertyCardProp {
   data: {
     img?: string;
     name: string;
@@ -129,10 +129,10 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
               </div>
             </div>
           )}
-          
+
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
+
           {/* Top badges */}
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
             <Badge
@@ -157,7 +157,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate leading-tight">
             {name}
           </h1>
-          
+
           {/* Address */}
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
@@ -168,27 +168,25 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
 
           {/* Developer Mode Buttons */}
           {mode && (
+
             <div className="flex gap-2 mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 h-8 text-xs"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('Update property:', id);
-                }}
-              >
-                <Edit className="w-3 h-3 mr-1" />
-                Update
-              </Button>
+              <Link href={`/home/propertie-mp?id=${id}`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                >
+                  <Edit className="w-3 h-3 mr-1" />
+                  Update
+                </Button>
+              </Link>
+
               <Button
                 variant="outline"
                 size="sm"
                 className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/20"
                 onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+
                   console.log('Delete property:', id);
                 }}
               >

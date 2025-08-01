@@ -112,7 +112,7 @@ interface ImgBoxListProps {
   className?: string;
   SetMainImg: (index: number) => void;
   setData: (list: FileUploadResult[]) => void;
-  del: (id: number) => void,
+  del: (id: string , index: number , supabaseID: string) => void,
   maxImg?: number
 
 }
@@ -277,7 +277,7 @@ export function ImgBoxList({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        del(i);
+                        del(file.id, i , file.supabaseID);
                       }}
                       className="w-7 h-7 bg-black/70 hover:bg-red-600/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors"
                       disabled={isDisabled}

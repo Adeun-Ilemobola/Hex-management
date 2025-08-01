@@ -79,15 +79,15 @@ model investmentBlock {
   initialInvestment Float // How much money did the user buy this property?
   margin            Float // Profit percentage Based off the initial investment
   typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
-  saleDuration      Int?     @default(0) // duration for how long to get my money back from the investment
+  saleDuration      Int     @default(0) // duration for how long to get my money back from the investment
 
   // ------------------ Lease -------------------------
-  leaseCycle Float?  @default(0.0)
-  leaseType  String? @default("Month") // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
+  leaseCycle Float  @default(0.0)
+  leaseType  String @default("Month") // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
 
   finalResult Float @default(0.0) // The result for the investment
 
-  discountPercentage Float? @default(0) // Discount percentage for the property, if applicable
+  discountPercentage Float @default(0) // Discount percentage for the property, if applicable
 
   propertieid       String             @unique
   propertie         propertie          @relation(fields: [propertieid], references: [id])
@@ -139,24 +139,24 @@ model propertie {
   id            String  @id @default(uuid())
   name          String
   address       String // The exact location with the ZIP Code and the general address
-  description   String? // General description of the property.
-  yearBuilt     Int? // The year the property was built. Helpful for valuation and depreciation.
-  squareFootage Int? // Useful for investors, renters, and comparative analysis.
-  numBedrooms   Int? // Common requirement for housing.
-  numBathrooms  Int? // Same as above.
+  description   String? @default("")// General description of the property.
+  yearBuilt     Int @default(2020) // The year the property was built. Helpful for valuation and depreciation.
+  squareFootage Int @default(0) // Useful for investors, renters, and comparative analysis.
+  numBedrooms   Int @default(0) // Common requirement for housing.
+  numBathrooms  Int @default(0) // Same as above.
 
   // Amenities and Features
-  hasGarage Boolean? // Quick way to check for popular amenities.
-  hasGarden Boolean?
-  hasPool   Boolean?
+  hasGarage Boolean @default(false)
+  hasGarden Boolean @default(false)
+  hasPool   Boolean @default(false)
   amenities String[] // List of amenities (e.g., ["Elevator", "Gym", "Fireplace"]).
 
-  lotSize       Float? // Size of the property land, in square meters or feet.
-  propertyType  String? // House, Apartment, Condo, Commercial, etc.
-  status        String? @default("active") // active, pending, sold, etc.
+  lotSize       Float @default(0) // Size of the property land, in square meters or feet.
+  propertyType  String @default("Apartment")// House, Apartment, Condo, Commercial, etc.
+  status        String @default("active") // active, pending, sold, etc.
   ownerName     String // Who currently owns the property.
   contactInfo   String // Contact details for inquiries.
-  leavingstatus String? @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
+  leavingstatus String @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
   // Media
   images        image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
   videoTourUrl  String? // Optional video tour.
