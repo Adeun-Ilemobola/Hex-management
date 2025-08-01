@@ -66,11 +66,11 @@ export const PropertiesRouter = createTRPCRouter({
 
     getPropertie: protectedProcedure
         .input(z.object({ pID: z.string() }))
-        .mutation(async ({ input, ctx }) => {
+        .query(async ({ input, ctx }) => {
             try {
                 if (!input.pID) {
                     return {
-                        message: "Failed to process property XXXXXX",
+                        message: "Failed to process property  not found",
                         success: false,
                         value: null
                     }
@@ -88,7 +88,7 @@ export const PropertiesRouter = createTRPCRouter({
                 })
                 if (!getP) {
                     return {
-                        message: "Failed to process property XXXXXX",
+                        message: "Failed to process property ",
                         success: false,
                         value: null
                     }

@@ -43,12 +43,18 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
 
             </div>
 
-            <div className=' flex w-[60%] justify-center'>
+            <div className=' flex w-[70%] items-center justify-end'>
+
+                <Link href="/home">
+                <Button className=' text-2xl' variant={"link"}>
+                    Dashbord
+                </Button>
+                </Link>
 
             </div>
 
 
-            <div className=' flex w-[15%] items-center p-3  '>
+            <div className=' flex w-[5%] items-center p-3  '>
 
                 {session &&
                     (<>
