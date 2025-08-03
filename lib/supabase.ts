@@ -39,7 +39,8 @@ export function UploadImage(file: FileUploadResult, userID: string): Promise<Fil
             type: file.type,
             lastModified: file.lastModified,
             thumbnail: file.thumbnail,
-            supabaseID: uploadData.path
+            supabaseID: uploadData.path,
+            id:""
 
         });
 
