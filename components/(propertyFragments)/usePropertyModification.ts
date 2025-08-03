@@ -1,6 +1,6 @@
 "use client";
 
-import {  useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import { authClient } from "@/lib/auth-client";
@@ -13,11 +13,11 @@ import {
     PropertyTypeEnumType,
     SaleTypeEnumType,
     StatusEnumType,
-   
+
     ExternalInvestorInput,
 } from "@/lib/Zod";
-import { DeleteImages,  } from "@/lib/supabase";
-import { useRouter } from "next/router";
+import { DeleteImages, } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 
 export function usePropertyModification(id: string) {
@@ -39,7 +39,7 @@ export function usePropertyModification(id: string) {
                 setPropertyInfo(defaultPropertyInput)
                 setInvestmentBlock(defaultInvestmentBlockInput)
                 setExternalInvestor([])
-                 Router.push("/home")
+                Router.push("/home")
 
 
             } else {
@@ -102,10 +102,12 @@ export function usePropertyModification(id: string) {
             duration = 12;
         }
         else if (typeOfSale === 'RENT') {
-            const base = initialInvestment / 12;               // monthly cost before markup
-            const pay = base * (1 + margin / 100);            // after markup
+            const depreciationYears = 8; // Investor wants to recover in 8 years
+            const base = initialInvestment / (depreciationYears * 12);
+            const pay = base * (1 + margin / 100);
             result = pay * (1 - discountPercentage / 100);
             duration = Math.ceil(initialInvestment / result);
+
         }
         else if (typeOfSale === 'LEASE') {
             const base = initialInvestment / leaseCycle;       // per‐cycle cost
@@ -226,7 +228,7 @@ export function usePropertyModification(id: string) {
         const { result, duration } = financials;
 
         setInvestmentBlock(prev => {
-            if (prev.saleDuration === duration &&prev.finalResult === result ) return prev;
+            if (prev.saleDuration === duration && prev.finalResult === result) return prev;
 
             return {
                 ...prev,
@@ -234,7 +236,7 @@ export function usePropertyModification(id: string) {
                 finalResult: result,
             };
         });
-    }, [investmentBlock.discountPercentage , investmentBlock.margin, investmentBlock.typeOfSale]);
+    }, [investmentBlock.discountPercentage, investmentBlock.margin, investmentBlock.typeOfSale]);
 
     useEffect(() => {
         setExternalInvestor(prev => {
@@ -249,7 +251,7 @@ export function usePropertyModification(id: string) {
             if (isSame) return prev;
             return updated;
         });
-    }, [investmentBlock.externalInvestors , investorCalculations.updatedInvestors]);
+    }, [investmentBlock.externalInvestors, investorCalculations.updatedInvestors]);
 
 
 

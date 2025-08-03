@@ -5,6 +5,7 @@ import { Nav } from "@/components/Nav";
 import DropBack from "@/components/DropBack";
 import PropertyCard from "@/components/(propertyFragments)/propertyCard";
 import { sampleProperties } from "@/lib/Zod";
+import PropertyInvestmentLanding from "@/components/LandingPage";
 
 
 export default function Home() {
@@ -15,12 +16,11 @@ export default function Home() {
       <div className="relative flex flex-col  min-h-screen  overflow-hidden">
         <Nav session={session} SignOut={authClient.signOut} />
 
-        <div className="flex flex-1 gap-2.5 justify-center items-center">
-          {sampleProperties.map((data) => (
-            <PropertyCard key={data.id} data={data} mode={true} />
-          ))}
+        <PropertyInvestmentLanding />
 
-        </div>
+       
+
+        
       </div>
     </DropBack>
   );

@@ -134,17 +134,25 @@ export const PropertiesRouter = createTRPCRouter({
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             try {
-                const { images, ...rest } = input.property;
+                const { images } = input.property;
                 const { externalInvestors, ...investmentBlock } = input.investmentBlock
                 const { id, propertyId, ...cleanInvestmentBlock } = investmentBlock;
+                const { id: pId, ...propertyData } = input.property;
+
+                const cleanImages = images.map(item => {
+                    const { id, ...rest } = item;
+                    return { ...rest, };
+                })
+
+                console.log('propertyData:', propertyData);
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
-                        ...rest,
+                        ...propertyData,
                         userId: ctx.user.id,
                         images: {
                             createMany: {
-                                data: [...images]
+                                data: [...cleanImages]
                             }
                         },
                         ...(cleanInvestmentBlock && {
@@ -171,9 +179,12 @@ export const PropertiesRouter = createTRPCRouter({
                     }
                 });
 
+                console.log(makeP);
+                
+
                 if (!makeP) {
                     return {
-                        message: "Failed to process property XXXXXX",
+                        message: "failed to create property",
                         success: false,
                         data: null
                     }
@@ -191,7 +202,7 @@ export const PropertiesRouter = createTRPCRouter({
             } catch (error) {
                 console.error("Error in postPropertie:", error);
                 return {
-                    message: "Failed to process property XXXXXX",
+                    message: "something went wrong while creating property listing ",
                     success: false,
                     data: null
                 }
