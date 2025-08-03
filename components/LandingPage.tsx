@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Building2, 
+ 
   TrendingUp, 
   Users, 
   MessageSquare, 
   FileText, 
   Shield, 
   Zap, 
-  BarChart3,
+  
   UserCheck,
   Home,
   DollarSign,
-  Clock,
-  Star,
+ 
   ArrowRight,
   Play,
   CheckCircle,
-  Globe,
+ 
   Target,
   Briefcase,
   Sparkles
 } from 'lucide-react';
 
 const PropertyInvestmentLanding = () => {
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [isVisible, setIsVisible] = useState({});
-  const [hoveredFeature, setHoveredFeature] = useState(null);
+ 
 
   const features = [
     {
@@ -121,28 +118,6 @@ const PropertyInvestmentLanding = () => {
     }
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible(prev => ({ ...prev, [entry.target.id]: true }));
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('[id^="animate-"]').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">

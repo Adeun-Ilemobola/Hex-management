@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
@@ -16,6 +16,8 @@ import InvestmentBlockSection from './InvestmentBlockSection'
 import PoolInvestorsSection from './PoolInvestorsSection'
 import { useSearchParams } from 'next/navigation'
 import { usePropertyModification } from './usePropertyModification'
+import Loading from '../Loading'
+import PayWall from '../PayWall'
 
 export default function PropertyModification() {
     const searchParams = useSearchParams();
@@ -33,7 +35,8 @@ export default function PropertyModification() {
         CreateProperty , 
         UpdateProperty ,
         disableInput , 
-        isLoading
+        isLoading,
+        sub
     } = usePropertyModification(id)
 
     const [section, Setsection] = useState(1)
@@ -91,7 +94,6 @@ export default function PropertyModification() {
                         ...investmentBlock,
                         externalInvestors: [...externalInvestor.filter(inv => inv.id.length === 0 && inv.investmentBlockId.length === 0)]
                     }
-
                 });
 
             } else {
@@ -123,7 +125,7 @@ export default function PropertyModification() {
             }
         }
     }
-
+const isSubscribed = sub.isActive && sub.planTier !== "free" ||sub.planTier !== "Free"
     return (
         <DropBack is={isLoading} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
@@ -191,18 +193,21 @@ export default function PropertyModification() {
                         </div>
 
                     )}
-
-
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
                             <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
+
+                            <PayWall allowed={false}>
                             <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
+                            </PayWall>
                         </div>
                     )}
 
 
                     {section === 3 && (
+                           <Suspense fallback={<Loading />}>
                         <div className=' flex flex-1 justify-center items-center flex-col gap-3'>
+                          
                             <InvestmentSummary
                                 investmentBlock={investmentBlock}
                                 financials={{
@@ -212,19 +217,12 @@ export default function PropertyModification() {
                                     base: financials.base,
                                     duration: financials.duration,
                                     result: financials.result
-
                                 }}
                             />
-
-
-
                         </div>
+                        </Suspense>
                     )}
-
-
-
                 </div>
-
                 <div className=' h-20 px-3.5 py-4 flex flex-row justify-center border-t border-t-amber-400/30'>
                     <Button
                         className=' mr-auto text-3xl font-bold '
@@ -237,8 +235,6 @@ export default function PropertyModification() {
                         }}
                         variant={"ghost"}
                     >Back</Button>
-
-
                     <Button
                         className=' ml-auto text-3xl font-bold'
                         variant={"ghost"}
@@ -251,21 +247,13 @@ export default function PropertyModification() {
                                 }
                                 Setsection(pre => ++pre)
                             } else {
-
                                 handleSubmit()
-
                             }
                         }}
                     >
                         {section === 3 ? "submit" : "Next"}
-
-
                     </Button>
-
                 </div>
-
-
-
             </div>
 
         </DropBack>

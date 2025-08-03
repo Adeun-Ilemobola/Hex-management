@@ -26,8 +26,8 @@ export default function ChatBox({ id, text, img }: Props) {
     return (
         <div className='flex justify-start w-full px-4 py-2'>
             {/* chat bubble */}
-            <div className='flex flex-col max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl overflow-hidden shadow-sm'>
-                
+            <div className='flex flex-col max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl overflow-hidden shadow-sm'>
+
                 {/* Files Section */}
                 {img && img.length > 0 && (
                     <div className='p-3'>
@@ -41,7 +41,7 @@ export default function ChatBox({ id, text, img }: Props) {
                                         alt={img[0].name}
                                         width={300}
                                         height={200}
-                                        className='rounded-lg w-full h-auto max-h-64 object-cover'  
+                                        className='rounded-lg w-full h-auto max-h-64 object-cover'
                                     />
                                 ) : (
                                     <div className='flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
@@ -71,7 +71,7 @@ export default function ChatBox({ id, text, img }: Props) {
                                                 alt={item.name}
                                                 width={150}
                                                 height={150}
-                                                className='rounded-lg w-full h-full object-cover'  
+                                                className='rounded-lg w-full h-full object-cover'
                                             />
                                         ) : (
                                             <div className='flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-gray-700 rounded-lg p-2'>
@@ -90,11 +90,11 @@ export default function ChatBox({ id, text, img }: Props) {
                         )}
                     </div>
                 )}
-                
+
                 {/* Text Section */}
                 {text && (
-                    <div className={`px-4 ${img && img.length > 0 ? 'pb-4' : 'py-4'}`}>
-                        <p className='text-sm text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap'>
+                    <div className="p-3 max-w-2xl w-full">
+                        <p className="text-[0.95rem] text-gray-900 dark:text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
                             {text}
                         </p>
                     </div>

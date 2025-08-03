@@ -95,7 +95,7 @@ export function usePropertyModification(id: string) {
 
         if (typeOfSale === "SELL") {
             // 1) compute markup
-            markedUpPrice = initialInvestment * (1 + margin / 100);
+            markedUpPrice = initialInvestment * (1.5 + margin / 100);
             // 2) apply discount to the marked-up price
             result = markedUpPrice * (1 - discountPercentage / 100);
             // one‐time sale → 1 payment
@@ -267,7 +267,7 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: getUserPlan.data,
+        sub: { planTier: getUserPlan.data?.data?.planTier || "Free" , isActive: getUserPlan.data?.data?.isActive || false} ,
         isLoading: getUserPlan.isPending || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,

@@ -26,9 +26,12 @@ export default function ChatSend({ sendMessage }: ChatSendProps) {
     }, []);
 
     function send() {
-        if (!message.message || message.message.trim() === "") return;
+        if ((!message.message || message.message.trim() === "") && (!message.file || message.file.length === 0)) return;
 
-        sendMessage(message);
+        sendMessage({
+            message: message.message,
+            file: message.file
+        });
         setMessage({ message: "", file: [] });
     }
 
@@ -127,7 +130,7 @@ export default function ChatSend({ sendMessage }: ChatSendProps) {
 
                     <Button 
                         onClick={send} 
-                        disabled={isUploading || !message.message.trim()}
+                        disabled={isUploading}
                     >
                         <Send /> Send
                     </Button>

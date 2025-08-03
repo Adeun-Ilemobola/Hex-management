@@ -36,7 +36,7 @@ export default function InputBtu({  onSubmit, className  , icon ,disabled }: Inp
                 onSubmit(value);
                 setValue("");
             }}
-            disabled={!value.trim() || disabled}
+            disabled={disabled}
             variant={"outline"}
             size={"icon"}
             

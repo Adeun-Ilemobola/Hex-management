@@ -11,8 +11,8 @@ import { useRouter } from "next/navigation";
 import { api } from '@/lib/trpc'
 import PropertyCard from './propertyCard'
 const zSearch = z.object({
-    status: z.string().min(4, "").optional(),
-    searchText: z.string().min(2).optional(),
+    status: z.string().min(4).nullable(),
+    searchText: z.string().min(2).nullable(),
 
 
 })
@@ -35,7 +35,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     const {data:getProperties , isPending:getPropertiesPending} = api.Propertie.getUserProperties.useQuery({data: data })
      const [isEdit, setIsEdit] = useState(false)
 
-    function NavSearch(urlData: { status: string, searchText: string }) {
+    function NavSearch(urlData: { status: string | null, searchText: string | null }) {
         const vSearch = zSearch.safeParse(urlData);
         if (!vSearch.success) {
             vSearch.error.errors.forEach(error => {
@@ -43,9 +43,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
             })
             
         }
-        router.push(`/home?status=${urlData.status}&searchText=${urlData.searchText}`, {
-
-        })
+        router.push(`/home?${urlData.status ? `status=${urlData.status} ` : ""}${urlData.searchText ? `&searchText=${urlData.searchText}` : ""}`)
 
 
 

@@ -14,7 +14,7 @@ import { PackagePlus, SearchCheck } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import InputBtu from '../InputBtu'
 interface PropertySearchNavProps {
-    onSubmit: (data: { status: string, searchText: string }) => void
+    onSubmit: (data: { status: string | null, searchText: string | null }) => void
     changeMode ?: (mode: boolean) => void
     mode?: boolean
 
@@ -39,12 +39,10 @@ export default function PropertySearchNav({ onSubmit , changeMode ,mode }: Prope
         <div className=' flex flex-row-reverse gap-2 w-full h-12 items-center pr-2 '>
            <InputBtu
             onSubmit={(value) => {
-                onSubmit({ status: search.status, searchText: value })
+                onSubmit({ status: search.status ? search.status : null, searchText: value.length  ? value : null })
               
             }}
             icon={<SearchCheck className="h-5 w-5" />}
-            
-
            />
             <Select value={search.status} defaultValue={search.status} onValueChange={(e) => setSearch(pre => ({ ...pre, status: e }))}>
                 <SelectTrigger className="w-[180px]">

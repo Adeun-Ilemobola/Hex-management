@@ -1,6 +1,7 @@
 "use client"
 import ChatBox from '@/components/(ChatFragments)/ChatBox';
 import ChatSend from '@/components/(ChatFragments)/ChatSend';
+import { DatePicker } from '@/components/date-picker';
 
 import {  FileUploadResult } from '@/lib/utils';
 import React, { useState } from 'react'
@@ -13,11 +14,12 @@ export default function Page() {
 
 
   const [message, setMessage] = useState<{ message: string, file: FileUploadResult[] }[]>([]);
+  const [data, setData] = useState(new Date().toISOString());
 
 
 
   return (
-    <div className='relative flex flex-row gap-4 p-4  min-h-screen items-center justify-center  overflow-hidden'>
+    <div className='relative flex flex-col gap-4 p-9  min-h-screen  overflow-hidden'>
 
 
       <div className='flex flex-col gap-4 w-64'>
@@ -34,6 +36,9 @@ export default function Page() {
         setMessage(prev => [...prev, { message: data.message, file: data.file }]);
 
       }} />
+
+
+      <DatePicker value={data} onChange={setData} />
 
       {/* <Button onClick={() => handleImageUrlsChange()}>Click</Button>
 <CustomSVG size={40} className="fill-transparent stroke-blue-800 stroke-2" />

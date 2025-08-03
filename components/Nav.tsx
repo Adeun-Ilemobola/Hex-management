@@ -67,16 +67,6 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                                 Properties
                             </Button>
                         </Link>
-
-                        <Link href="/investments">
-                            <Button 
-                                variant="ghost" 
-                                className="text-lg font-semibold px-6 py-3 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300"
-                            >
-                                Investments
-                            </Button>
-                        </Link>
-
                         <Link href="/analytics">
                             <Button 
                                 variant="ghost" 
@@ -128,7 +118,7 @@ export default function UserCard({ go, img, Logout, name, sub }: { name: string,
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <div className="group flex items-center space-x-3 p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-300">
+                <div className="group flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-300">
                     <div className="relative">
                         <Avatar className="h-12 w-12 rounded-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-400 dark:group-hover:border-purple-500 transition-all duration-300 shadow-lg">
                             <AvatarImage src={img} className="object-cover" />
