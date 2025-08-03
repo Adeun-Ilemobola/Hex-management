@@ -4,7 +4,7 @@ import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
 import { Button } from '../ui/button'
-import {  investmentBlockSchema, propertySchema,  } from '@/lib/Zod'
+import { investmentBlockSchema, propertySchema, } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
@@ -22,19 +22,19 @@ import PayWall from '../PayWall'
 export default function PropertyModification() {
     const searchParams = useSearchParams();
     const id = searchParams.get("id") ?? "";
-    const { 
-        propertyInfo, 
-        investmentBlock, 
-        externalInvestor, 
-        setPropertyInfo, 
-        setInvestmentBlock, 
-        setExternalInvestor  , 
-        Session , 
-        financials, 
-        RemoveImage , 
-        CreateProperty , 
-        UpdateProperty ,
-        disableInput , 
+    const {
+        propertyInfo,
+        investmentBlock,
+        externalInvestor,
+        setPropertyInfo,
+        setInvestmentBlock,
+        setExternalInvestor,
+        Session,
+        financials,
+        RemoveImage,
+        CreateProperty,
+        UpdateProperty,
+        disableInput,
         isLoading,
         sub
     } = usePropertyModification(id)
@@ -125,7 +125,7 @@ export default function PropertyModification() {
             }
         }
     }
-const isSubscribed = sub.isActive && sub.planTier !== "free" ||sub.planTier !== "Free"
+    const isSubscribed = sub.isActive && sub.planTier !== "free" || sub.planTier !== "Free"
     return (
         <DropBack is={isLoading} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
@@ -197,29 +197,29 @@ const isSubscribed = sub.isActive && sub.planTier !== "free" ||sub.planTier !== 
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
                             <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
 
-                            <PayWall allowed={false}>
-                            <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
+                            <PayWall allowed={isSubscribed}>
+                                <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
                             </PayWall>
                         </div>
                     )}
 
 
                     {section === 3 && (
-                           <Suspense fallback={<Loading />}>
-                        <div className=' flex flex-1 justify-center items-center flex-col gap-3'>
-                          
-                            <InvestmentSummary
-                                investmentBlock={investmentBlock}
-                                financials={{
-                                    netPayment: financials.netPayment,
-                                    discountAmount: financials.discountAmount,
-                                    marginAmount: financials.marginAmount,
-                                    base: financials.base,
-                                    duration: financials.duration,
-                                    result: financials.result
-                                }}
-                            />
-                        </div>
+                        <Suspense fallback={<Loading />}>
+                            <div className=' flex flex-1 justify-center items-center flex-col gap-3'>
+
+                                <InvestmentSummary
+                                    investmentBlock={investmentBlock}
+                                    financials={{
+                                        netPayment: financials.netPayment,
+                                        discountAmount: financials.discountAmount,
+                                        marginAmount: financials.marginAmount,
+                                        base: financials.base,
+                                        duration: financials.duration,
+                                        result: financials.result
+                                    }}
+                                />
+                            </div>
                         </Suspense>
                     )}
                 </div>

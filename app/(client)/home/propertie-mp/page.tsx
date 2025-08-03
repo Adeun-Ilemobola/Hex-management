@@ -1,5 +1,4 @@
 import PropertyModification from "@/components/(propertyFragments)/PropertyModification";
-import { useSearchParams } from "next/navigation";
 
 export default async function Page() {
    

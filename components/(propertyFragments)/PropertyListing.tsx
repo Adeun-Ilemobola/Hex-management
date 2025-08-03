@@ -4,7 +4,7 @@ import { defaultPropertyListingInput, PropertyListingInput, StatusEnumType } fro
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image'
-import React, { useState, useEffect, use } from 'react'
+import React, { useState, useEffect } from 'react'
 import DropBack from '../DropBack';
 import { Badge } from '../ui/badge';
 import {
@@ -33,12 +33,12 @@ const SaleType = {
     LEASE: 'LEASE'
 };
 
-const PropertyType = {
-    APARTMENT: 'Apartment',
-    HOUSE: 'House',
-    CONDO: 'Condo',
-    TOWNHOUSE: 'Townhouse'
-};
+// const PropertyType = {
+//     APARTMENT: 'Apartment',
+//     HOUSE: 'House',
+//     CONDO: 'Condo',
+//     TOWNHOUSE: 'Townhouse'
+// };
 
 const Status = {
     ACTIVE: 'Active',

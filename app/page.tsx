@@ -3,8 +3,7 @@ import { authClient } from "@/lib/auth-client";
 
 import { Nav } from "@/components/Nav";
 import DropBack from "@/components/DropBack";
-import PropertyCard from "@/components/(propertyFragments)/propertyCard";
-import { sampleProperties } from "@/lib/Zod";
+
 import PropertyInvestmentLanding from "@/components/LandingPage";
 
 

@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { 
- 
-  TrendingUp, 
-  Users, 
-  MessageSquare, 
-  FileText, 
-  Shield, 
-  Zap, 
-  
+import React from 'react';
+import {
+
+  TrendingUp,
+  Users,
+  MessageSquare,
+  FileText,
+  Shield,
+  Zap,
+
   UserCheck,
   Home,
   DollarSign,
- 
+
   ArrowRight,
   Play,
   CheckCircle,
- 
+
   Target,
   Briefcase,
   Sparkles
 } from 'lucide-react';
 
 const PropertyInvestmentLanding = () => {
- 
+
 
   const features = [
     {
@@ -63,29 +63,29 @@ const PropertyInvestmentLanding = () => {
     }
   ];
 
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Real Estate Investor",
-      content: "This platform revolutionized how I manage my property portfolio. The pooled investment feature helped me access deals I couldn't afford alone.",
-      rating: 5,
-      avatar: "SJ"
-    },
-    {
-      name: "Michael Chen",
-      role: "Property Manager",
-      content: "The tenant communication system and automated invoicing saved me 15 hours per week. It's incredibly intuitive and powerful.",
-      rating: 5,
-      avatar: "MC"
-    },
-    {
-      name: "Emma Rodriguez",
-      role: "Investment Pool Leader",
-      content: "Managing multiple investors used to be a nightmare. Now everything is transparent, automated, and professionally handled.",
-      rating: 5,
-      avatar: "ER"
-    }
-  ];
+  // const testimonials = [
+  //   {
+  //     name: "Sarah Johnson",
+  //     role: "Real Estate Investor",
+  //     content: "This platform revolutionized how I manage my property portfolio. The pooled investment feature helped me access deals I couldn't afford alone.",
+  //     rating: 5,
+  //     avatar: "SJ"
+  //   },
+  //   {
+  //     name: "Michael Chen",
+  //     role: "Property Manager",
+  //     content: "The tenant communication system and automated invoicing saved me 15 hours per week. It's incredibly intuitive and powerful.",
+  //     rating: 5,
+  //     avatar: "MC"
+  //   },
+  //   {
+  //     name: "Emma Rodriguez",
+  //     role: "Investment Pool Leader",
+  //     content: "Managing multiple investors used to be a nightmare. Now everything is transparent, automated, and professionally handled.",
+  //     rating: 5,
+  //     avatar: "ER"
+  //   }
+  // ];
 
   const steps = [
     {
@@ -96,7 +96,7 @@ const PropertyInvestmentLanding = () => {
       color: "text-emerald-500"
     },
     {
-      step: "02", 
+      step: "02",
       title: "Get Smart Pricing",
       description: "Receive data-driven pricing recommendations designed to maximize your return on investment",
       icon: <Target className="w-10 h-10" />,
@@ -127,7 +127,7 @@ const PropertyInvestmentLanding = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20"></div>
         <div className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-        
+
         <div className="relative max-w-7xl mx-auto">
           <div className="text-center">
             {/* Badge */}
@@ -135,7 +135,7 @@ const PropertyInvestmentLanding = () => {
               <Sparkles className="w-5 h-5 text-blue-500 dark:text-purple-400 mr-2" />
               <span className="text-blue-600 dark:text-purple-300 text-sm font-semibold">Revolutionary Property Investment Platform</span>
             </div>
-            
+
             {/* Main Heading */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
               <span className="text-gray-900 dark:text-white">Maximize Your</span>
@@ -144,13 +144,13 @@ const PropertyInvestmentLanding = () => {
                 Property Returns
               </span>
             </h1>
-            
+
             {/* Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              The ultimate all-in-one platform for property management, investment analytics, and collaborative investing. 
+              The ultimate all-in-one platform for property management, investment analytics, and collaborative investing.
               Get optimal pricing, manage tenants, and pool investments with cutting-edge AI technology.
             </p>
-            
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
               <button className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25">
@@ -160,7 +160,7 @@ const PropertyInvestmentLanding = () => {
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl"></div>
               </button>
-              
+
               <button className="group flex items-center px-10 py-5 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-500 dark:hover:border-purple-500 hover:text-blue-600 dark:hover:text-purple-400 transition-all duration-300 backdrop-blur-sm">
                 <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
                 Watch Demo
@@ -197,27 +197,27 @@ const PropertyInvestmentLanding = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              From intelligent pricing to collaborative investing, our platform provides all the tools 
+              From intelligent pricing to collaborative investing, our platform provides all the tools
               you need to maximize your property investment returns.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={index}
                 className={`group relative p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-transparent transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl ${
-                //   isVisible['animate-features'] ? 'animate-fade-in-up' : 'opacity-0'
-                ''
-                }`}
+                  //   isVisible['animate-features'] ? 'animate-fade-in-up' : 'opacity-0'
+                  ''
+                  }`}
                 style={{ animationDelay: `${index * 100}ms` }}
-                // onMouseEnter={() => setHoveredFeature(index)}
-                // onMouseLeave={() => setHoveredFeature(null)}
+              // onMouseEnter={() => setHoveredFeature(index)}
+              // onMouseLeave={() => setHoveredFeature(null)}
               >
                 {/* Gradient Border on Hover */}
                 <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm`}></div>
                 <div className="absolute inset-[1px] rounded-3xl bg-white dark:bg-gray-800"></div>
-                
+
                 <div className="relative z-10">
                   <div className={`mb-6 p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} w-fit group-hover:scale-110 transition-transform duration-300`}>
                     <div className="text-white">
@@ -248,15 +248,14 @@ const PropertyInvestmentLanding = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Whether you're going solo or joining forces, we have the perfect investment solution for your goals.
-            </p>
+              Whether you&#39;re going solo or joining forces, we have the perfect investment solution for your goals.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Individual Investment */}
             <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-blue-900/20 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-500 hover:transform hover:scale-105">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full transform translate-x-16 -translate-y-16"></div>
-              
+
               <div className="relative p-10">
                 <div className="flex items-center mb-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 mr-6 group-hover:scale-110 transition-transform duration-300">
@@ -264,16 +263,16 @@ const PropertyInvestmentLanding = () => {
                   </div>
                   <h3 className="text-3xl font-black text-gray-900 dark:text-white">Individual Investor</h3>
                 </div>
-                
+
                 <p className="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
-                  Take full control of your property investments with advanced analytics, 
+                  Take full control of your property investments with advanced analytics,
                   automated pricing, and comprehensive management tools.
                 </p>
-                
+
                 <ul className="space-y-4 mb-10">
                   {[
                     "Complete ownership and control",
-                    "AI-powered pricing optimization", 
+                    "AI-powered pricing optimization",
                     "Direct tenant management",
                     "Automated invoicing and reporting"
                   ].map((item, idx) => (
@@ -283,7 +282,7 @@ const PropertyInvestmentLanding = () => {
                     </li>
                   ))}
                 </ul>
-                
+
                 <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-blue-500/25">
                   Start Individual Investing
                 </button>
@@ -293,7 +292,7 @@ const PropertyInvestmentLanding = () => {
             {/* Pooled Investment */}
             <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-purple-900/20 border border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 transition-all duration-500 hover:transform hover:scale-105">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full transform translate-x-16 -translate-y-16"></div>
-              
+
               <div className="relative p-10">
                 <div className="flex items-center mb-8">
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 mr-6 group-hover:scale-110 transition-transform duration-300">
@@ -301,17 +300,17 @@ const PropertyInvestmentLanding = () => {
                   </div>
                   <h3 className="text-3xl font-black text-gray-900 dark:text-white">Pooled Investment</h3>
                 </div>
-                
+
                 <p className="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
-                  Join or lead investment pools to access larger properties and diversify your portfolio 
+                  Join or lead investment pools to access larger properties and diversify your portfolio
                   with transparent governance and fair distribution.
                 </p>
-                
+
                 <ul className="space-y-4 mb-10">
                   {[
                     "Access to premium properties",
                     "Democratic voting system",
-                    "Transparent profit sharing", 
+                    "Transparent profit sharing",
                     "Reduced individual risk"
                   ].map((item, idx) => (
                     <li key={idx} className="flex items-center text-gray-700 dark:text-gray-300">
@@ -320,7 +319,7 @@ const PropertyInvestmentLanding = () => {
                     </li>
                   ))}
                 </ul>
-                
+
                 <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-purple-500/25">
                   Join Investment Pool
                 </button>
@@ -352,7 +351,7 @@ const PropertyInvestmentLanding = () => {
                 {index < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500 transform translate-x-8"></div>
                 )}
-                
+
                 <div className="relative mb-8">
                   <div className="mx-auto w-24 h-24 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-700 flex items-center justify-center group-hover:border-blue-400 dark:group-hover:border-purple-500 transition-all duration-300 group-hover:scale-110 shadow-lg">
                     <div className={`${step.color} group-hover:scale-110 transition-transform duration-300`}>
@@ -363,7 +362,7 @@ const PropertyInvestmentLanding = () => {
                     {step.step}
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
                   {step.title}
                 </h3>
@@ -446,10 +445,10 @@ const PropertyInvestmentLanding = () => {
               <span className="block">Property Investments?</span>
             </h2>
             <p className="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Join thousands of investors who are already maximizing their returns with our intelligent platform. 
+              Join thousands of investors who are already maximizing their returns with our intelligent platform.
               Start your journey today with a free account.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
               <button className="group bg-white text-blue-600 px-10 py-5 rounded-2xl text-lg font-bold hover:bg-gray-50 transition-all transform hover:scale-105 shadow-2xl">
                 <span className="flex items-center">
@@ -461,9 +460,9 @@ const PropertyInvestmentLanding = () => {
                 Schedule Demo
               </button>
             </div>
-            
+
             <p className="text-white/80 text-lg">
-               14-day free trial • Cancel anytime
+              14-day free trial • Cancel anytime
             </p>
           </div>
         </div>

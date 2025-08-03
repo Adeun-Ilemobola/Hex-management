@@ -185,7 +185,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
                 variant="outline"
                 size="sm"
                 className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/20"
-                onClick={(e) => {
+                onClick={() => {
 
                   console.log('Delete property:', id);
                 }}
