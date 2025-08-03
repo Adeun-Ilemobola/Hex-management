@@ -47,7 +47,7 @@ const subscriptionPlans = [
 ];
 
 export default function SubscriptionPage() {
-  const {  isPending: sessionLoading } = authClient.useSession();
+  const { isPending: sessionLoading } = authClient.useSession();
   const [subscriptionList, setSubscriptionList] = React.useState(subscriptionPlans);
   const getUserPlan = api.user.getUserPlan.useQuery()
   const subscriptionMutation = api.makeSubscription.useMutation({
@@ -66,11 +66,11 @@ export default function SubscriptionPage() {
   React.useEffect(() => {
     if (getUserPlan.data) {
       console.log(getUserPlan.data);
-      
-      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.value === getUserPlan.data.data.planTier )})));
+
+      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.value === getUserPlan.data.data.planTier) })));
     }
 
-   
+
   }, [getUserPlan.data]);
 
   function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium') {
@@ -81,15 +81,17 @@ export default function SubscriptionPage() {
 
   return (
     <DropBack is={isPending}>
-      <div className="container mx-auto px-6 py-12">
-        <header className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold">Select Your Plan</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Upgrade or downgrade at any time, no hidden fees.
+      <div className="container mx-auto px-6 py-16">
+        <header className="text-center mb-14">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+            Select Your Plan
+          </h1>
+          <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">
+            Upgrade or downgrade anytime. No hidden fees.
           </p>
         </header>
 
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {subscriptionList.map((plan) => (
             <SubscriptionCard
               key={plan.tier}
@@ -99,6 +101,7 @@ export default function SubscriptionPage() {
           ))}
         </div>
       </div>
+
     </DropBack>
   );
 }

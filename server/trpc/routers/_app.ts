@@ -1,16 +1,18 @@
 import { z } from 'zod';
+import { DateTime } from "luxon";
 
-import { protectedProcedure, createTRPCRouter  } from '../init';
+import { protectedProcedure, createTRPCRouter } from '../init';
 import { PropertiesRouter } from './UserRouter';
 import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
 import { userCongiRouter } from './userCongi';
+import Stripe from 'stripe';
 //import { headers } from "next/headers";
 
 export const appRouter = createTRPCRouter({
 
   Propertie: PropertiesRouter,
-  user:userCongiRouter,
+  user: userCongiRouter,
 
   // Add other routers here as needed
   makeSubscription: protectedProcedure
@@ -33,38 +35,68 @@ export const appRouter = createTRPCRouter({
       try {
         // ─── FREE TIER ─────────────────────────────────────────────
         if (input.tier === "Free") {
-          // cancel any active paid subs
+          // find any active paid subs
           const paidSub = await ctx.prisma.subscription.findFirst({
-            where: {
-              userId,
-              isActive: true,
-              status: "active",
-              planTier: { in: ["Deluxe", "Premium"] },
-            },
+            where: { userId, stripeSubscriptionId: { not: null } },
           });
-
           if (paidSub?.stripeSubscriptionId) {
             await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
-            await ctx.prisma.subscription.update({
-              where: { id: paidSub.id },
+
+            if (paidSub.currentPeriodEnd) {
+              const { id, createdAt, updatedAt, ...archivableData } = paidSub;
+
+              const daysLeft = DateTime.fromJSDate(paidSub.currentPeriodEnd).diff(DateTime.local()).days;
+              if (daysLeft <= 0) {
+                const hasHistory = await ctx.prisma.subscriptionArchives.findFirst({
+                  where: {
+                    userId: userId,
+                  },
+                })
+
+                if (!hasHistory) {
+                  await ctx.prisma.subscriptionArchives.create({
+                    data: {
+                      userId: userId,
+                      Subscriptions: {
+                        create: {
+                          ...archivableData
+                        },
+                      }
+                    },
+
+                  });
+                } else {
+                  await ctx.prisma.subscriptionArchives.update({
+                    where: {
+                      userId: userId,
+                    },
+                    data: {
+                      Subscriptions: {
+                        create: {
+                          ...archivableData
+                        },
+                      }
+                    },
+                  });
+
+                }
+              }
+
+
+            }
+            await ctx.prisma.subscription.create({
               data: {
-                status: "canceled",
-                isActive: false,
-                canceledAt: new Date(),
+                userId: userId,
+                stripeSubscriptionId: null,
+                currentPeriodEnd: null,
+                planTier: "Free",
+                isActive: true
               },
+
             });
+            // The processing of the subscription will be done in the webhook.
+
           }
-
-          // create local free‐plan record
-          await ctx.prisma.subscription.create({
-            data: {
-              userId,
-              planTier: "Free",
-              status: "active",
-              isActive: true,
-            },
-          });
-
           return { url: null, message: "Now on Free tier." };
         }
 

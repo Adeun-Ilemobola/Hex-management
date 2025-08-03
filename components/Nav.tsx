@@ -88,16 +88,9 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                             />
                         ) : (
                             <div className="flex items-center space-x-3">
-                                <Link href="/signup">
-                                    <Button 
-                                        variant="ghost" 
-                                        className="text-lg font-semibold px-6 py-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300"
-                                    >
-                                        Sign Up
-                                    </Button>
-                                </Link>
+                               
                                 <Button 
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3  font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                                     onClick={() => router.push("/login")}
                                 >
                                     Login

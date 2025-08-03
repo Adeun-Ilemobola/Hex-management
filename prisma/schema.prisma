@@ -28,7 +28,7 @@ enum SaleType {
 }
 
 model User {
-  id            String         @id
+  id            String      @id
   name          String
   email         String
   emailVerified Boolean
@@ -44,15 +44,52 @@ model User {
   sessions      Session[]
   accounts      Account[]
   properties    propertie[]
-  Subscriptions Subscription[]
-
 
   rooms    ChatRoomMember[]
   messages Message[]
   images   ChatImage[]
 
+  SubscriptionArchives   SubscriptionArchives?
+  Subscription      Subscription?
+
   @@unique([email])
   @@map("user")
+}
+
+model SubscriptionArchives {
+  id            String         @id @default(uuid())
+  Subscriptions Subscription[]
+  user User @relation(fields: [userId] , references: [id])
+  userId String @unique
+}
+
+model Subscription {
+  id String @id @default(uuid())
+
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  priceId              String? // Stripe Price ID
+  status               String @default("active") // active | past_due | canceled | incomplete, etc.
+  isActive             Boolean @default(false)
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime? // optional, if user cancels
+
+  planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
+
+  nextStripeSubscriptionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id])
+  userId String  @unique
+
+  SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
+  subscriptionArchivesId String?
 }
 
 model externalInvestor {
@@ -79,7 +116,7 @@ model investmentBlock {
   initialInvestment Float // How much money did the user buy this property?
   margin            Float // Profit percentage Based off the initial investment
   typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
-  saleDuration      Int     @default(0) // duration for how long to get my money back from the investment
+  saleDuration      Int      @default(0) // duration for how long to get my money back from the investment
 
   // ------------------ Lease -------------------------
   leaseCycle Float  @default(0.0)
@@ -92,30 +129,8 @@ model investmentBlock {
   propertieid       String             @unique
   propertie         propertie          @relation(fields: [propertieid], references: [id])
   externalInvestors externalInvestor[]
+
   @@unique([id])
-}
-
-model Subscription {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  priceId              String? // Stripe Price ID
-  status               String // active | past_due | canceled | incomplete, etc.
-  isActive             Boolean @default(false)
-
-  currentPeriodStart DateTime?
-  currentPeriodEnd   DateTime?
-
-  cancelAtPeriodEnd Boolean   @default(false)
-  canceledAt        DateTime? // optional, if user cancels
-
-  planTier String // "Free" | "Deluxe" | "Premium", etc.
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model image {
@@ -139,24 +154,24 @@ model propertie {
   id            String  @id @default(uuid())
   name          String
   address       String // The exact location with the ZIP Code and the general address
-  description   String? @default("")// General description of the property.
-  yearBuilt     Int @default(2020) // The year the property was built. Helpful for valuation and depreciation.
-  squareFootage Int @default(0) // Useful for investors, renters, and comparative analysis.
-  numBedrooms   Int @default(0) // Common requirement for housing.
-  numBathrooms  Int @default(0) // Same as above.
+  description   String? @default("") // General description of the property.
+  yearBuilt     Int     @default(2020) // The year the property was built. Helpful for valuation and depreciation.
+  squareFootage Int     @default(0) // Useful for investors, renters, and comparative analysis.
+  numBedrooms   Int     @default(0) // Common requirement for housing.
+  numBathrooms  Int     @default(0) // Same as above.
 
   // Amenities and Features
-  hasGarage Boolean @default(false)
-  hasGarden Boolean @default(false)
-  hasPool   Boolean @default(false)
+  hasGarage Boolean  @default(false)
+  hasGarden Boolean  @default(false)
+  hasPool   Boolean  @default(false)
   amenities String[] // List of amenities (e.g., ["Elevator", "Gym", "Fireplace"]).
 
-  lotSize       Float @default(0) // Size of the property land, in square meters or feet.
-  propertyType  String @default("Apartment")// House, Apartment, Condo, Commercial, etc.
-  status        String @default("active") // active, pending, sold, etc.
+  lotSize       Float   @default(0) // Size of the property land, in square meters or feet.
+  propertyType  String  @default("Apartment") // House, Apartment, Condo, Commercial, etc.
+  status        String  @default("active") // active, pending, sold, etc.
   ownerName     String // Who currently owns the property.
   contactInfo   String // Contact details for inquiries.
-  leavingstatus String @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
+  leavingstatus String  @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
   // Media
   images        image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
   videoTourUrl  String? // Optional video tour.
@@ -268,7 +283,7 @@ model ChatImage {
   chatOwnerID String // what user posted image
 
   message   Message @relation(fields: [messageId], references: [id])
-  messageId String  
+  messageId String
   owner     User    @relation(fields: [ownerId], references: [id])
-  ownerId   String  
+  ownerId   String
 }

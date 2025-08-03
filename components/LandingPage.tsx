@@ -13,13 +13,14 @@ import {
   DollarSign,
 
   ArrowRight,
-  Play,
+
   CheckCircle,
 
   Target,
   Briefcase,
   Sparkles
 } from 'lucide-react';
+import { Button } from './ui/button';
 
 const PropertyInvestmentLanding = () => {
 
@@ -153,18 +154,18 @@ const PropertyInvestmentLanding = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
-              <button className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25">
+              <Button className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-5 rounded-xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/25">
                 <span className="relative z-10 flex items-center">
                   Start Investing Now
                   <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl"></div>
-              </button>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl"></div>
+              </Button>
 
-              <button className="group flex items-center px-10 py-5 rounded-2xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-500 dark:hover:border-purple-500 hover:text-blue-600 dark:hover:text-purple-400 transition-all duration-300 backdrop-blur-sm">
+              {/* <Button className="group flex items-center px-10 py-5 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-500 dark:hover:border-purple-500 hover:text-blue-600 dark:hover:text-purple-400 transition-all duration-300 backdrop-blur-sm">
                 <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
                 Watch Demo
-              </button>
+              </Button> */}
             </div>
 
             {/* Stats */}
@@ -283,9 +284,9 @@ const PropertyInvestmentLanding = () => {
                   ))}
                 </ul>
 
-                <button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-blue-500/25">
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4  font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-blue-500/25">
                   Start Individual Investing
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -320,9 +321,9 @@ const PropertyInvestmentLanding = () => {
                   ))}
                 </ul>
 
-                <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-4 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-purple-500/25">
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-4  font-bold text-lg transition-all transform hover:scale-105 shadow-xl hover:shadow-purple-500/25">
                   Join Investment Pool
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -450,15 +451,15 @@ const PropertyInvestmentLanding = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
-              <button className="group bg-white text-blue-600 px-10 py-5 rounded-2xl text-lg font-bold hover:bg-gray-50 transition-all transform hover:scale-105 shadow-2xl">
+              <Button className="group bg-white text-blue-600 px-10 py-5  text-lg font-bold hover:bg-gray-50 transition-all transform hover:scale-105 shadow-2xl">
                 <span className="flex items-center">
                   Get Started Free
                   <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
                 </span>
-              </button>
-              <button className="px-10 py-5 rounded-2xl border-2 border-white/30 text-white hover:bg-white/10 transition-all backdrop-blur-sm">
+              </Button>
+              {/* <button className="px-10 py-5 rounded-2xl border-2 border-white/30 text-white hover:bg-white/10 transition-all backdrop-blur-sm">
                 Schedule Demo
-              </button>
+              </button> */}
             </div>
 
             <p className="text-white/80 text-lg">
