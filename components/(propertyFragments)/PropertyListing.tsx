@@ -160,7 +160,7 @@ export default function PropertyListing({ id }: { id: string }) {
     return (
         <DropBack is={fetchListing.isPending}  >
             <div className=' flex flex-col flex-1 gap-0.5 w-full '>
-                <Nav session={Session.data} SignOut={() => {authClient.signOut}} />
+                <Nav session={Session.data} SignOut={() => {authClient.signOut()}} />
                 <div className="flex flex-col flex-1  w-[70%] m-auto py-1">
                     {isMounded && (<>
                         <div className="relative w-full h-[48vh] overflow-hidden mx-auto gap-6 px-4 py-6 rounded-sm group  ">
