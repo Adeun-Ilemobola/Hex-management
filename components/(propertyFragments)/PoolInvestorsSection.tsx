@@ -1,38 +1,54 @@
 import { DollarSign, Edit2, Mail, TrendingUp, User, Users, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { Button } from '../ui/button'
-import {  ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
+import { ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
 import { toast } from 'sonner';
 import { api } from '@/lib/trpc';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogOverlay,
+    DialogFooter
+} from "@/components/ui/dialog"
+import InputBox, { NumberBox } from '../InputBox';
 
 
 interface propertyIFProps {
     mebers: ExternalInvestorInput[];
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
- 
+    userName: string
+    userEmail: string
 
-    
+
+
 
 }
-export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers , userName, userEmail }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
-    const  updateExternalInvestorMut =api.Propertie.updataExternalInvestor.useMutation({
+
+    const [mode, setMode] = useState<"edit" | "add">("add")
+    const updateExternalInvestorMut = api.Propertie.updataExternalInvestor.useMutation({
         onMutate() {
-            toast.loading("Updating Investors" , { id: "update" });
+            toast.loading("Updating Investors", { id: "update" });
         },
         onSuccess(data) {
             console.log(showInvestorMod);
-            
+
             if (data && data.success) {
-                toast.success(data.message , { id: "update" });
+                toast.success(data.message, { id: "update" });
             } else {
-                toast.error(data.message , { id: "update" });
+                toast.error(data.message, { id: "update" });
             }
         }
     })
 
-    
+   
+
+
     const addNewInvestor = () => {
         const newInvestor: ExternalInvestorInput = {
             name: "",
@@ -45,15 +61,18 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
             investmentBlockId: "",
             id: "",
         };
-       setInvestor(newInvestor)
-       setShowInvestorMod(false)
+        setInvestor(newInvestor)
+        setShowInvestorMod(true)
+        setMode("add")
+
     }
+
     function SubmintInvestors() {
         // add the new investor to the list
-        const  vInvestor = externalInvestorSchema.safeParse(investor)
+        const vInvestor = externalInvestorSchema.safeParse(investor)
 
         if (!vInvestor.success) {
-            if(vInvestor.error.errors.length > 0) {
+            if (vInvestor.error.errors.length > 0) {
                 vInvestor.error.errors.forEach(err => {
                     toast.error(`Error in ${err.path.join(",")}: ${err.message}`);
                 }
@@ -65,18 +84,19 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
         if (investor && investor.id.length <= 0 && investor.investmentBlockId.length <= 0) {
             setMebers(prev => [...prev, investor]);
             setInvestor(null)
+            setShowInvestorMod(false)
             return
         }
 
-        // update the existing investor
-        if (investor && (investor.id.length > 0 || investor.investmentBlockId.length > 0)) {
-            updateExternalInvestorMut.mutate({
-                externalInvestors: investor
-            })
-            return
-        }
-         
-        
+        // // update the existing investor
+        // if (investor && (investor.id.length > 0 || investor.investmentBlockId.length > 0)) {
+        //     updateExternalInvestorMut.mutate({
+        //         externalInvestors: investor
+        //     })
+        //     return
+        // }
+
+
     }
 
     const removeInvestor = (index: number) => {
@@ -102,7 +122,8 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
                         className="text-sm font-medium"
                         onClick={() => {
                             console.log('add investors')
-                            SubmintInvestors()
+                            addNewInvestor()
+
                         }}
                     >
                         Add Investors
@@ -112,15 +133,16 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
 
             <div className="p-6 flex flex-col gap-2 overflow-auto">
                 {mebers.length > 0 ? (
-                    <div>
+                    <div className="flex flex-col gap-4">
                         {mebers.map((member, index) => (
                             <InvestorCard
                                 key={index}
                                 member={member}
-                                
+
                                 onEdit={() => {
                                     console.log('edit investors')
                                     setInvestor(member)
+                                    setMode("edit")
                                     setShowInvestorMod(true)
                                 }}
                                 onRemove={() => {
@@ -131,10 +153,26 @@ export default function PoolInvestorsSection({mebers, setMebers}: propertyIFProp
                         ))}
                     </div>
                 ) : (
-                    <EmptyState onAddInvestor={addNewInvestor} />
+                    <EmptyState onAddInvestor={() => {
+                        addNewInvestor()
+                        setShowInvestorMod(true)
+
+                    }} />
                 )}
-               
+
             </div>
+
+            {investor && (
+                <InvestorConfig
+                    investor={investor}
+                    setInvestor={setInvestor}
+                    showInvestorMod={showInvestorMod}
+                    setShowInvestorMod={setShowInvestorMod}
+                    mode={mode}
+                    onSubmit={SubmintInvestors}
+
+                />
+            )}
         </div>
     )
 }
@@ -152,8 +190,8 @@ function EmptyState({ onAddInvestor }: { onAddInvestor: () => void }) {
             <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
                 Start building your investment pool by adding investors. Each investor can contribute a percentage of the total investment.
             </p>
-            <Button 
-                onClick={onAddInvestor} 
+            <Button
+                onClick={onAddInvestor}
                 className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             >
                 Add Your First Investor
@@ -163,22 +201,20 @@ function EmptyState({ onAddInvestor }: { onAddInvestor: () => void }) {
 }
 
 // Individual Investor Card Component
-function InvestorCard({ 
-    member, 
-    
-    onEdit, 
-    onRemove 
-}: { 
-    member: ExternalInvestorInput; 
-   
-    onEdit: () => void; 
-    onRemove: () => void; 
+function InvestorCard({
+    member,
+    onEdit,
+    onRemove
+}: {
+    member: ExternalInvestorInput;
+    onEdit: () => void;
+    onRemove: () => void;
 }) {
     return (
         <div className="group shrink-0 relative bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 hover:border-purple-300 dark:hover:border-purple-600 hover:-translate-y-1">
             {/* Decorative gradient border */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-            
+
             <div className="flex items-center justify-between">
                 {/* Left side - Investor Info */}
                 <div className="flex items-center space-x-4">
@@ -189,7 +225,7 @@ function InvestorCard({
                         </div>
                         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                     </div>
-                    
+
                     {/* Info */}
                     <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
@@ -206,7 +242,7 @@ function InvestorCard({
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Right side - Financial Info & Actions */}
                 <div className="flex items-center space-x-6">
                     {/* Financial Stats */}
@@ -230,7 +266,7 @@ function InvestorCard({
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Action Buttons */}
                     <div className="flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                         <Button
@@ -258,8 +294,75 @@ function InvestorCard({
 
 
 
-// function InvestorConfig({ investor, setInvestor }:{investor: ExternalInvestorInput , setInvestor: React.Dispatch<React.SetStateAction<ExternalInvestorInput>>}) {
+
+interface InvestorConfigProps {
+    investor: ExternalInvestorInput;
+    setInvestor: React.Dispatch<React.SetStateAction<ExternalInvestorInput | null>>;
+    showInvestorMod: boolean;
+    setShowInvestorMod: React.Dispatch<React.SetStateAction<boolean>>;
+    mode: "edit" | "add",
+    onSubmit: () => void;
+
+}
 
 
-    
-// }
+
+function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvestorMod, mode, onSubmit }: InvestorConfigProps) {
+
+    return (
+        <Dialog open={showInvestorMod} onOpenChange={setShowInvestorMod} >
+            <DialogOverlay className='bg-purple-800/70 backdrop-blur-xl  ' />
+            <DialogContent className='border border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/60 rounded-3xl shadow-xl'>
+                <DialogHeader>
+                    <DialogTitle>
+                        {mode === "edit" ? "Edit Investor" : "Add Investor"}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {mode === "edit" ? "Edit existing investor" : "Add new investor"}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className='flex flex-col gap-4'>
+
+                    <InputBox
+                        label="Name"
+                        value={investor.name}
+                        onChange={(e) => setInvestor({ ...investor, name: e })}
+                    />
+                    <InputBox
+                        label="Email"
+                        value={investor.email}
+                        onChange={(e) => setInvestor({ ...investor, email: e })}
+                    />
+
+
+                    <NumberBox
+                        label="Contribution Percentage"
+                        value={investor.contributionPercentage}
+                        setValue={(e) => setInvestor({ ...investor, contributionPercentage: e })}
+                    />
+
+
+
+                </div>
+                 <DialogFooter className='flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+                <Button
+                    variant="outline"
+                    onClick={() => {
+                        onSubmit();
+
+                    }}
+                >
+
+                    {mode === "edit" ? "Save Changes" : "Add Investor"}
+                </Button>
+
+            </DialogFooter>
+            </DialogContent>
+           
+
+        </Dialog>
+    )
+
+
+
+}

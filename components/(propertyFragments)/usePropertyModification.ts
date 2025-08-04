@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import { authClient } from "@/lib/auth-client";
@@ -57,6 +57,8 @@ export function usePropertyModification(id: string) {
             toast.loading("Creating property...", { id: "create" });
         },
     })
+    const hasInitializedCurrentUserRef = useRef(false);
+
     const updateProperty = api.Propertie.updataPropertie.useMutation({
         onSuccess(data) {
             if (data && data.success) {
@@ -154,6 +156,7 @@ export function usePropertyModification(id: string) {
             0
         );
         const updatedInvestors = externalInvestor.map(investor => {
+
             // Calculate dollar investment amount based on percentage
             const investmentAmount = (investor.contributionPercentage / 100) * investmentBlock.initialInvestment;
 
@@ -236,22 +239,88 @@ export function usePropertyModification(id: string) {
                 finalResult: result,
             };
         });
-    }, [investmentBlock.discountPercentage, investmentBlock.margin, investmentBlock.typeOfSale]);
+    }, [financials.result, financials.duration]);
 
     useEffect(() => {
         setExternalInvestor(prev => {
             const updated = investorCalculations.updatedInvestors;
+
+            // Merge calculated outputs into existing investors, preserve their contributionPercentage
+            const merged = updated.map(u => {
+                const existing = prev.find(p => p.email === u.email && p.name === u.name);
+                if (!existing) return {
+                    ...u,
+                    contributionPercentage: u.contributionPercentage ?? 0, // fallback if new
+                };
+                return {
+                    ...existing,
+                    returnPercentage: u.returnPercentage,
+                    dollarValueReturn: u.dollarValueReturn,
+                };
+            });
+
+            // If lengths differ or any key field differs, replace
             const isSame =
-                prev.length === updated.length &&
-                prev.every((inv, i) =>
-                    inv.dollarValueReturn === updated[i].dollarValueReturn &&
-                    inv.returnPercentage === updated[i].returnPercentage
-                );
+                prev.length === merged.length &&
+                merged.every(m => {
+                    const corresponding = prev.find(p => p.email === m.email && p.name === m.name);
+                    if (!corresponding) return false;
+                    return (
+                        corresponding.contributionPercentage === m.contributionPercentage &&
+                        corresponding.returnPercentage === m.returnPercentage &&
+                        corresponding.dollarValueReturn === m.dollarValueReturn
+                    );
+                });
 
             if (isSame) return prev;
-            return updated;
+            return merged;
         });
-    }, [investmentBlock.externalInvestors, investorCalculations.updatedInvestors]);
+    }, [investorCalculations.updatedInvestors]);
+
+
+    useEffect(() => {
+        if (!Session?.data?.user) return;
+        if(externalInvestor.length === 0) return;
+        const name = Session.data.user.name;
+        const email = Session.data.user.email;
+        if (!name || !email) return;
+
+        setExternalInvestor(prev => {
+            // Separate lead and others
+            const others = prev.filter(inv => !(inv.email === email && inv.name === name));
+            const lead = prev.find(inv => inv.email === email && inv.name === name);
+
+            const sumOthers = others.reduce(
+                (sum, investor) => sum + (investor.contributionPercentage || 0),
+                0
+            );
+            const desiredLeadContribution = Math.max(0, 100 - sumOthers);
+
+            if (lead) {
+                if (lead.contributionPercentage === desiredLeadContribution) {
+                    return prev;
+                }
+                return others.concat({
+                    ...lead,
+                    contributionPercentage: desiredLeadContribution,
+                });
+            } else {
+                // create lead with remainder
+                const newLead: ExternalInvestorInput = {
+                    name,
+                    email,
+                    contributionPercentage: desiredLeadContribution,
+                    returnPercentage: 0,
+                    isInternal: false,
+                    accessRevoked: false,
+                    dollarValueReturn: 0,
+                    investmentBlockId: "",
+                    id: "",
+                };
+                return [...others, newLead];
+            }
+        });
+    }, [ externalInvestor , Session]);
 
 
 
@@ -267,7 +336,7 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: { planTier: getUserPlan.data?.data?.planTier || "Free" , isActive: getUserPlan.data?.data?.isActive || false , daysLeft: getUserPlan.data?.data?.daysLeft || null} ,
+        sub: { planTier: getUserPlan.data?.data?.planTier || "Free", isActive: getUserPlan.data?.data?.isActive || false, daysLeft: getUserPlan.data?.data?.daysLeft || null },
         isLoading: getUserPlan.isPending || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,

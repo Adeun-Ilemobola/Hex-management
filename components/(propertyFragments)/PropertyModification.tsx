@@ -197,16 +197,18 @@ export default function PropertyModification() {
                             </div>
                         </div>
                     )}
-
-
-
+                    
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
                             <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
 
-                            <PayWall allowed={isSubscribed}>
-                                <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
-                            </PayWall>
+                            {Session.data?.user && (
+                                <PayWall allowed={isSubscribed}>
+                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} userName={Session.data.user.name} userEmail={Session.data.user.name} />
+                                </PayWall>
+                            )}
+
+
                         </div>
                     )}
 

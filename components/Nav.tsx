@@ -12,6 +12,7 @@ import { Button } from './ui/button'
 import { useRouter } from 'next/navigation'
 import CustomSVG from './Icon/logo'
 import Link from 'next/link'
+import { Bell } from 'lucide-react'
 
 
 export function Nav({ session, SignOut }: { session: Session | null, SignOut: () => void }) {
@@ -78,6 +79,14 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                     {/* User Section */}
                     <div className="flex items-center space-x-4">
                         {session ? (
+
+                            <>
+                            <Button  variant={'ghost'}>
+                                 <Bell size={38} color='oklch(60% 0.118 184.704)'/>
+                                 Notifications
+                            </Button>
+                            
+                            
                             <UserCard
                                 id={session.user.id}
                                 name={session.user.name}
@@ -86,6 +95,8 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                                 go={() => router.push("/")}
                                 sub={() => router.push("/home/subscription")}
                             />
+
+                            </>
                         ) : (
                             <div className="flex items-center space-x-3">
                                

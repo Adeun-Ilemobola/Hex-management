@@ -94,7 +94,7 @@ export default function PropertySearchNav({ onSubmit, changeMode, mode }: Proper
             {/* Add property */}
             <Button
                 type="button"
-                size="icon"
+               
                 variant="ghost"
                 onClick={() => {
                     router.push("/home/propertie-mp"); // keep your route; adjust if this was a typo
@@ -107,6 +107,7 @@ export default function PropertySearchNav({ onSubmit, changeMode, mode }: Proper
                 title="Add new property"
             >
                 <PackagePlus size={22} strokeWidth={1.8} className="hover:text-cyan-700" />
+                Add new property
             </Button>
         </div>
     );
