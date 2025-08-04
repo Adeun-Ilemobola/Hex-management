@@ -267,7 +267,7 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: { planTier: getUserPlan.data?.data?.planTier || "Free" , isActive: getUserPlan.data?.data?.isActive || false} ,
+        sub: { planTier: getUserPlan.data?.data?.planTier || "Free" , isActive: getUserPlan.data?.data?.isActive || false , daysLeft: getUserPlan.data?.data?.daysLeft || null} ,
         isLoading: getUserPlan.isPending || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,

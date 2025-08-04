@@ -1,9 +1,10 @@
-import { PropertyInput } from '@/lib/Zod'
+import { amenitiesItems, PropertyInput } from '@/lib/Zod'
 import { nanoid } from 'nanoid'
 
 import React from 'react'
-import InputBox, { NumberBox, SelectorBox, SwitchBox } from '../InputBox'
+import InputBox, { MultiSelectorBox, NumberBox, SelectorBox, SwitchBox } from '../InputBox'
 import { Button } from '../ui/button'
+import { set } from 'date-fns'
 
 interface PropertyGIFProps {
     propertyInfo: PropertyInput,
@@ -18,7 +19,7 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
     }
 
     return (
-        <div className="space-y-6 p-3">
+        <div className="space-y-6 p-3 min-w-full">
             {/* Basic Information */}
             <div className="space-y-2">
                 <h3 className="text-lg font-semibold border-b border-gray-200 pb-1.5">
@@ -45,7 +46,7 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
                 <h3 className="text-lg font-semibold border-b border-gray-200 pb-2">
                     Property Details
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-6 xl:grid-cols-4 gap-3">
                     <NumberBox
                         label="Bedrooms"
                         value={propertyInfo.numBedrooms}
@@ -67,13 +68,7 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
                         setValue={(val) => handleField('lotSize', val, 'number')}
                         className="min-w-0"
                     />
-                    <NumberBox
-                        label="Year Built"
-                        value={propertyInfo.yearBuilt}
-                        disabled={disable}
-                        setValue={(val) => handleField('yearBuilt', val, 'number')}
-                        className="min-w-0"
-                    />
+
                     <NumberBox
                         label="Sq. Footage"
                         value={propertyInfo.squareFootage}
@@ -81,6 +76,31 @@ export default function PropertyGIF({ propertyInfo, setPropertyInfo, disable }: 
                         setValue={(val) => handleField('squareFootage', val, 'number')}
                         className="min-w-0"
                     />
+                </div>
+                <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 gap-3'>
+
+
+                    <MultiSelectorBox 
+                        label="Property Features"
+                        options={amenitiesItems}
+                        value={propertyInfo.amenities}
+                        disabled={disable}
+                        onChange={(val) => {
+                            setPropertyInfo(prev => ({ ...prev, amenities: val }))
+
+                        }}
+                        className='max-w-[23rem]'
+                        
+                    
+                        />
+                    <NumberBox
+                        label="Year Built"
+                        value={propertyInfo.yearBuilt}
+                        disabled={disable}
+                        setValue={(val) => handleField('yearBuilt', val, 'number')}
+                        className="min-w-0"
+                    />
+
                 </div>
             </div>
 

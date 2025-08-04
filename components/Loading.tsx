@@ -1,5 +1,5 @@
-import { LoaderCircle, Sparkles } from "lucide-react";
 import React from "react";
+import { LoaderCircle, Sparkles } from "lucide-react";
 
 const PHRASES = [
   "Fetching awesomeness…",
@@ -10,68 +10,101 @@ const PHRASES = [
   "Serving up your data…",
 ];
 
-export default function Loading({ text , full }: { text?: string | React.ReactNode , full?: boolean}) {
+type LoadingProps = {
+  /** If undefined -> uses a random phrase. If "" -> hides text. If ReactNode/String -> shows it. */
+  text?: string | React.ReactNode;
+  /** Fullscreen mode */
+  full?: boolean;
+  /** Optional 0–100 progress */
+  progress?: number;
+  /** Subtle vs brandy glow */
+  variant?: "brand" | "muted";
+};
+
+export default function Loading({
+  text,
+  full,
+  progress,
+  variant = "brand",
+}: LoadingProps) {
   const phrase =
-    typeof text === "string" && !text
+    typeof text === "undefined"
       ? PHRASES[Math.floor(Math.random() * PHRASES.length)]
       : null;
 
-      const size = full ? "min-w-screen min-h-screen " : " min-w-full min-h-full";
+  const size = full ? "min-h-screen min-w-full" : "min-h-[12rem] w-full";
+  const showText = typeof text === "string" ? text.length > 0 : !!text || phrase;
+
   return (
-    <div className={`flex flex-col items-center justify-center ${size}`}>
-      {/* Centered Loader + Glow together */}
-      <div className="relative flex items-center justify-center w-32 h-32">
-        {/* SVG Halo using shadcn theme colors */}
-        <svg
-          className="absolute inset-0 w-full h-full blur-2xl opacity-70 animate-pulse"
-          width="128"
-          height="128"
-          viewBox="0 0 256 256"
-          fill="none"
-        >
-          <defs>
-            {/* Use currentColor for theme-aware coloring */}
-            <radialGradient id="halo" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.7" />
-              <stop offset="80%" stopColor="var(--accent)" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="var(--background)" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="128" cy="128" r="100" fill="url(#halo)" />
-        </svg>
-        {/* Loader Icon using text-primary */}
-        <LoaderCircle
-          size={64}
-          className="relative z-10 animate-spin text-primary drop-shadow-lg"
-          strokeWidth={1}
+    <div
+      className={`relative ${size} grid place-items-center`}
+      role="status"
+      aria-busy="true"
+    >
+      {/* Center stack */}
+      <div className="relative flex flex-col items-center">
+        {/* Soft gradient glow */}
+        <div
+          className={`pointer-events-none absolute -inset-10 blur-2xl opacity-60 ${
+            variant === "brand"
+              ? "bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"
+              : "bg-gradient-to-r from-zinc-300 via-zinc-200 to-zinc-300 dark:from-zinc-700 dark:via-zinc-800 dark:to-zinc-700"
+          } rounded-full`}
+          aria-hidden
         />
-        {/* Sparkles overlay using text-accent */}
-        <Sparkles
-          size={28}
-          strokeWidth={1.5}
-          className="absolute z-20 -top-4 -right-4 text-accent animate-bounce"
-        />
+
+        {/* Icon */}
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          <LoaderCircle
+            className="animate-spin text-primary drop-shadow-sm"
+            size={64}
+            strokeWidth={1.25}
+          />
+          <Sparkles
+            className="absolute -right-2 -top-2 text-accent animate-bounce"
+            size={22}
+            strokeWidth={1.5}
+          />
+        </div>
+
+        {/* Text (gradient animated, theme-aware) */}
+        {showText && (
+          <div className="mt-4">
+            <span
+              className="block text-center text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 animate-gradient-x"
+              style={{
+                backgroundSize: "200% auto",
+                animation: "gradient-x 2.5s linear infinite alternate",
+              }}
+            >
+              {text ?? phrase}
+            </span>
+          </div>
+        )}
+
+        {/* Optional progress */}
+        {typeof progress === "number" && progress >= 0 && progress <= 100 && (
+          <div className="mt-4 w-64">
+            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-[width]"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="mt-1 text-center text-xs text-muted-foreground">
+              {Math.round(progress)}%
+            </div>
+          </div>
+        )}
       </div>
-      {/* Animated Gradient Text using theme colors */}
-      {(text || phrase) && (
-        <h2
-          className="mt-6 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary animate-gradient-x"
-          style={{
-            backgroundSize: "200% auto",
-            animation: "gradient-x 2.5s linear infinite alternate",
-          }}
-        >
-          {text || phrase}
-        </h2>
-      )}
-      <style>
-        {`
-          @keyframes gradient-x {
-            0% { background-position: 0% 50%;}
-            100% { background-position: 100% 50%;}
-          }
-        `}
-      </style>
+
+      {/* Inline keyframes (no external CSS) */}
+      <style>{`
+        @keyframes gradient-x {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }
+      `}</style>
     </div>
   );
 }

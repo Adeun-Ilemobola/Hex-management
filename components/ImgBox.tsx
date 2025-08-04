@@ -192,7 +192,7 @@ export function ImgBoxList({
   return (
     <div
       className={clsx(
-        "flex flex-col w-full max-w-4xl h-80 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm overflow-hidden",
+        "flex flex-col  h-80 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm overflow-hidden",
         isDisabled && "opacity-50 pointer-events-none",
         className
       )}
