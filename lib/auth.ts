@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from "@/server/actions/sendEmail";
+import { organization } from "better-auth/plugins"
+import { createServerCaller } from "@/server/trpc/caller"; 
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -16,7 +18,7 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "https://hex-management.vercel.app", // ✅ Production URL
     "https://hex-management-7t951livfx-adeuns-projects-408b65cf.vercel.app",
-     process.env.NEXTAUTH_URL as string || "http://localhost:3000",
+    process.env.NEXTAUTH_URL as string || "http://localhost:3000",
   ],
 
   socialProviders: {
@@ -61,8 +63,7 @@ export const auth = betterAuth({
         templateText: "VerifyEmail",
         to: user.email,
         params: {
-          url,
-          token
+          verifyUrl: url
         }
       })
 
@@ -81,6 +82,31 @@ export const auth = betterAuth({
       trustedProviders: ["google", "github"]
     }
   },
+
+  plugins: [
+    organization({
+      // async sendInvitationEmail(data) {
+      //   const inviteLink = `https://app.com/accept-invite/${data.id}`;
+      //   await sendEmail({
+      //     to: data.email,
+      //     subject: `Join ${data.organization.name}`,
+      //     html: `<a href="${inviteLink}">Accept invite</a>`
+      //   });
+      // }
+
+      allowUserToCreateOrganization: async (user) => {
+        const caller = await createServerCaller();
+        const {data: plan} = await caller.user.getUserPlan();
+        if (plan.planTier === "Free") {
+          return false
+        }else if (plan.planTier === "Deluxe" || plan.planTier === "Premium") {
+          return true
+        }
+        
+        return false
+      }
+    })
+  ]
 
 
 });

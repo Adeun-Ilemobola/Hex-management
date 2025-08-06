@@ -12,7 +12,7 @@ export const userCongiRouter = createTRPCRouter({
     setPasswordForOAuth: protectedProcedure.input(z.object({ newPassword: z.string(), confirmPassword: z.string(), currentPassword: z.string() }))
         .mutation(async ({ input, ctx }) => {
             try {
-                const headers = ctx.req.headers;
+                const headers = ctx.headers;
 
                 // 2) Check existing accounts
                 const accounts = await authClient.listAccounts();

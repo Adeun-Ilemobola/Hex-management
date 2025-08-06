@@ -49,8 +49,11 @@ model User {
   messages Message[]
   images   ChatImage[]
 
-  SubscriptionArchives   SubscriptionArchives?
-  Subscription      Subscription?
+  SubscriptionArchives SubscriptionArchives?
+  Subscription         Subscription?
+
+  members     Member[]
+  invitations Invitation[]
 
   @@unique([email])
   @@map("user")
@@ -59,8 +62,8 @@ model User {
 model SubscriptionArchives {
   id            String         @id @default(uuid())
   Subscriptions Subscription[]
-  user User @relation(fields: [userId] , references: [id])
-  userId String @unique
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String         @unique
 }
 
 model Subscription {
@@ -69,7 +72,7 @@ model Subscription {
   stripeCustomerId     String?
   stripeSubscriptionId String?
   priceId              String? // Stripe Price ID
-  status               String @default("active") // active | past_due | canceled | incomplete, etc.
+  status               String  @default("active") // active | past_due | canceled | incomplete, etc.
   isActive             Boolean @default(false)
 
   currentPeriodStart DateTime?
@@ -85,8 +88,8 @@ model Subscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user   User @relation(fields: [userId], references: [id])
-  userId String  @unique
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 
   SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
   subscriptionArchivesId String?
@@ -231,6 +234,8 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  activeOrganizationId String?
+
   @@unique([token])
   @@map("session")
 }
@@ -286,4 +291,44 @@ model ChatImage {
   messageId String
   owner     User    @relation(fields: [ownerId], references: [id])
   ownerId   String
+}
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String?
+  logo        String?
+  createdAt   DateTime
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  @@unique([slug])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  createdAt      DateTime
+
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@map("invitation")
 }

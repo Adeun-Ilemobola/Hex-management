@@ -1,16 +1,15 @@
 "use server";
 
-import { templates } from "@/lib/reSend";
+import { generateTemplate, TemplateParamMap, TemplateType } from "@/lib/reSend";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-type EmailTemplate = "VerifyEmail" | "ResetPassword" | "Welcome";
 
 interface SendEmailInput {
-  templateText: EmailTemplate;
+  templateText: TemplateType;
   to: string;
-  params: Record<string, any>;
+  params: TemplateParamMap[TemplateType];
 }
 
 export async function sendEmail(input: SendEmailInput) {
@@ -18,7 +17,7 @@ export async function sendEmail(input: SendEmailInput) {
 
   try {
     // Here you can generate your subject and HTML using your templates
-    const { subject, html } = generateTemplate(templateText, params);
+    const { subject, html } = generateTemplate(templateText, { ...params });
 
     const response = await resend.emails.send({
       from: "onboarding@resend.dev",
@@ -34,10 +33,3 @@ export async function sendEmail(input: SendEmailInput) {
   }
 }
 
-/**
- * Example template generator function.
- * Replace with your actual template logic.
- */
-function generateTemplate( templateText: EmailTemplate, params: Record<string, any>) {
-  return templates[templateText](params as any);
-}

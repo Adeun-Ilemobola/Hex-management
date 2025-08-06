@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, SaleTypeEnumType, PropertyTypeEnumType } from '@/lib/Zod';
 import { Delete } from 'lucide-react';
 import { DeleteImages } from '@/lib/supabase';
+import { sendEmail } from '@/server/actions/sendEmail';
 
 
 export const PropertiesRouter = createTRPCRouter({
@@ -155,32 +156,54 @@ export const PropertiesRouter = createTRPCRouter({
                                 data: [...cleanImages]
                             }
                         },
-                        ...(cleanInvestmentBlock && {
-                            investBlock: {
-                                create: {
-                                    ...cleanInvestmentBlock,
-                                    ...(externalInvestors.length > 0 && {
-                                        externalInvestors: {
-                                            createMany: {
-                                                data: [...externalInvestors.map(item => {
-                                                    const { investmentBlockId, id, ...rest } = item
-                                                    return {
-                                                        ...rest,
-                                                    }
-                                                })],
-                                            }
-                                        }
-                                    })
-
-                                }
-                            }
-                        })
+                       
 
                     }
                 });
 
-                console.log(makeP);
-                
+                if (makeP) {
+                    const makeIB = await ctx.prisma.investmentBlock.create({
+                        data: {
+                            ...cleanInvestmentBlock,
+                            propertieid: makeP.id
+                        }
+                    })
+
+                    if (makeIB) {
+                       const makeEI = await Promise.all(externalInvestors.map(async (item) => {
+                        const { id, ...rest } = item
+                            return await ctx.prisma.externalInvestor.create({
+                                data: {
+                                    ...rest,
+                                    investmentBlockId: makeIB.id
+                                    
+                                }
+                            })
+                       }))
+                        await Promise.all(
+                            makeEI.map(async(item) => {
+                                const { id , investmentBlockId, ...rest } = item;
+                                await sendEmail({
+                                    templateText: "VerifyExternalInvestor",
+                                    to: rest.email,
+                                    params: {
+                                        name: rest.name,
+                                        email: rest.email,
+                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
+                                        propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
+                                        contributionPercent: rest.contributionPercentage,
+                                        DollarValueReturn: rest.dollarValueReturn,
+                                        propertyName: makeP.name
+                                    }
+                                        
+                                       
+                                })
+                            })
+                        );
+                    }
+                }
+                  
+
 
                 if (!makeP) {
                     return {
@@ -255,25 +278,74 @@ export const PropertiesRouter = createTRPCRouter({
                             investBlock: {
                                 update: {
                                     ...cleanInvestmentBlock,
-                                    ...(externalInvestors.length > 0 && {
-                                        externalInvestors: {
-                                            createMany: {
-                                                data: [...externalInvestors.map(item => {
-                                                    const { investmentBlockId, id, ...rest } = item
-                                                    return {
-                                                        ...rest,
-                                                    }
-                                                })],
-                                            }
-                                        }
-                                    })
-
                                 }
                             }
                         })
 
+                    },
+                    include: {
+                        images: true,
+                        investBlock: {
+                            include: {
+                                externalInvestors: true
+                            }
+                        }
                     }
                 })
+                if (updataData.investBlock) {
+                    const { id: BlockId } = updataData.investBlock
+                    const newExternalInvestors = externalInvestors.filter(item => !item.id || item.id === "")
+                    const oldExternalInvestors = externalInvestors.filter(item => item.id || item.id !== "")
+
+                    await Promise.all(
+                        oldExternalInvestors.map(item => {
+                            const { id, ...rest } = item;
+                            return ctx.prisma.externalInvestor.update({
+                                where: { id },
+                                data: rest
+                            });
+                        })
+                    );
+
+                    if (newExternalInvestors.length > 0) {
+                       const res = await Promise.all(
+                            newExternalInvestors.map(item => {
+                                const { id, ...rest } = item;
+                                
+                                return ctx.prisma.externalInvestor.create({
+                                    data: {
+                                        ...rest,
+                                        investmentBlockId: BlockId
+                                    }
+                                });
+                            })
+                        )
+                        await Promise.all(
+                            res.map(async(item) => {
+                                const { id , investmentBlockId, ...rest } = item;
+                                await sendEmail({
+                                    templateText: "VerifyExternalInvestor",
+                                    to: rest.email,
+                                    params: {
+                                        name: rest.name,
+                                        email: rest.email,
+                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
+                                        propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
+                                        contributionPercent: rest.contributionPercentage,
+                                        DollarValueReturn: rest.dollarValueReturn,
+                                        propertyName: updataData.name
+                                    }
+                                        
+                                       
+                                })
+                            })
+                        );
+
+                    }
+
+
+
+                }
                 if (!updataData) {
                     return {
                         message: "Failed to process property XXXXXX",
@@ -496,7 +568,7 @@ export const PropertiesRouter = createTRPCRouter({
                         numBathrooms: true,
                         numBedrooms: true,
                         yearBuilt: true,
-                      
+
                     }
                 })
 
@@ -515,7 +587,7 @@ export const PropertiesRouter = createTRPCRouter({
                         leaseCycle: getP.investBlock?.leaseCycle as number
                     }, // { finalResult: the final result, typeOfSale: the type of sale [SELL, RENT, LEASE], leaseCycle: the lease cycle }, this is an object
                     name: getP.name,
-                    address: getP.address, 
+                    address: getP.address,
                     id: getP.id,
                     description: getP.description || "",
                     lotSize: getP.lotSize,// number
@@ -533,7 +605,7 @@ export const PropertiesRouter = createTRPCRouter({
 
                 }
                 console.log("cleanData", cleanData);
-                
+
 
                 return {
                     message: "successfully created property listing",

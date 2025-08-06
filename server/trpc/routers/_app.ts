@@ -7,6 +7,7 @@ import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
 import { userCongiRouter } from './userCongi';
 import Stripe from 'stripe';
+import { createServerCaller } from '../caller';
 //import { headers } from "next/headers";
 
 export const appRouter = createTRPCRouter({
@@ -129,6 +130,19 @@ export const appRouter = createTRPCRouter({
           message: err?.message ?? "Subscription service unavailable",
         });
       }
+    }),
+
+
+    test: protectedProcedure.query(async ({ ctx }) => {
+      const user = ctx.session?.user;
+      if (!user) {
+        console.warn("[test] not signed in");
+        // you can either throw or return a shaped error
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+      }
+       const trpc = await createServerCaller();
+       await trpc.user.getUserPlan()
+      return { ok: true };
     }),
 
 

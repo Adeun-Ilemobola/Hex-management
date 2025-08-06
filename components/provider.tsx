@@ -1,5 +1,5 @@
+// components/provider.tsx
 'use client';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { api } from '@/lib/trpc'; 
 import { httpBatchLink } from '@trpc/client';
@@ -23,12 +23,9 @@ function makeQueryClient() {
         refetchOnReconnect: false, // Don't refetch on reconnect
       },
       mutations: {
-        // With SSR, we usually want to set some default retry
-        // to avoid failing mutations immediately on the client
+      
         retry: 1, // Retry failed mutations once
-        // Don't refetch queries after a mutation
-        // This is important to avoid refetching queries that
-        // were already fetched on the server
+       
        
       },
     },

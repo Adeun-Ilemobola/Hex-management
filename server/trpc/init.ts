@@ -1,24 +1,16 @@
-
+// server/trpc/init.ts
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { initTRPC, TRPCError } from '@trpc/server';
-import { headers } from 'next/headers';
-
-
-
-export const createTRPCContext = async (opts: { req: Request }) => {
+export const createTRPCContext = async ({headers}: { headers: Headers  }) => {
   const session = await auth.api.getSession({
-     headers: opts.req.headers,
+     headers
   });
-
-
-  return { session , prisma , req: opts.req };
+  return { session , prisma , headers};
 };
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
 const t = initTRPC.context<Context>().create();
-
-
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
