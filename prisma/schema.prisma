@@ -120,6 +120,7 @@ model investmentBlock {
   margin            Float // Profit percentage Based off the initial investment
   typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
   saleDuration      Int      @default(0) // duration for how long to get my money back from the investment
+  depreciationYears Int @default(1) //
 
   // ------------------ Lease -------------------------
   leaseCycle Float  @default(0.0)

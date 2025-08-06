@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { createServerCaller } from "../caller";
+
 
 
 export const organizationRouter = createTRPCRouter({
@@ -52,21 +52,41 @@ export const organizationRouter = createTRPCRouter({
             }
         }),
 
-    getUserOrganizations: protectedProcedure
+    getAllOrganization: protectedProcedure
         .query(async ({ ctx }) => {
             try {
-                const data = await auth.api.listOrganizations();
+                const data = await auth.api.listOrganizations({headers: ctx.headers});
+                console.log(data);
+                
+                const organizations =  await Promise.all(
+                    data.map(async (org) => {
+                        const members = await ctx.prisma.member.count({
+                            where: {
+                                organizationId: org.id
+                            }
+                        })
+                        return {
+                            ...org,
+                            memberCount: members,
+                            metadata: JSON.parse(org.metadata) as {
+                                planType: string;
+                                seatLimit: number;
+                            }
+                        }
+                    })
+                )
+             
                 return {
                     message: "Successfully got user organizations",
                     success: true,
-                    value: data
+                    value: organizations
                 }
             } catch (error) {
                 console.error("Error in getUserOrganizations:", error);
                 return {
                     message: "Failed to get user organizations",
                     success: false,
-                    value: null
+                    value: []
                 }
             }
         }),
@@ -83,21 +103,27 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-
-                const api = await createServerCaller();
-                const userSub = await api.user.getUserPlan()
+                const userSub = ctx.plan
                 const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}#${Math.floor(Math.random() * 1000)}`
                 const metadata = {
                     planType: userSub.data.planTier,
                     seatLimit: seatPlan(userSub.data.planTier),
                 }
-                const {status} = await auth.api.checkOrganizationSlug({
+                console.log({
+                    userSub,
+                    metadata,
+                    slug
+                });
+                
+                const { status } = await auth.api.checkOrganizationSlug({
                     body: {
                         slug: slug, // required
                     },
                 });
 
-                if(status){
+                if (!status) {
+                    console.log("Organization with slug already exists");
+                    
                     return {
                         message: `Organization with slug ${slug} already exists`,
                         success: false,
@@ -105,7 +131,7 @@ export const organizationRouter = createTRPCRouter({
                     }
                 }
 
-
+                console.log("Organization with slug does not exist" + status);
 
                 const res = await auth.api.createOrganization({
                     body: {
@@ -119,12 +145,15 @@ export const organizationRouter = createTRPCRouter({
                 })
 
                 if (!res) {
+                    console.log("Failed to create organization");
+                    
                     return {
                         message: "Failed to create organization",
                         success: false,
                         value: null
                     }
                 }
+                
                 return {
                     message: "Successfully created organization",
                     success: true,

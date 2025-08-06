@@ -104,7 +104,7 @@ export default function PoolInvestorsSection({ mebers, setMebers , userName, use
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-w-[50rem] max-w-[55rem]">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-w-[56rem] max-w-[60rem]">
             <div className=" flex flex-row px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex flex-1 items-center space-x-3">
                     <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">

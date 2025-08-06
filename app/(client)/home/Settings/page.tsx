@@ -11,6 +11,16 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Mail, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner';
 import { z } from 'zod';
+import InputBtu from '@/components/InputBtu';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 
 const passworDefault = {
@@ -48,8 +58,30 @@ export default function Page() {
   const [password, setPassword] = useState(passworDefault);
   const { isPending, data } = authClient.useSession();
   const [mounted, setMounted] = useState(false);
+  const [add, setAdd] = useState(false);
+  const { data: organizations, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
+
   // const { mutateAsync: updateUser } = api.User.updateUser.useMutation();
   const fetchedUser = api.Propertie.getUserProfle.useQuery();
+  const createOrganization = api.organization.createOrganization.useMutation({
+    onMutate() {
+      toast.loading("Creating organization...", { id: "create" });
+    },
+    onSuccess(data) {
+      if (data && data.success) {
+        toast.success(data.message, { id: "create" });
+        organizationsQuery.refetch();
+      } else {
+        toast.error(data.message, { id: "create" });
+      }
+    },
+    onError(error) {
+      console.log(error);
+      
+      toast.error(error.message, { id: "create" });
+    }
+
+  });
   const UpdataPassMutb = api.user.setPasswordForOAuth.useMutation({
     onMutate() {
       toast.loading("Updating password...", { id: "updatePass" });
@@ -65,7 +97,7 @@ export default function Page() {
       toast.error(error.message, { id: "updatePass" });
     }
   });
- 
+
 
   const makeUpdate = api.Propertie.updateUserProfle.useMutation({
     onMutate() {
@@ -127,7 +159,7 @@ export default function Page() {
   function updataPassWord() {
     const vPassSchema = vPass.safeParse(password);
     console.log(password);
-    
+
     if (!vPassSchema.success) {
       vPassSchema.error.errors.forEach(error => {
         toast.warning(`${error.path[0]}: ${error.message}`)
@@ -274,20 +306,67 @@ export default function Page() {
 
 
 
-             <div className=' rounded-lg border border-gray-200 shadow-sm'>
+            <div className=' rounded-lg border border-gray-200 shadow-sm'>
               <div className='px-6 py-4 border-b border-gray-200'>
                 <h2 className='text-xl font-semibold '>Organization Information</h2>
                 <p className='text-sm  mt-1'>Update your organization details or creat a new one</p>
               </div>
 
               <div className='p-6'>
+                {organizations && organizations.value.length > 0 ? (
+                  <>
+                    <Table>
+                      <TableCaption>
+                        A list of your user organizations
+                      </TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead >Name</TableHead>
+                          <TableHead>Members</TableHead>
+                          <TableHead>Slug</TableHead>
+                          <TableHead >Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {organizations.value.map((organization) => (
+                          <TableRow key={organization.id}>
+                            <TableCell className="font-medium">{organization.name}</TableCell>
+                            <TableCell>{organization.memberCount} / {organization.metadata.seatLimit}</TableCell>
+                            <TableCell>{organization.slug}</TableCell>
+                            <TableCell>
+                              <Button>View</Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </>
+                ) : (<>
+                  <div className='flex flex-col'>
+
+                    <h2 className='text-lg font-semibold'>create your first organization</h2>
+                    <div className='flex   justify-center' >
+                      <InputBtu
+                        onSubmit={(value) => {
+                          createOrganization.mutate({ name: value })
+
+                        }}
+                        icon={" new organization"}
+                        disabled={createOrganization.isPending}
+                      />
+
+                    </div>
+
+                  </div>
+                </>)}
+
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                 
+
                 </div>
 
                 {/* Action Buttons */}
                 <div className='flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200'>
-                  
+
                 </div>
               </div>
             </div>
@@ -310,6 +389,9 @@ export default function Page() {
           </div>
         </div>
       </div>
+
+
+
     </DropBack>
   )
 }

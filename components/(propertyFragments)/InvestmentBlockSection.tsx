@@ -15,7 +15,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
         setInvestmentBlock(prev => ({ ...prev, [field]: type === 'number' ? Number(val) : val }))
     }
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-w-[50rem] max-w-[55rem]">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-w-[56rem] max-w-[60rem]">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
@@ -29,7 +29,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
             </div>
 
             <div className="p-6">
-                <div className="flex flex-row gap-1.5">
+                <div className="flex flex-row justify-center items-center gap-1.5">
                     <NumberBox
                         label="Investment"
                         value={investmentBlock.initialInvestment}
@@ -52,6 +52,17 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                         setValue={(val: number) => handleField('discountPercentage', val, 'number')}
                         className="w-28"
                     />
+
+                    {(investmentBlock.typeOfSale === 'RENT' || investmentBlock.typeOfSale === 'LEASE') && (
+                        <NumberBox
+                            label="Depreciation (years)"
+                            value={investmentBlock.depreciationYears}
+                            disabled={disable}
+                            setValue={(val: number) => handleField('depreciationYears', val, 'number')}
+                            className="w-40"
+                        />
+                        
+                    )}
                     {investmentBlock.typeOfSale === 'LEASE' && (
                         <NumberBox
                             label="Cycle (mo)"

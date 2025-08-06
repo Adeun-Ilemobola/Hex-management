@@ -243,6 +243,7 @@ export const investmentBlockSchema = z
       .string()
       .default(""),
     externalInvestors: z.array(externalInvestorSchema),
+    depreciationYears:z.number().min(1).nonnegative().default(1),  
 
   })
   .superRefine((data, ctx) => {
@@ -523,6 +524,7 @@ export const defaultInvestmentBlockInput: InvestmentBlockInput = {
   externalInvestors: [],
   propertyId: "",
   id: "",
+  depreciationYears: 1,
 
 };
 

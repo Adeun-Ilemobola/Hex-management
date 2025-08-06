@@ -6,14 +6,15 @@ import { PropertiesRouter } from './UserRouter';
 import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
 import { userCongiRouter } from './userCongi';
-import Stripe from 'stripe';
 import { createServerCaller } from '../caller';
+import { organizationRouter } from './organization';
 //import { headers } from "next/headers";
 
 export const appRouter = createTRPCRouter({
 
   Propertie: PropertiesRouter,
   user: userCongiRouter,
+  organization:organizationRouter,
 
   // Add other routers here as needed
   makeSubscription: protectedProcedure

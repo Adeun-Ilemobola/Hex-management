@@ -28,6 +28,7 @@ interface InvestmentBlock {
   discountPercentage: number;
   leaseCycle: number;
   saleDuration?: number;
+  depreciationYears: number;
 }
 
 interface Financials {
@@ -148,51 +149,47 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
     description?: string;
   }
 
-  const MetricCard: React.FC<MetricCardProps> = ({ 
-    icon: Icon, 
-    label, 
-    value, 
-    isMain = false, 
+  const MetricCard: React.FC<MetricCardProps> = ({
+    icon: Icon,
+    label,
+    value,
+    isMain = false,
     trend = 'neutral',
-    description 
+    description
   }) => (
-    <div className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 hover:scale-105 ${
-      isMain 
-        ? `${theme.secondary} ${theme.border} shadow-xl ${theme.glowColor} hover:shadow-2xl` 
+    <div className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 hover:scale-105 ${isMain
+        ? `${theme.secondary} ${theme.border} shadow-xl ${theme.glowColor} hover:shadow-2xl`
         : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg'
-    }`}>
+      }`}>
       {/* Gradient overlay for main cards */}
       {isMain && (
         <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent dark:from-white/5 dark:to-transparent"></div>
       )}
-      
+
       <div className="relative p-6">
         <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl transition-all duration-300 group-hover:scale-110 ${
-            isMain 
-              ? `bg-gradient-to-br ${theme.gradient} shadow-lg` 
+          <div className={`p-3 rounded-xl transition-all duration-300 group-hover:scale-110 ${isMain
+              ? `bg-gradient-to-br ${theme.gradient} shadow-lg`
               : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600'
-          }`}>
+            }`}>
             <Icon className={`h-6 w-6 ${isMain ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
           </div>
-          
+
           {trend !== 'neutral' && (
-            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-              trend === 'up' 
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+            <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${trend === 'up'
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-            }`}>
+              }`}>
               {trend === 'up' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
               <span>{trend === 'up' ? 'Gain' : 'Discount'}</span>
             </div>
           )}
         </div>
-        
+
         <div>
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{label}</p>
-          <p className={`text-2xl font-bold transition-colors ${
-            isMain ? theme.text : 'text-gray-900 dark:text-white'
-          }`}>
+          <p className={`text-2xl font-bold transition-colors ${isMain ? theme.text : 'text-gray-900 dark:text-white'
+            }`}>
             {value}
           </p>
           {description && (
@@ -206,7 +203,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-8">
       {/* Enhanced Header */}
-      <Card className={`overflow-hidden border-2 ${theme.border} shadow-2xl ${theme.glowColor} dark:bg-gray-900`}>
+      <Card className={`overflow-hidden border-2 ${theme.border} shadow-2xl pt-0 px-0 ${theme.glowColor} dark:bg-gray-900`}>
         <CardHeader className={`relative bg-gradient-to-r ${theme.gradient} text-white p-0`}>
           <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent"></div>
           <div className="relative p-8">
@@ -224,8 +221,8 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                 </div>
               </div>
               <div className="flex flex-col items-end space-y-2">
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className="bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-bold backdrop-blur-sm"
                 >
                   {investmentBlock.typeOfSale}
@@ -265,6 +262,16 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                   <span className="text-lg font-medium">
                     Total Value: {formatCurrency(financials.result * financials.duration)}
                   </span>
+                  {(investmentBlock.typeOfSale === "RENT" || investmentBlock.typeOfSale === "LEASE") && (
+                    <>
+                      <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                      <span className="text-lg font-medium">
+                        depreciation Years: {investmentBlock.depreciationYears}
+                      </span>
+                    </>
+
+                  )}
+
                 </div>
               )}
             </div>
@@ -274,31 +281,31 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
 
           {/* Enhanced Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-            <MetricCard 
-              icon={DollarSign} 
-              label="Base Amount" 
-              value={formatCurrency(financials.base)} 
-              isMain 
+            <MetricCard
+              icon={DollarSign}
+              label="Base Amount"
+              value={formatCurrency(financials.base)}
+              isMain
               description="Per payment cycle"
             />
-            <MetricCard 
-              icon={TrendingUp} 
-              label="Margin Added" 
-              value={formatCurrency(financials.marginAmount)} 
+            <MetricCard
+              icon={TrendingUp}
+              label="Margin Added"
+              value={formatCurrency(financials.marginAmount)}
               trend="up"
               description={`${formatPercentage(investmentBlock.margin)} increase`}
             />
-            <MetricCard 
-              icon={Percent} 
-              label="Discount Applied" 
-              value={formatCurrency(financials.discountAmount)} 
+            <MetricCard
+              icon={Percent}
+              label="Discount Applied"
+              value={formatCurrency(financials.discountAmount)}
               trend="down"
               description={`${formatPercentage(investmentBlock.discountPercentage)} reduction`}
             />
-            <MetricCard 
-              icon={Target} 
-              label="Net Payment" 
-              value={formatCurrency(financials.netPayment)} 
+            <MetricCard
+              icon={Target}
+              label="Net Payment"
+              value={formatCurrency(financials.netPayment)}
               description="Final calculated amount"
             />
           </div>
@@ -306,7 +313,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
           {/* Enhanced Breakdown */}
           <div className={`relative overflow-hidden rounded-3xl ${theme.secondary} ${theme.border} border-2 shadow-xl`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/20 to-transparent dark:from-white/5 dark:to-transparent rounded-full transform translate-x-16 -translate-y-16"></div>
-            
+
             <div className="relative p-8">
               <div className="flex items-center space-x-3 mb-8">
                 <div className={`p-3 rounded-xl bg-gradient-to-r ${theme.gradient}`}>
@@ -314,7 +321,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                 </div>
                 <h3 className={`text-2xl font-bold ${theme.text}`}>Calculation Breakdown</h3>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
@@ -331,7 +338,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="flex justify-between items-center p-4 rounded-xl bg-green-50 dark:bg-green-900/20">
                       <div className="flex items-center space-x-2">
@@ -357,9 +364,9 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                     </div>
                   </div>
                 </div>
-                
+
                 <Separator className="my-6" />
-                
+
                 <div className={`flex justify-between items-center p-6 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white shadow-xl`}>
                   <span className="text-2xl font-bold">Final Amount:</span>
                   <span className="text-3xl font-black">{formatCurrency(financials.result)}</span>
@@ -377,7 +384,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                 </div>
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">Payment Schedule</span>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                   <div className="text-center">
@@ -387,7 +394,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                     <div className="text-gray-600 dark:text-gray-400 font-medium">Total Payments</div>
                   </div>
                 </div>
-                
+
                 <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
@@ -396,7 +403,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = ({
                     <div className="text-gray-600 dark:text-gray-400 font-medium">Total Value</div>
                   </div>
                 </div>
-                
+
                 <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">

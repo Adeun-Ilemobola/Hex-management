@@ -90,7 +90,7 @@ export function usePropertyModification(id: string) {
 
 
     const financials = useMemo(() => {
-        const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle, } = investmentBlock;
+        const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle,depreciationYears } = investmentBlock;
         let result = 0;
         let duration = 0;
         let markedUpPrice = 0;
@@ -104,7 +104,7 @@ export function usePropertyModification(id: string) {
             duration = 12;
         }
         else if (typeOfSale === 'RENT') {
-            const depreciationYears = 8; // Investor wants to recover in 8 years
+           
             const base = initialInvestment / (depreciationYears * 12);
             const pay = base * (1 + margin / 100);
             result = pay * (1 - discountPercentage / 100);
@@ -112,10 +112,11 @@ export function usePropertyModification(id: string) {
 
         }
         else if (typeOfSale === 'LEASE') {
-            const base = initialInvestment / leaseCycle;       // per‐cycle cost
+              
+            const base = initialInvestment / (depreciationYears * leaseCycle);       // per‐cycle cost
             const pay = base * (1 + margin / 100);
             result = pay * (1 - discountPercentage / 100);
-            duration = leaseCycle
+            duration = Math.ceil(initialInvestment / result);
         }
         else {
             throw new Error(`Unknown typeOfSale "${typeOfSale}"`);
@@ -149,6 +150,7 @@ export function usePropertyModification(id: string) {
         investmentBlock.margin,
         investmentBlock.discountPercentage,
         investmentBlock.leaseCycle,
+        investmentBlock.depreciationYears
     ]);
     const investorCalculations = useMemo(() => {
         const totalInvestorPercentage = externalInvestor.reduce(
@@ -209,6 +211,7 @@ export function usePropertyModification(id: string) {
                     propertyId: property.id,
                     saleDuration: investmentBlock.saleDuration,
                     leaseCycle: investmentBlock.leaseCycle,
+                    depreciationYears: investmentBlock.depreciationYears
                 });
             }
         }

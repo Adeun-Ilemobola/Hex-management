@@ -8,7 +8,7 @@ import { ScanSearch } from 'lucide-react';
 interface InputBtuProps {
     onSubmit: (value: string) => void;
     className?: string;
-    icon?: React.ReactNode;
+    icon?: React.ReactNode | string;
     disabled?: boolean;
 }
 
@@ -16,7 +16,7 @@ export default function InputBtu({  onSubmit, className  , icon ,disabled }: Inp
     const [value, setValue] = useState<string>("");
 
   return (
-    <div className={clsx("flex flex-row gap-1.5  items-center ", className)}>
+    <div className={clsx("flex flex-row gap-1.5 items-center ", className)}>
         <InputBox
             value={value}
             onChange={setValue}
@@ -38,7 +38,7 @@ export default function InputBtu({  onSubmit, className  , icon ,disabled }: Inp
             }}
             disabled={disabled}
             variant={"outline"}
-            size={"icon"}
+            size={ typeof icon === "string" ? "default" : "icon"}
             
         >
             {icon || <ScanSearch className="h-4 w-4" />}

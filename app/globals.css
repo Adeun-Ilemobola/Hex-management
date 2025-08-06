@@ -197,34 +197,5 @@
 }
 
 /* Soft floating for blobs */
-@keyframes slow-float {
-  0% { transform: translateY(0) translateX(0) scale(1); }
-  50% { transform: translateY(-12px) translateX(6px) scale(1.02); }
-  100% { transform: translateY(0) translateX(0) scale(1); }
-}
-.animate-slow-float {
-  animation: slow-float 12s ease-in-out infinite;
-}
 
-/* Animated stripe background used in <Strips /> */
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
-  50% { background-position: 100% 50%; filter: hue-rotate(15deg); }
-  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
-}
-
-.bg-animated-stripe {
-  /* Uses CSS vars from the component: --from / --to */
-  background-image: linear-gradient(90deg, var(--from), var(--to));
-  background-size: 200% 200%;
-  border-radius: 1.25rem; /* ~rounded-2xl */
-  opacity: 0.85;
-}
-.animate-gradient-shift {
-  animation: gradient-shift 10s ease-in-out infinite;
-}
-
-/* Optional: nicer focus styles for keyboard users */
-:root {
-  --ring: 0 0% 100%;
-}
+/*  */
