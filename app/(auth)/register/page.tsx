@@ -69,7 +69,7 @@ export default function Page() {
     },
   });
 
-  function setCountry(e: string, _identify: string) {
+  function setCountry(e: string, ) {
     if (!e || e === registerInfo.country || e === "None") return;
     setRegisterInfo((prev) => ({ ...prev, country: e }));
     getCountryData.mutate(e);
@@ -165,7 +165,7 @@ export default function Page() {
                 label="Country"
                 identify="country"
                 value={registerInfo.country}
-                setValue={(e) => setCountry(e, "country")}
+                setValue={(e) => setCountry(e,)}
                 options={[
                   { value: "None", label: "None" },
                   ...countries.map((country) => ({ value: country, label: country })),

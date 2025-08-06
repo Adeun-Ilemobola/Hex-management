@@ -115,6 +115,8 @@ export async function POST(req: NextRequest) {
                         },
                     },
                 });
+                console.log(id , createdAt, updatedAt,);
+                
                 await prisma.subscription.delete({
                     where: {
                         id: currentSub.id

@@ -58,7 +58,6 @@ export default function Page() {
   const [password, setPassword] = useState(passworDefault);
   const { isPending, data } = authClient.useSession();
   const [mounted, setMounted] = useState(false);
-  const [add, setAdd] = useState(false);
   const { data: organizations, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
 
   // const { mutateAsync: updateUser } = api.User.updateUser.useMutation();

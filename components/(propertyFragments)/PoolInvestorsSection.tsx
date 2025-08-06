@@ -1,9 +1,9 @@
 import { DollarSign, Edit2, Mail, TrendingUp, User, Users, X } from 'lucide-react'
-import React, { use, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '../ui/button'
 import { ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
 import { toast } from 'sonner';
-import { api } from '@/lib/trpc';
+// import { api } from '@/lib/trpc';
 import {
     Dialog,
     DialogContent,
@@ -19,32 +19,26 @@ import InputBox, { NumberBox } from '../InputBox';
 interface propertyIFProps {
     mebers: ExternalInvestorInput[];
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
-    userName: string
-    userEmail: string
-
-
-
-
 }
-export default function PoolInvestorsSection({ mebers, setMebers , userName, userEmail }: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
 
     const [mode, setMode] = useState<"edit" | "add">("add")
-    const updateExternalInvestorMut = api.Propertie.updataExternalInvestor.useMutation({
-        onMutate() {
-            toast.loading("Updating Investors", { id: "update" });
-        },
-        onSuccess(data) {
-            console.log(showInvestorMod);
+    // const updateExternalInvestorMut = api.Propertie.updataExternalInvestor.useMutation({
+    //     onMutate() {
+    //         toast.loading("Updating Investors", { id: "update" });
+    //     },
+    //     onSuccess(data) {
+    //         console.log(showInvestorMod);
 
-            if (data && data.success) {
-                toast.success(data.message, { id: "update" });
-            } else {
-                toast.error(data.message, { id: "update" });
-            }
-        }
-    })
+    //         if (data && data.success) {
+    //             toast.success(data.message, { id: "update" });
+    //         } else {
+    //             toast.error(data.message, { id: "update" });
+    //         }
+    //     }
+    // })
 
    
 

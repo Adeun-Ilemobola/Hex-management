@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid'
 import React from 'react'
 import InputBox, { MultiSelectorBox, NumberBox, SelectorBox, SwitchBox } from '../InputBox'
 import { Button } from '../ui/button'
-import { set } from 'date-fns'
 
 interface PropertyGIFProps {
     propertyInfo: PropertyInput,

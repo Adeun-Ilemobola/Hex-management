@@ -57,7 +57,7 @@ export function usePropertyModification(id: string) {
             toast.loading("Creating property...", { id: "create" });
         },
     })
-    const hasInitializedCurrentUserRef = useRef(false);
+    // const hasInitializedCurrentUserRef = useRef(false);
 
     const updateProperty = api.Propertie.updataPropertie.useMutation({
         onSuccess(data) {

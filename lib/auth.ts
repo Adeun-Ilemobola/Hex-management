@@ -3,7 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from "@/server/actions/sendEmail";
 import { organization } from "better-auth/plugins"
-import { createServerCaller } from "@/server/trpc/caller"; 
+import { createServerCaller } from "@/server/trpc/caller";
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -58,7 +58,7 @@ export const auth = betterAuth({
 
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }) => {
+    sendVerificationEmail: async ({ user, url }) => {
       const res = await sendEmail({
         templateText: "VerifyEmail",
         to: user.email,
@@ -94,15 +94,15 @@ export const auth = betterAuth({
       //   });
       // }
 
-      allowUserToCreateOrganization: async (user) => {
+      allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
-        const {data: plan} = await caller.user.getUserPlan();
+        const { data: plan } = await caller.user.getUserPlan();
         if (plan.planTier === "Free") {
           return false
-        }else if (plan.planTier === "Deluxe" || plan.planTier === "Premium") {
+        } else if (plan.planTier === "Deluxe" || plan.planTier === "Premium") {
           return true
         }
-        
+
         return false
       }
     })
