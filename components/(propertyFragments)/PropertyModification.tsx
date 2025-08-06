@@ -204,7 +204,7 @@ export default function PropertyModification() {
 
                             {Session.data?.user && (
                                 <PayWall allowed={isSubscribed}>
-                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} userName={Session.data.user.name} userEmail={Session.data.user.name} />
+                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
                                 </PayWall>
                             )}
 
