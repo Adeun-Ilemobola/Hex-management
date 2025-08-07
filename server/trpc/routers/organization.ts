@@ -108,6 +108,7 @@ export const organizationRouter = createTRPCRouter({
                 const metadata = {
                     planType: userSub.data.planTier,
                     seatLimit: seatPlan(userSub.data.planTier),
+                    isExpired :(ctx.plan.data.daysLeft || 0) <= 0 
                 }
                 console.log({
                     userSub,

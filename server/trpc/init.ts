@@ -2,7 +2,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { initTRPC, TRPCError } from '@trpc/server';
-import { fetchUserPlan } from '../actions/subscriptionService';
+import { fetchUserPlanFull } from '../actions/subscriptionService';
 import { headers } from 'next/headers';
 
 
@@ -10,7 +10,7 @@ export const createTRPCContext = async () => {
   const webHeaders = await headers();
   const session = await auth.api.getSession({headers: webHeaders});
    const planResult = session?.user?.id
-    ? await fetchUserPlan(session.user.id)
+    ? await fetchUserPlanFull(session.user.id)
     : { success: false, data: { planTier: 'Free', isActive: false, daysLeft: null } };
   return { session , prisma , headers: webHeaders , plan:planResult};
 };

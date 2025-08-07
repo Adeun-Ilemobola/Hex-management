@@ -10,17 +10,20 @@ export interface PlanResult {
         daysLeft: number | null;
     };
 }
-export interface PlanResult {
+export interface PlanResultFull {
     success: boolean;
     data: {
         planTier: string;
         isActive: boolean;
         daysLeft: number | null;
+        oganizationId: string | null;
+        role: string;
+        isExpired: boolean
     };
 }
 
 
-export async function fetchUserPlan(userId: string): Promise<PlanResult> {
+ async function fetchUserPlan(userId: string): Promise<PlanResult> {
     try {
         const isActive = await prisma.subscription.findFirst({
             where: {
@@ -169,4 +172,73 @@ export async function fetchUserPlan(userId: string): Promise<PlanResult> {
         }
     }
 
+}
+
+
+
+export async function fetchUserPlanFull(userId: string): Promise<PlanResultFull> {
+    try {
+        const usePlan = await fetchUserPlan(userId);
+        const fetchMemberOfOganization = await prisma.member.findFirst({
+            where: {
+                userId: userId
+            }
+
+        })
+        if (!fetchMemberOfOganization) {
+            return {
+                success: true, data: {
+                    ...usePlan.data,
+                    oganizationId: null,
+                    role: "",
+                    isExpired: true
+                }
+            }
+        }
+        const fetchOganization = await prisma.organization.findFirst({
+            where: {
+                id: fetchMemberOfOganization.organizationId
+            }
+        })
+        if (!fetchOganization) {
+            return {
+                success: true, data: {
+                    ...usePlan.data,
+                    oganizationId: null,
+                    role: "",
+                    isExpired: true
+                }
+            }
+        }
+        const data = JSON.parse(fetchOganization.metadata || "null") as {
+            planType: string;
+            seatLimit: number;
+            isExpired: boolean
+        }|null;
+        return {
+            success: true, data: {
+                ...usePlan.data,
+                oganizationId: fetchOganization.id,
+                role: fetchMemberOfOganization.role,
+                isExpired: data?.isExpired || false
+             
+            }
+        }
+
+
+
+    } catch (error) {
+        console.log(error);
+        return {
+            success: false, data: {
+                planTier: "Free",
+                isActive: false,
+                daysLeft: null,
+                oganizationId: null,
+                role: "",
+                isExpired: true
+            }
+        }
+
+    }
 }
