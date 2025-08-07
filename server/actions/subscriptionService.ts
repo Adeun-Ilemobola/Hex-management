@@ -16,14 +16,23 @@ export interface PlanResultFull {
         planTier: string;
         isActive: boolean;
         daysLeft: number | null;
-        oganizationId: string | null;
-        role: string;
-        isExpired: boolean
+        organizationList?: userOrgMembershipPayload[];
     };
 }
 
+export interface OrganizationMetadata {
+    planType: string;
+    seatLimit: number;
+    isExpired: boolean
+}
+export interface userOrgMembershipPayload {
+    organizationId: string | null;
+    role: string;
+    isExpired: boolean;
+}
 
- async function fetchUserPlan(userId: string): Promise<PlanResult> {
+
+async function fetchUserPlan(userId: string): Promise<PlanResult> {
     try {
         const isActive = await prisma.subscription.findFirst({
             where: {
@@ -32,7 +41,7 @@ export interface PlanResultFull {
 
         })
         const daysLeft = isActive?.currentPeriodEnd ? DateTime.fromJSDate(isActive.currentPeriodEnd).diffNow("days").days : null;
-        const isExpired = daysLeft !== null && daysLeft <= 0;
+        const isExpired = (daysLeft !== null) ? (daysLeft <= 0) : true;
 
         if (isExpired && isActive?.nextStripeSubscriptionId) {
             const stripeSub = await stripe.subscriptions.retrieve(isActive.nextStripeSubscriptionId);
@@ -179,49 +188,45 @@ export interface PlanResultFull {
 export async function fetchUserPlanFull(userId: string): Promise<PlanResultFull> {
     try {
         const usePlan = await fetchUserPlan(userId);
-        const fetchMemberOfOganization = await prisma.member.findFirst({
+        const fetchMemberOfOganization = await prisma.member.findMany({
             where: {
                 userId: userId
             }
 
         })
-        if (!fetchMemberOfOganization) {
-            return {
-                success: true, data: {
-                    ...usePlan.data,
-                    oganizationId: null,
-                    role: "",
+
+        const userOrgMembership: userOrgMembershipPayload[] = await Promise.all(
+            fetchMemberOfOganization.map(async (member) => {
+                const org = await prisma.organization.findFirst({
+                    where: {
+                        id: member.organizationId
+                    }
+                })
+                if (!org) return {
+                    organizationId: null,
+                    role: member.role,
                     isExpired: true
+                };
+                const metadata = JSON.parse(org.metadata || "null") as {
+                    planType: string;
+                    seatLimit: number;
+                    isExpired: boolean
+                } | null;
+                return {
+                    organizationId: org.id,
+                    role: member.role,
+                    isExpired: metadata?.isExpired || true
                 }
-            }
-        }
-        const fetchOganization = await prisma.organization.findFirst({
-            where: {
-                id: fetchMemberOfOganization.organizationId
-            }
-        })
-        if (!fetchOganization) {
-            return {
-                success: true, data: {
-                    ...usePlan.data,
-                    oganizationId: null,
-                    role: "",
-                    isExpired: true
-                }
-            }
-        }
-        const data = JSON.parse(fetchOganization.metadata || "null") as {
-            planType: string;
-            seatLimit: number;
-            isExpired: boolean
-        }|null;
+            })
+        )
+
+
+
         return {
             success: true, data: {
                 ...usePlan.data,
-                oganizationId: fetchOganization.id,
-                role: fetchMemberOfOganization.role,
-                isExpired: data?.isExpired || false
-             
+               organizationList: userOrgMembership,
+
             }
         }
 
@@ -234,9 +239,7 @@ export async function fetchUserPlanFull(userId: string): Promise<PlanResultFull>
                 planTier: "Free",
                 isActive: false,
                 daysLeft: null,
-                oganizationId: null,
-                role: "",
-                isExpired: true
+                organizationList: []
             }
         }
 

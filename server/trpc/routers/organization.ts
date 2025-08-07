@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
+import { OrganizationMetadata } from "@/server/actions/subscriptionService";
+import { sendEmail } from "@/server/actions/sendEmail";
 
 
 
@@ -14,7 +16,7 @@ export const organizationRouter = createTRPCRouter({
                     email: input.email,
                     password: `${input.name}${Math.floor(Math.random() * 1000)}`,
                 }
-                const { response, headers } = await auth.api.signUpEmail({
+                const { response } = await auth.api.signUpEmail({
                     returnHeaders: true,
                     body: newUserbody,
                 })
@@ -35,10 +37,29 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
+                const newEmailSend  = await sendEmail({
+                    templateText:"onboardingFinished",
+                    to: input.email,
+                    params:{
+                        name: input.name,
+                        organizationName: input.name,
+                        email: input.email,
+                        tempPassword: newUserbody.password,
+                        fallbackUrl: `${process.env.NEXTAUTH_URL}/login`
+                    }
+                })
+                if (!newEmailSend.success) {
+                    console.error("Failed to send onboarding email:", newEmailSend.error);
+                    return {
+                        message: "Failed to send onboarding email",
+                        success: false,
+                        value: null
+                    }
+                }
                 return {
                     message: "Successfully onboarded user",
                     success: true,
-                    value: user
+                    value: res
                 }
 
             } catch (error) {
@@ -68,10 +89,7 @@ export const organizationRouter = createTRPCRouter({
                         return {
                             ...org,
                             memberCount: members,
-                            metadata: JSON.parse(org.metadata) as {
-                                planType: string;
-                                seatLimit: number;
-                            }
+                            metadata: JSON.parse(org.metadata) as OrganizationMetadata
                         }
                     })
                 )
