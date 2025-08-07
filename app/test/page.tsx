@@ -1,28 +1,146 @@
 "use client"
-import ChatBox from '@/components/(ChatFragments)/ChatBox';
-import ChatSend from '@/components/(ChatFragments)/ChatSend';
-import { DatePicker } from '@/components/date-picker';
+import { Button } from '@/components/ui/button';
+import { authClient } from '@/lib/auth-client';
+import { sendEmail } from '@/server/actions/sendEmail';
+import { useMutation } from '@tanstack/react-query'
+// import ChatBox from '@/components/(ChatFragments)/ChatBox';
+// import ChatSend from '@/components/(ChatFragments)/ChatSend';
+// import { DatePicker } from '@/components/date-picker';
 
-import {  FileUploadResult } from '@/lib/utils';
-import React, { useState } from 'react'
+// import {  FileUploadResult } from '@/lib/utils';
+import { toast } from 'sonner';
 
 // Fake data for all tiers
 
-
+const email = "adeun2020@gmail.com"
 
 export default function Page() {
+  const VerifyEmail = useMutation({
+    mutationFn: async () => await sendEmail({
+      templateText: "VerifyEmail",
+      to: email,
+      params: {
+        verifyUrl: "https://google.com"
+      }
+    }),
+    onSuccess: (data) => {
+      console.log("Email sent successfully:", data);
+      toast.success("Email sent successfully!" , {id: "email-VerifyEmail"});
+    },
+    onError: (error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email", {id: "email-VerifyEmail"});
+    }
+  
+  });
+
+  const ResetPassword = useMutation({
+    mutationFn: async () => await sendEmail({
+      templateText: "ResetPassword",
+      to: email,
+      params: {
+        resetUrl: "https://google.com"
+      }
+    }),
+    onSuccess: (data) => {
+      console.log("Email sent successfully:", data);
+      toast.success("Email sent successfully!" , {id: "email-ResetPassword"});
+    },
+    onError: (error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email", {id: "email-ResetPassword"});
+    }
+  });
+
+  const WelcomeEmail = useMutation({
+    mutationFn: async () => await sendEmail({
+      templateText: "Welcome",
+      to: email,
+      params: {
+       userName: "Adekunle",
+      }
+    }),
+    onSuccess: (data) => {
+      console.log("Email sent successfully:", data);
+      toast.success("Email sent successfully!" , {id: "email-WelcomeEmail"});
+    },
+    onError: (error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email", {id: "email-WelcomeEmail"});
+    }
+  });
 
 
-  const [message, setMessage] = useState<{ message: string, file: FileUploadResult[] }[]>([]);
-  const [data, setData] = useState(new Date().toISOString());
+  const VerifyExternalInvestor = useMutation({
+    mutationFn: async () => await sendEmail({
+      templateText: "VerifyExternalInvestor",
+      to: email,
+      params: {
+       name: "Adekunle",
+       organizationName: "Adekunle's Org",
+       propertyName: "Adekunle's Property",
+       propertyLink: "https://google.com",
+       email: "adeun2020@gmail.com",
+       DollarValueReturn: 1000,
+       verificationLink: "https://google.com",
+       contributionPercent: 10
+      }
+    }),
+    onSuccess: (data) => {
+      console.log("Email sent successfully:", data);
+      toast.success("Email sent successfully!" , {id: "email-VerifyExternalInvestor"});
+    },
+    onError: (error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email", {id: "email-VerifyExternalInvestor"});
+    }
+  });
+
+
+  const onboardingFinished = useMutation({
+    mutationFn: async () => await sendEmail({
+      templateText: "onboardingFinished",
+      to: email,
+      params: {
+        name: "Adekunle",
+        organizationName: "Adekunle's Org",
+        email: "adeun2020@gmail.com",
+        fallbackUrl: "https://google.com",
+        tempPassword: "password"
+      }
+    }),
+    onSuccess: (data) => {
+      console.log("Email sent successfully:", data);
+      toast.success("Email sent successfully!" , {id: "email-onboardingFinished"});
+    },
+    onError: (error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email", {id: "email-onboardingFinished"});
+    }
+  });
+
+
+
+
+  // const [message, setMessage] = useState<{ message: string, file: FileUploadResult[] }[]>([]);
+  // const [data, setData] = useState(new Date().toISOString());
 
 
 
   return (
     <div className='relative flex flex-col gap-4 p-9  min-h-screen  overflow-hidden'>
 
+      <div className='flex flex-row  gap-6 items-center justify-center'>
+        <Button size={"lg"} onClick={() => VerifyEmail.mutate()}>Send Verify Email</Button>
+        <Button size={"lg"} onClick={() => ResetPassword.mutate()}>Send Reset Password Email</Button>
+        <Button size={"lg"} onClick={() => WelcomeEmail.mutate()}>Send Welcome Email</Button>
+        <Button size={"lg"} onClick={() => VerifyExternalInvestor.mutate()}>Send Verify External Investor Email</Button>
+        <Button size={"lg"} onClick={() => onboardingFinished.mutate()}>Send Onboarding Finished Email</Button>
 
-      <div className='flex flex-col gap-4 w-64'>
+      </div>
+
+
+      {/* <div className='flex flex-col gap-4 w-64'>
         {message.map((data, index) => (
           <ChatBox key={index} id={data.message} text={data.message} img={data.file} />
         ))}
@@ -38,7 +156,7 @@ export default function Page() {
       }} />
 
 
-      <DatePicker value={data} onChange={setData} />
+      <DatePicker value={data} onChange={setData} /> */}
 
       {/* <Button onClick={() => handleImageUrlsChange()}>Click</Button>
 <CustomSVG size={40} className="fill-transparent stroke-blue-800 stroke-2" />

@@ -1,5 +1,5 @@
 import { DollarSign, Edit2, Mail, TrendingUp, User, Users, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
 import { toast } from 'sonner';
@@ -20,9 +20,10 @@ interface propertyIFProps {
     mebers: ExternalInvestorInput[];
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
 }
-export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
+    const [maxContribution, setMaxContribution] = useState(0)
 
     const [mode, setMode] = useState<"edit" | "add">("add")
     // const updateExternalInvestorMut = api.Propertie.updataExternalInvestor.useMutation({
@@ -39,11 +40,22 @@ export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFP
     //         }
     //     }
     // })
+    useEffect(() => {
+        // Calculate the maximum contribution percentage based on existing members
+        const totalContribution = mebers.reduce((acc, member) => acc + member.contributionPercentage, 0);
+        setMaxContribution(100 - totalContribution);
+    }, [mebers]);
+    console.log(maxContribution);
+    
 
-   
+
 
 
     const addNewInvestor = () => {
+        if (maxContribution == 0) {
+            toast.error("Maximum contribution percentage reached. Cannot add more investors.");
+            return;
+        }
         const newInvestor: ExternalInvestorInput = {
             name: "",
             email: "",
@@ -63,6 +75,11 @@ export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFP
 
     function SubmintInvestors() {
         // add the new investor to the list
+        if (maxContribution == 0) {
+            toast.error("Maximum contribution percentage reached. Cannot add more investors.");
+            return;
+        }
+
         const vInvestor = externalInvestorSchema.safeParse(investor)
 
         if (!vInvestor.success) {
@@ -115,7 +132,10 @@ export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFP
                         size="sm"
                         className="text-sm font-medium"
                         onClick={() => {
-                            console.log('add investors')
+                            if (maxContribution == 100) {
+                                toast.error("Maximum contribution percentage reached. Cannot add more investors.");
+                                return;
+                            }
                             addNewInvestor()
 
                         }}
@@ -148,6 +168,7 @@ export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFP
                     </div>
                 ) : (
                     <EmptyState onAddInvestor={() => {
+
                         addNewInvestor()
                         setShowInvestorMod(true)
 
@@ -164,6 +185,7 @@ export default function PoolInvestorsSection({ mebers, setMebers  }: propertyIFP
                     setShowInvestorMod={setShowInvestorMod}
                     mode={mode}
                     onSubmit={SubmintInvestors}
+                    maxContribution={maxContribution}
 
                 />
             )}
@@ -296,12 +318,13 @@ interface InvestorConfigProps {
     setShowInvestorMod: React.Dispatch<React.SetStateAction<boolean>>;
     mode: "edit" | "add",
     onSubmit: () => void;
+    maxContribution: number; //  prop to limit contribution percentage 
 
 }
 
 
 
-function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvestorMod, mode, onSubmit }: InvestorConfigProps) {
+function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvestorMod, mode, onSubmit, maxContribution }: InvestorConfigProps) {
 
     return (
         <Dialog open={showInvestorMod} onOpenChange={setShowInvestorMod} >
@@ -333,26 +356,28 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                         label="Contribution Percentage"
                         value={investor.contributionPercentage}
                         setValue={(e) => setInvestor({ ...investor, contributionPercentage: e })}
+                        max={maxContribution}
+                        min={0}
                     />
 
 
 
                 </div>
-                 <DialogFooter className='flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
-                <Button
-                    variant="outline"
-                    onClick={() => {
-                        onSubmit();
+                <DialogFooter className='flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            onSubmit();
 
-                    }}
-                >
+                        }}
+                    >
 
-                    {mode === "edit" ? "Save Changes" : "Add Investor"}
-                </Button>
+                        {mode === "edit" ? "Save Changes" : "Add Investor"}
+                    </Button>
 
-            </DialogFooter>
+                </DialogFooter>
             </DialogContent>
-           
+
 
         </Dialog>
     )

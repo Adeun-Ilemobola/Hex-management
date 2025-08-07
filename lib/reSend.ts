@@ -408,7 +408,7 @@ function onboardingFinish(
   fallbackUrl: string
 ): { subject: string; html: string } {
   return {
-    subject: "Onboarding Complete",
+    subject: "🚀 Welcome to Your New Fintech Journey",
     html: `
     <!DOCTYPE html>
 <html lang="en">
@@ -417,66 +417,132 @@ function onboardingFinish(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
+      .dark-container { 
+        background: rgba(17, 24, 39, 0.9) !important; 
+        border-color: rgba(55, 65, 81, 0.8) !important;
+      }
+      .dark-glass { 
+        background: rgba(31, 41, 55, 0.8) !important; 
+        border-color: rgba(75, 85, 99, 0.6) !important; 
+      }
+      .dark-text { color: #f9fafb !important; }
+      .dark-muted { color: #d1d5db !important; }
+      .dark-border { border-color: rgba(75, 85, 99, 0.4) !important; }
+      .dark-notice { background: rgba(34, 197, 94, 0.15) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: #3b82f6;
+    }
+    
+    .glass-container {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-inner {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+    }
+    
+    .gradient-button {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      border-radius: 50px;
+      padding: 16px 40px;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+    }
+    
+    .blob-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(253, 230, 138, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 70%, rgba(236, 72, 153, 0.4) 0%, transparent 50%);
+      border-radius: 24px;
+      overflow: hidden;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f0f4f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6;">
+<body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fce7f3 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; min-height: 100vh;" class="dark-mode">
   
-  <!-- Main Container Table -->
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0f4f8;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: transparent;">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
+      <td align="center" style="padding: 60px 20px;">
         
-        <!-- Email Content Container -->
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: rgba(255, 255, 255, 0.85); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.6); position: relative; overflow: hidden;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; position: relative;" class="glass-container dark-container">
           
-          <!-- Decorative Background Blob 1 -->
           <tr>
-            <td style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJibG9iMSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZkZTY4YSIgc3RvcC1vcGFjaXR5PSIwLjYiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZGE0YWYiIHN0b3Atb3BhY2l0eT0iMC42Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSIxMDAiIGZpbGw9InVybCgjYmxvYjEpIi8+PC9zdmc+'); background-size: cover; opacity: 0.6; pointer-events: none;"></td>
+            <td style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
+              <div class="blob-bg"></div>
+            </td>
           </tr>
           
-          <!-- Main Content -->
           <tr>
-            <td style="padding: 60px 40px; position: relative; z-index: 1;">
+            <td style="padding: 80px 50px; position: relative; z-index: 10;">
               
-              <!-- Header -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <h1 style="margin: 0; font-size: 42px; font-weight: 800; line-height: 1.1; background-image: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #3b82f6;">
-                      Welcome to ${organizationName}!
+                  <td align="center" style="padding-bottom: 40px;">
+                    <h1 style="margin: 0; font-size: 56px; font-weight: 900; line-height: 0.9; letter-spacing: -0.02em;" class="gradient-text">
+                      Welcome Aboard!
                     </h1>
+                    <h2 style="margin: 16px 0 0 0; font-size: 28px; font-weight: 800; color: #374151;" class="dark-muted">
+                      ${organizationName}
+                    </h2>
                   </td>
                 </tr>
               </table>
               
-              <!-- Greeting -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="padding-bottom: 24px;">
-                    <p style="margin: 0; font-size: 18px; font-weight: 600; color: #374151;">
-                      Hi ${name},
+                  <td style="padding-bottom: 32px; text-align: center;">
+                    <p style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937;" class="dark-text">
+                      Hey ${name}! 👋
+                    </p>
+                    <p style="margin: 16px 0 0 0; font-size: 18px; color: #6b7280;" class="dark-muted">
+                      Your fintech journey starts here. Let's get you signed in!
                     </p>
                   </td>
                 </tr>
               </table>
               
-              <!-- Glass Effect Credentials Container -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: rgba(255, 255, 255, 0.6); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.8); margin-bottom: 32px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" class="glass-inner dark-glass" style="margin-bottom: 40px;">
                 <tr>
-                  <td style="padding: 24px;">
-                    <p style="margin: 0 0 16px 0; font-size: 16px; color: #374151; font-weight: 500;">
-                      You can sign in using the following credentials:
+                  <td style="padding: 32px;">
+                    <p style="margin: 0 0 24px 0; font-size: 20px; color: #374151; font-weight: 700; text-align: center;" class="dark-text">
+                      🔐 Your Access Credentials
                     </p>
+                    
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                       <tr>
-                        <td style="padding-bottom: 8px;">
-                          <span style="font-weight: 700; color: #374151; font-size: 16px;">Email: </span>
-                          <span style="font-weight: 700; background-image: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #3b82f6; font-size: 16px;">${email}</span>
+                        <td style="padding: 16px 0; border-bottom: 1px solid rgba(156, 163, 175, 0.2);" class="dark-border">
+                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted">EMAIL</div>
+                          <div style="font-size: 18px; font-weight: 800;" class="gradient-text">${email}</div>
                         </td>
                       </tr>
                       <tr>
-                        <td>
-                          <span style="font-weight: 700; color: #374151; font-size: 16px;">Password: </span>
-                          <span style="font-weight: 700; background-image: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #3b82f6; font-size: 16px;">${tempPassword}</span>
+                        <td style="padding: 16px 0;">
+                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted">TEMPORARY PASSWORD</div>
+                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">${tempPassword}</div>
                         </td>
                       </tr>
                     </table>
@@ -484,72 +550,49 @@ function onboardingFinish(
                 </tr>
               </table>
               
-              <!-- CTA Button -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td align="center" style="padding-bottom: 32px;">
+                  <td align="center" style="padding-bottom: 40px;">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${fallbackUrl}" style="height:48px;v-text-anchor:middle;width:140px;" arcsize="50%" strokecolor="#3b82f6" fillcolor="#3b82f6">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${fallbackUrl}" style="height:56px;v-text-anchor:middle;width:240px;" arcsize="50%" fillcolor="#3b82f6">
                       <w:anchorlock/>
-                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:600;">Sign In</center>
+                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:18px;font-weight:700;">🚀 Launch Dashboard</center>
                     </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
-                    <a href="${fallbackUrl}" style="display: inline-block; padding: 14px 32px; background-image: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); background-color: #3b82f6; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 50px; border: none; text-align: center; line-height: 1.2;">
-                      Sign In
+                    <a href="${fallbackUrl}" class="gradient-button">
+                      🚀 Launch Dashboard
                     </a>
                     <!--<![endif]-->
                   </td>
                 </tr>
               </table>
               
-              <!-- Footer Note -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="border-top: 1px solid rgba(156, 163, 175, 0.3); padding-top: 24px;">
-                    <p style="margin: 0; font-size: 14px; color: #6b7280; text-align: center;">
-                      Please verify your email after signing in to access all features.
-                    </p>
+                  <td style="border-top: 1px solid rgba(156, 163, 175, 0.2); padding-top: 32px;" class="dark-border">
+                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 20px; text-align: center;" class="dark-notice">
+                      <p style="margin: 0; font-size: 16px; color: #059669; font-weight: 600;" class="dark-muted">
+                        🔒 <strong>Security First:</strong> Please update your password and verify your email after signing in for enhanced protection.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               </table>
               
             </td>
           </tr>
-          
-          <!-- Decorative Background Blob 2 -->
-          <tr>
-            <td style="position: absolute; bottom: -50px; right: -50px; width: 200px; height: 200px; background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJibG9iMiIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2E1YjRmYyIgc3RvcC1vcGFjaXR5PSIwLjYiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2ZWU3YjciIHN0b3Atb3BhY2l0eT0iMC42Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSIxMDAiIGZpbGw9InVybCgjYmxvYjIpIi8+PC9zdmc+'); background-size: cover; opacity: 0.6; pointer-events: none;"></td>
-          </tr>
-          
         </table>
         
       </td>
     </tr>
   </table>
-  
-  <!-- Dark Mode Styles -->
-  <div style="display: none; max-height: 0; overflow: hidden;">
-    [if !mso]><!-->
-    <div style="display: none; max-height: 0; overflow: hidden;">
-      @media (prefers-color-scheme: dark) {
-        .dark-bg { background-color: #1a1a1a !important; }
-        .dark-container { background-color: rgba(31, 41, 55, 0.85) !important; border-color: rgba(75, 85, 99, 0.6) !important; }
-        .dark-text { color: #f3f4f6 !important; }
-        .dark-muted { color: #9ca3af !important; }
-      }
-    </div>
-    <!--<![endif]
-  </div>
 
 </body>
 </html>
     `.trim()
   };
 }
-
-
-
 
 export type TemplateType = | 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished'
 export interface TemplateParamMap {

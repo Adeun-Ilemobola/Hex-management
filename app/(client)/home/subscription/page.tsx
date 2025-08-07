@@ -67,7 +67,7 @@ export default function SubscriptionPage() {
     if (getUserPlan.data) {
       console.log(getUserPlan.data);
 
-      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.value === getUserPlan.data.data.planTier) })));
+      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.tier === getUserPlan.data.data.planTier) })));
     }
 
 
@@ -79,6 +79,7 @@ export default function SubscriptionPage() {
 
   const isPending = sessionLoading || subscriptionMutation.isPending || getUserPlan.isPending || getUserPlan.isFetching;
 
+  
   return (
     <DropBack is={isPending}>
       <div className="container mx-auto px-6 py-16">

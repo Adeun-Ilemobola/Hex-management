@@ -125,7 +125,18 @@ export default function PropertyModification() {
             }
         }
     }
-    console.log(sub);
+    function handleSSubscriptionRequirement() {
+    const  tier  = sub.planTier
+    if (tier === 'Free') {
+      return 5
+    } else if (tier === 'Deluxe') {
+      return 35
+    } else if (tier === 'Premium') {
+      return 100
+    }
+    return 5;
+  }
+
 
     const isSubscribed = sub.isActive && sub.planTier !== "free" || sub.planTier !== "Free"
     return (
@@ -178,6 +189,8 @@ export default function PropertyModification() {
                                                         RemoveImage({ id, supabaseID });
                                                     }
                                                 }}
+                                                maxImg={ handleSSubscriptionRequirement() }
+                                                
                                             />
                                         </div>
 
