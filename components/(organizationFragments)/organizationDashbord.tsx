@@ -1,5 +1,5 @@
 'use client'
-import React, { use, useEffect } from 'react'
+import React, {  useEffect } from 'react'
 import { Nav } from '../Nav'
 import { authClient } from '@/lib/auth-client'
 import { Badge } from '@/components/ui/badge';
