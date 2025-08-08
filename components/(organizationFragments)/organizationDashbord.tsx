@@ -2,17 +2,27 @@
 import React, { use, useEffect } from 'react'
 import { Nav } from '../Nav'
 import { authClient } from '@/lib/auth-client'
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Users, Shield, Clock, CheckCircle2, XCircle, Building2, Crown, User } from 'lucide-react';
-
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogOverlay,
+    DialogFooter
+} from "@/components/ui/dialog"
 import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/trpc'
 import { InvitationStatus } from 'better-auth/plugins'
 import { Button } from '../ui/button';
-import InputBox from '../InputBox';
+import InputBox, { SelectorBox } from '../InputBox';
+import DropBack from '../DropBack';
+import { z } from 'zod';
+import { toast } from 'sonner';
 
 type invitations = {
     id: string;
@@ -58,9 +68,10 @@ export default function OrganizationDashbord() {
     const searchParams = useSearchParams()
     const OrgId = searchParams.get('id')
     const slug = searchParams.get('slug')
-    const { data: getOrganization } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
+    const { data: getOrganization, isPending ,refetch } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
     const [organization, setOrganization] = React.useState<XOrganization | null>(null)
     const { data } = authClient.useSession()
+    const [AddMemberDialogOpen, setAddMemberDialogOpen] = React.useState(false)
 
     useEffect(() => {
         const info = getOrganization?.value
@@ -102,6 +113,7 @@ export default function OrganizationDashbord() {
         }
     }, [getOrganization])
 
+
     const T = `
      bg-white/98
   backdrop-blur-[20px]
@@ -124,8 +136,9 @@ export default function OrganizationDashbord() {
     `
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 relative">
-            <style jsx>{`
+        <DropBack is={isPending} >
+            <div className="min-h-screen relative">
+                <style jsx>{`
                 @keyframes float {
                     0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
                     33% { transform: translate3d(20px, -20px, 0) rotate(120deg); }
@@ -145,228 +158,351 @@ export default function OrganizationDashbord() {
                 }
              
             `}</style>
+                <Nav session={data} SignOut={() => authClient.signOut()} />
 
-            {/* Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="blob-1 absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-r from-blue-200/30 to-purple-200/30 dark:from-blue-500/20 dark:to-purple-500/20 rounded-full blur-3xl"></div>
-                <div className="blob-2 absolute bottom-0 -left-32 w-80 h-80 bg-gradient-to-r from-purple-200/25 to-pink-200/25 dark:from-purple-500/15 dark:to-pink-500/15 rounded-full blur-3xl"></div>
-                <div className="absolute top-1/3 left-1/2 w-56 h-56 bg-gradient-to-r from-sky-100/20 to-blue-100/20 dark:from-sky-500/10 dark:to-blue-500/10 rounded-full blur-2xl"></div>
-            </div>
-
-            <Nav session={data} SignOut={() => authClient.signOut()} />
-
-            <main className="relative z-10 max-w-6xl mx-auto px-6 py-8">
-                {organization && (
-                    <div className="space-y-8">
-                        {/* Header */}
-                        <div className={" rounded-3xl p-8" + " " + G}>
-                            <div className="flex items-center gap-6">
-                                <div className="relative">
-                                    {organization.logo ? (
-                                        <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-700">
-                                            <img src={organization.logo} alt="" className="w-full h-full object-cover" />
-                                        </div>
-                                    ) : (
-                                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-600 to-gray-800 dark:from-gray-400 dark:to-gray-600 flex items-center justify-center shadow-xl">
-                                            <Building2 className="w-10 h-10 text-white" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white leading-tight">{organization.name}</h1>
-                                    <p className="text-gray-600 dark:text-gray-300 mt-1 text-lg">Organization Management</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className={"rounded-3xl p-6" + " " + G}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg">
-                                        <Shield className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Plan</p>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{organization.metadata.planType}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={"rounded-3xl p-6" + " " + G}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg">
-                                        <Users className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Seats</p>
-                                        <p className="text-2xl  font-bold text-gray-900 dark:text-white">{organization.members?.length}/{organization.metadata.seatLimit}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={"rounded-3xl p-6" + " " + G}>
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${organization.metadata.isExpired
-                                        ? 'bg-gradient-to-br from-red-500 to-rose-600'
-                                        : 'bg-gradient-to-br from-emerald-500 to-green-600'
-                                        }`}>
-                                        {organization.metadata.isExpired ? (
-                                            <XCircle className="w-6 h-6 text-white" />
+                <main className="relative z-10 max-w-6xl mx-auto px-6 py-8">
+                    {organization && (
+                        <div className="space-y-8">
+                            {/* Header */}
+                            <div className={" rounded-3xl p-8" + " " + G}>
+                                <div className="flex items-center gap-6">
+                                    <div className="relative">
+                                        {organization.logo ? (
+                                            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-xl ring-1 ring-gray-200 dark:ring-gray-700">
+                                                <img src={organization.logo} alt="" className="w-full h-full object-cover" />
+                                            </div>
                                         ) : (
-                                            <CheckCircle2 className="w-6 h-6 text-white" />
+                                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-600 to-gray-800 dark:from-gray-400 dark:to-gray-600 flex items-center justify-center shadow-xl">
+                                                <Building2 className="w-10 h-10 text-white" />
+                                            </div>
                                         )}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Status</p>
-                                        <p className={`text-2xl font-bold ${organization.metadata.isExpired
-                                            ? 'text-red-600 dark:text-red-400'
-                                            : 'text-emerald-600 dark:text-emerald-400'
+                                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white leading-tight">{organization.name}</h1>
+                                        <p className="text-gray-600 dark:text-gray-300 mt-1 text-lg">Organization Management</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className={"rounded-3xl p-6" + " " + G}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg">
+                                            <Shield className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Plan</p>
+                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{organization.metadata.planType}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={"rounded-3xl p-6" + " " + G}>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg">
+                                            <Users className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Seats</p>
+                                            <p className="text-2xl  font-bold text-gray-900 dark:text-white">{organization.members?.length}/{organization.metadata.seatLimit}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={"rounded-3xl p-6" + " " + G}>
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${organization.metadata.isExpired
+                                            ? 'bg-gradient-to-br from-red-500 to-rose-600'
+                                            : 'bg-gradient-to-br from-emerald-500 to-green-600'
                                             }`}>
-                                            {organization.metadata.isExpired ? 'Expired' : 'Active'}
-                                        </p>
+                                            {organization.metadata.isExpired ? (
+                                                <XCircle className="w-6 h-6 text-white" />
+                                            ) : (
+                                                <CheckCircle2 className="w-6 h-6 text-white" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Status</p>
+                                            <p className={`text-2xl font-bold ${organization.metadata.isExpired
+                                                ? 'text-red-600 dark:text-red-400'
+                                                : 'text-emerald-600 dark:text-emerald-400'
+                                                }`}>
+                                                {organization.metadata.isExpired ? 'Expired' : 'Active'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Members Section */}
-                        <div>
-                            <div className="mb-6">
-                                <h2 className="text-3xl font-bold gradient-text">Team Members</h2>
-                                <p className="text-gray-600 dark:text-slate-300 mt-2">Active members in your organization</p>
-                            </div>
-
-                            <div className={" rounded-3xl p-6" + " " + T}>
-                                <div className="mb-1 w-full flex flex-row items-center gap-4 ">
-                                    <InputBox
-                                        placeholder="Invite member by email"
-                                        className="ml-auto"
-                                        onChange={(e) => console.log(e)}
-                                        type="email"
-                                       value=''
-                                    
-                                    />
-                                    <Button className=' ' variant="outline">Invite Member</Button>
+                            {/* Members Section */}
+                            <div>
+                                <div className="mb-6">
+                                    <h2 className="text-3xl font-bold gradient-text">Team Members</h2>
+                                    <p className="text-gray-600 dark:text-slate-300 mt-2">Active members in your organization</p>
                                 </div>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="border-gray-200 dark:border-slate-600">
-                                            <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Member</TableHead>
-                                            <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Role</TableHead>
-                                            <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Joined</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {organization.members?.map((member) => (
-                                            <TableRow key={member.id} className="border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
-                                                <TableCell className="py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-10 w-10 shadow-lg ring-2 ring-white/50 dark:ring-slate-600/50">
-                                                            <AvatarImage src={member.user.image} />
-                                                            <AvatarFallback className="font-semibold bg-gradient-to-br from-gray-500 to-gray-700 text-white">
-                                                                {member.user.name?.[0]}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="font-semibold text-gray-900 dark:text-slate-100">{member.user.name}</p>
-                                                                {member.role === 'owner' && <Crown className="w-4 h-4 text-amber-500" />}
-                                                            </div>
-                                                            <p className="text-sm text-gray-500 dark:text-slate-400">{member.user.email}</p>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className={`font-medium px-3 py-1 rounded-full ${member.role === 'owner' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' :
-                                                            member.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200' :
-                                                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200'
-                                                            }`}
-                                                    >
-                                                        {member.role}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <p className="text-sm text-gray-600 dark:text-slate-300">
-                                                        {member.createdAt.toLocaleDateString()}
-                                                    </p>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
 
-                        {/* Invitations Section */}
-                        <div>
-                            <div className="mb-6">
-                                <h2 className="text-3xl font-bold gradient-text">Pending Invitations</h2>
-                                <p className="text-gray-600 dark:text-slate-300 mt-2">Outstanding invitations to join your organization</p>
-                            </div>
+                                <div className={" rounded-3xl p-6" + " " + T}>
+                                    <div className="mb-1 w-full flex flex-row items-center gap-4 ">
+                                        <InputBox
+                                            placeholder="Invite member by email"
+                                            className="ml-auto"
+                                            onChange={(e) => console.log(e)}
+                                            type="email"
+                                            value=''
 
-                            <div className={" rounded-3xl p-6" + " " + T}>
-                                {organization.invitations?.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <Clock className="w-12 h-12 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
-                                        <p className="text-gray-500 dark:text-slate-400">No pending invitations</p>
+                                        />
+                                        <Button
+                                        variant={"ghost"}
+                                            onClick={() => {
+                                                // Handle invite member logic here
+                                                setAddMemberDialogOpen(true)
+                                            }}
+                                        >Invite Member</Button>
                                     </div>
-                                ) : (
                                     <Table>
                                         <TableHeader>
                                             <TableRow className="border-gray-200 dark:border-slate-600">
-                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Email</TableHead>
+                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Member</TableHead>
                                                 <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Role</TableHead>
-                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Status</TableHead>
-                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Expires</TableHead>
+                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Joined</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {organization.invitations?.map((invite) => (
-                                                <TableRow key={invite.id} className="border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                                            {organization.members?.map((member) => (
+                                                <TableRow key={member.id} className="border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
                                                     <TableCell className="py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center shadow-lg">
-                                                                <User className="w-5 h-5 text-white" />
+                                                            <Avatar className="h-10 w-10 shadow-lg ring-2 ring-white/50 dark:ring-slate-600/50">
+                                                                <AvatarImage src={member.user.image} />
+                                                                <AvatarFallback className="font-semibold bg-gradient-to-br from-gray-500 to-gray-700 text-white">
+                                                                    {member.user.name?.[0]}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="font-semibold text-gray-900 dark:text-slate-100">{member.user.name}</p>
+                                                                    {member.role === 'owner' && <Crown className="w-4 h-4 text-amber-500" />}
+                                                                </div>
+                                                                <p className="text-sm text-gray-500 dark:text-slate-400">{member.user.email}</p>
                                                             </div>
-                                                            <p className="font-medium text-gray-900 dark:text-slate-100">{invite.email}</p>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge
-                                                            variant="outline"
-                                                            className="font-medium px-3 py-1 rounded-full border-gray-300 dark:border-slate-500 text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800"
-                                                        >
-                                                            {invite.role}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge
-                                                            className={`font-medium px-3 py-1 rounded-full ${invite.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200' :
-                                                                invite.status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200' :
-                                                                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
+                                                            variant="secondary"
+                                                            className={`font-medium px-3 py-1 rounded-full ${member.role === 'owner' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' :
+                                                                member.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200' :
+                                                                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200'
                                                                 }`}
                                                         >
-                                                            {invite.status}
+                                                            {member.role}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
                                                         <p className="text-sm text-gray-600 dark:text-slate-300">
-                                                            {invite.expiresAt.toLocaleDateString()}
+                                                            {member.createdAt.toLocaleDateString()}
                                                         </p>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
                                     </Table>
-                                )}
+                                </div>
                             </div>
+
+                            {/* Invitations Section */}
+                            <div>
+                                <div className="mb-6">
+                                    <h2 className="text-3xl font-bold gradient-text">Pending Invitations</h2>
+                                    <p className="text-gray-600 dark:text-slate-300 mt-2">Outstanding invitations to join your organization</p>
+                                </div>
+
+                                <div className={" rounded-3xl p-6" + " " + T}>
+                                    {organization.invitations?.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <Clock className="w-12 h-12 text-gray-400 dark:text-slate-500 mx-auto mb-4" />
+                                            <p className="text-gray-500 dark:text-slate-400">No pending invitations</p>
+                                        </div>
+                                    ) : (
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="border-gray-200 dark:border-slate-600">
+                                                    <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Email</TableHead>
+                                                    <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Role</TableHead>
+                                                    <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Status</TableHead>
+                                                    <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Expires</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {organization.invitations?.map((invite) => (
+                                                    <TableRow key={invite.id} className="border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                                                        <TableCell className="py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center shadow-lg">
+                                                                    <User className="w-5 h-5 text-white" />
+                                                                </div>
+                                                                <p className="font-medium text-gray-900 dark:text-slate-100">{invite.email}</p>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="font-medium px-3 py-1 rounded-full border-gray-300 dark:border-slate-500 text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800"
+                                                            >
+                                                                {invite.role}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                className={`font-medium px-3 py-1 rounded-full ${invite.status === 'pending' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200' :
+                                                                    invite.status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200' :
+                                                                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
+                                                                    }`}
+                                                            >
+                                                                {invite.status}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <p className="text-sm text-gray-600 dark:text-slate-300">
+                                                                {invite.expiresAt.toLocaleDateString()}
+                                                            </p>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    )}
+                                </div>
+                            </div>
+                            <AddMemberDialog
+                                isOpen={AddMemberDialogOpen}
+                                onClose={(d) => setAddMemberDialogOpen(d)}
+                                organizationId={organization.id}
+                                reLoadData={() => {
+                                    // Reload the data here
+                                    refetch();
+                                }}
+                            />
                         </div>
-                    </div>
-                )}
-            </main>
-        </div>
+
+                    )}
+                </main>
+            </div>
+
+        </DropBack>
     );
+}
+
+interface AddMemberDialogProps {
+    isOpen: boolean;
+    onClose: (value: boolean) => void;
+    organizationId: string;
+    reLoadData: () => void;
+}
+
+function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMemberDialogProps) {
+
+    const zNewMember = z.object({
+        email: z.string().email(),
+        role: z.enum(["member", "admin", "owner"]),
+        name: z.string().min(1, "Name is required"),
+    });
+    const [formData, setFormData] = React.useState({
+        email: '',
+        role: 'member',
+        name: ''
+    });
+
+    const onboardUser = api.organization.onboardUserToOrg.useMutation({
+        onMutate() {
+            toast.loading('Adding member...', { id: 'add-member' });
+        },
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message, { id: 'add-member' });
+                onClose(false);
+                reLoadData();
+            } else {
+                toast.error(data.message, { id: 'add-member' });
+            }
+        },
+        onError(error) {
+            toast.error(error.message || 'Failed to add member.', { id: 'add-member' });
+            console.log(error);
+        }
+    });
+
+
+    function handleAddMember() {
+        const validation = zNewMember.safeParse(formData);
+        if (!validation.success) {
+            if (validation.error.errors) {
+                validation.error.errors.forEach(error => {
+                    toast.error(error.message, { id: 'add-member' });
+                });
+            }
+            return;
+        }
+        onboardUser.mutate({
+            name: formData.name,
+            email: formData.email,
+            organizationId,
+            role: formData.role as "member" | "admin" | "owner"
+        });
+
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogOverlay className="fixed inset-0 min-h-screen backdrop-blur-md bg-fuchsia-400/30 dark:bg-fuchsia-900/30 " />
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add New Member</DialogTitle>
+                    <DialogDescription>
+                        Please enter the email address of the new member you want to add.
+                    </DialogDescription>
+                </DialogHeader>
+
+
+                <div className='flex flex-col  gap-5'>
+                    <InputBox
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e })}
+                        placeholder='Email address'
+                        label="Email"
+                        disabled={onboardUser.isPending}
+                    />
+                    <InputBox
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e })}
+                        placeholder='Name'
+                        label="Name"
+                        disabled={onboardUser.isPending}
+                    />
+                    <SelectorBox
+                        value={formData.role}
+                        setValue={(e) => setFormData({ ...formData, role: e })}
+                        options={[
+                            { value: 'member', label: 'Member' },
+                            { value: 'admin', label: 'Admin' },
+                            { value: 'owner', label: 'Owner' },
+                        ]}
+                        label="Role"
+                        ClassName="w-full"
+                        isDisable={onboardUser.isPending}
+                    />
+
+
+                </div>
+
+                <DialogFooter >
+                    <Button disabled={onboardUser.isPending} onClick={handleAddMember} className='ml-auto'>
+                       {onboardUser.isPending ? 'Adding...' : 'Add Member'}
+                        </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+
 }

@@ -9,25 +9,32 @@ import { XOrganization } from "@/components/(organizationFragments)/organization
 
 export const organizationRouter = createTRPCRouter({
 
-    onboardUserToOrg: protectedProcedure.input(z.object({ name: z.string(), email: z.string(), organizationId: z.string() }))
+    onboardUserToOrg: protectedProcedure.input(z.object({ name: z.string(), email: z.string(), organizationId: z.string()  ,  role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
             try {
+                let userId = ""
                 const newUserbody = {
                     name: input.name,
                     email: input.email,
                     password: `${input.name}${Math.floor(Math.random() * 1000)}`,
                 }
-                const { response } = await auth.api.signUpEmail({
-                    returnHeaders: true,
-                    body: newUserbody,
-                })
-                const { user } = response;
+                const userExists = await  ctx.prisma.user.findUnique({ where: { email: input.email } })
+                if (userExists) {
+                    userId = userExists.id
+                } else {
+                    const { response } = await auth.api.signUpEmail({
+                        returnHeaders: true,
+                        body: newUserbody,
+                    })
+                    const { user } = response;
+                    userId = user.id
+                }
 
                 const res = await auth.api.addMember({
                     body: {
-                        userId: user.id,
+                        userId: userId,
                         organizationId: input.organizationId,
-                        role: ["member"]
+                        role: input.role
                     }
                 })
 
