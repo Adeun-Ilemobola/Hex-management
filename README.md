@@ -1,5 +1,5 @@
 
-````md
+
 # 🏠 Hex Management
 
 **Hex Management** is a modern real estate management platform built with **Next.js**, **Prisma**, and **BetterAuth**.  
