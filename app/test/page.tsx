@@ -1,6 +1,5 @@
 "use client"
 import { Button } from '@/components/ui/button';
-import { authClient } from '@/lib/auth-client';
 import { sendEmail } from '@/server/actions/sendEmail';
 import { useMutation } from '@tanstack/react-query'
 // import ChatBox from '@/components/(ChatFragments)/ChatBox';

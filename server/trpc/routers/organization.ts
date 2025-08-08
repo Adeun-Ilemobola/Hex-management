@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
 import { OrganizationMetadata } from "@/server/actions/subscriptionService";
 import { sendEmail } from "@/server/actions/sendEmail";
+import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 
 
 
@@ -37,10 +38,10 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const newEmailSend  = await sendEmail({
-                    templateText:"onboardingFinished",
+                const newEmailSend = await sendEmail({
+                    templateText: "onboardingFinished",
                     to: input.email,
-                    params:{
+                    params: {
                         name: input.name,
                         organizationName: input.name,
                         email: input.email,
@@ -76,10 +77,10 @@ export const organizationRouter = createTRPCRouter({
     getAllOrganization: protectedProcedure
         .query(async ({ ctx }) => {
             try {
-                const data = await auth.api.listOrganizations({headers: ctx.headers});
+                const data = await auth.api.listOrganizations({ headers: ctx.headers });
                 console.log(data);
-                
-                const organizations =  await Promise.all(
+
+                const organizations = await Promise.all(
                     data.map(async (org) => {
                         const members = await ctx.prisma.member.count({
                             where: {
@@ -93,7 +94,7 @@ export const organizationRouter = createTRPCRouter({
                         }
                     })
                 )
-             
+
                 return {
                     message: "Successfully got user organizations",
                     success: true,
@@ -110,6 +111,62 @@ export const organizationRouter = createTRPCRouter({
         }),
 
 
+    getOrganization: protectedProcedure
+        .input(z.object({ id: z.string(), slug: z.string() }))
+        .query(async ({ input, ctx }) => {
+           try {
+            console.log(input);
+            
+             const data = await auth.api.getFullOrganization({
+                query: {
+                    organizationId: input.id,
+                    organizationSlug: input.slug,
+                },
+                headers: ctx.headers
+            });
+
+            if (!data) {
+                console.error("Failed to get organization"  ,data );
+                return {
+                    message: "Failed to get organization",
+                    success: false,
+                    value: null
+                }
+            }
+            const fullData:XOrganization = {
+                metadata: JSON.parse(data?.metadata || "{}") as OrganizationMetadata,
+                id: data.id,
+                name: data.name,
+                slug: data.slug,
+                logo: data.logo,
+                createdAt: data.createdAt,
+                invitations: data.invitations,
+                members: data.members,
+                
+            }
+            console.log("fullData ====", fullData);
+            
+
+            return {
+                message: "Successfully got organization",
+                success: true,
+                value: fullData
+            }
+            
+           } catch (error) {
+            console.log("Error in getOrganization:", error);
+            return {
+                message: "Failed to get organization",
+                success: false,
+                value: null
+            }
+            
+            
+           }
+
+        }),
+
+
 
     createOrganization: protectedProcedure.input(z.object({ name: z.string() }))
         .mutation(async ({ input, ctx, }) => {
@@ -122,18 +179,18 @@ export const organizationRouter = createTRPCRouter({
                     }
                 }
                 const userSub = ctx.plan
-                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}#${Math.floor(Math.random() * 1000)}`
+                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
                 const metadata = {
                     planType: userSub.data.planTier,
                     seatLimit: seatPlan(userSub.data.planTier),
-                    isExpired :(ctx.plan.data.daysLeft || 0) <= 0 
+                    isExpired: (ctx.plan.data.daysLeft || 0) <= 0
                 }
                 console.log({
                     userSub,
                     metadata,
                     slug
                 });
-                
+
                 const { status } = await auth.api.checkOrganizationSlug({
                     body: {
                         slug: slug, // required
@@ -142,7 +199,7 @@ export const organizationRouter = createTRPCRouter({
 
                 if (!status) {
                     console.log("Organization with slug already exists");
-                    
+
                     return {
                         message: `Organization with slug ${slug} already exists`,
                         success: false,
@@ -165,14 +222,14 @@ export const organizationRouter = createTRPCRouter({
 
                 if (!res) {
                     console.log("Failed to create organization");
-                    
+
                     return {
                         message: "Failed to create organization",
                         success: false,
                         value: null
                     }
                 }
-                
+
                 return {
                     message: "Successfully created organization",
                     success: true,

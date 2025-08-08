@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useRouter } from 'next/navigation';
 
 
 const passworDefault = {
@@ -54,6 +55,7 @@ const vPass = z.object({
 })
 
 export default function Page() {
+  const router = useRouter();
   const [user, setUser] = useState<UserInput>(defaultUserInput);
   const [password, setPassword] = useState(passworDefault);
   const { isPending, data } = authClient.useSession();
@@ -333,7 +335,11 @@ export default function Page() {
                             <TableCell>{organization.memberCount} / {organization.metadata.seatLimit}</TableCell>
                             <TableCell>{organization.slug}</TableCell>
                             <TableCell>
-                              <Button>View</Button>
+                              <Button
+                                onClick={() => {
+                                  router.push(`/home/organization?id=${organization.id}&slug=${organization.slug}`)
+                                }}
+                              >View</Button>
                             </TableCell>
                           </TableRow>
                         ))}
