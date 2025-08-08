@@ -10,6 +10,7 @@ import { Users, Shield, Clock, CheckCircle2, XCircle, Building2, Crown, User } f
 import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/trpc'
 import { InvitationStatus } from 'better-auth/plugins'
+import DropBack from '../DropBack';
 
 type invitations = {
     id: string;
@@ -55,7 +56,7 @@ export default function OrganizationDashbord() {
     const searchParams = useSearchParams()
     const OrgId = searchParams.get('id')
     const slug = searchParams.get('slug')
-    const { data: getOrganization } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
+    const { data: getOrganization , isPending } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
     const [organization, setOrganization] = React.useState<XOrganization | null>(null)
     const { data } = authClient.useSession()
 
@@ -100,6 +101,7 @@ export default function OrganizationDashbord() {
     }, [getOrganization])
 
     return (
+        <DropBack is={isPending} >
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
             <style jsx>{`
                 @keyframes float {
@@ -360,5 +362,6 @@ export default function OrganizationDashbord() {
                 )}
             </main>
         </div>
+        </DropBack>
     );
 }
