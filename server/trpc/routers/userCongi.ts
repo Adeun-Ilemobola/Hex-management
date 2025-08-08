@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
+import {  createTRPCRouter, protectedProcedure } from '../init';
 import { authClient } from '@/lib/auth-client';
 import { auth } from '@/lib/auth';
 import { DateTime } from 'luxon';
