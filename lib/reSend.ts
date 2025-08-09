@@ -405,7 +405,8 @@ function onboardingFinish(
   email: string,
   organizationName: string,
   tempPassword: string,
-  fallbackUrl: string
+  fallbackUrl: string,
+  userExists:boolean
 ): { subject: string; html: string } {
   return {
     subject: "🚀 Welcome to Your New Fintech Journey",
@@ -539,12 +540,31 @@ function onboardingFinish(
                           <div style="font-size: 18px; font-weight: 800;" class="gradient-text">${email}</div>
                         </td>
                       </tr>
-                      <tr>
+
+                      ${userExists ? (`
+                        <tr>
+                        <td style="padding: 16px 0;">
+                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted"> PASSWORD</div>
+                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">
+                              Sign in with the method you used to create the account.
+                          </div>
+                        </td>
+                      </tr>
+                        
+                        
+                        
+                        `) : (`
+                          <tr>
                         <td style="padding: 16px 0;">
                           <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted">TEMPORARY PASSWORD</div>
                           <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">${tempPassword}</div>
                         </td>
                       </tr>
+                          
+                          
+                          
+                          `)}
+                      
                     </table>
                   </td>
                 </tr>
@@ -594,7 +614,219 @@ function onboardingFinish(
   };
 }
 
-export type TemplateType = | 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished'
+
+function memberRemovedEmail(
+  member: string,
+  organizationName: string
+): { subject: string; html: string } {
+  return {
+    subject: `👋 ${member}, your access to ${organizationName} has been removed`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
+      .dark-container { background: rgba(17,24,39,0.9) !important; border-color: rgba(55,65,81,0.8) !important; }
+      .dark-glass { background: rgba(31,41,55,0.8) !important; border-color: rgba(75,85,99,0.6) !important; }
+      .dark-text { color: #f9fafb !important; }
+      .dark-muted { color: #d1d5db !important; }
+      .dark-border { border-color: rgba(75,85,99,0.4) !important; }
+      .dark-notice { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.3) !important; }
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; color: #3b82f6;
+    }
+    .glass-container {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    }
+    .glass-inner {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 16px;
+    }
+    .blob-bg {
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(253,230,138,0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139,92,246,0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 70%, rgba(236,72,153,0.4) 0%, transparent 50%);
+      border-radius: 24px; overflow: hidden;
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fce7f3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;min-height:100vh;" class="dark-mode">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:transparent;">
+    <tr>
+      <td align="center" style="padding:60px 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;position:relative;" class="glass-container dark-container">
+          <tr><td style="position:absolute;inset:0;"><div class="blob-bg"></div></td></tr>
+          <tr>
+            <td style="padding:80px 50px;position:relative;z-index:10;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td align="center" style="padding-bottom:40px;">
+                    <h1 style="margin:0;font-size:48px;font-weight:900;line-height:1;letter-spacing:-0.02em;" class="gradient-text">Access Updated</h1>
+                    <h2 style="margin:16px 0 0 0;font-size:24px;font-weight:800;color:#374151;" class="dark-muted">${organizationName}</h2>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="glass-inner dark-glass" style="margin-bottom:32px;">
+                <tr>
+                  <td style="padding:32px;">
+                    <p style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#111827;" class="dark-text">Hi ${member},</p>
+                    <p style="margin:0;color:#6b7280;font-size:16px;" class="dark-muted">
+                      Your membership in <strong>${organizationName}</strong> has been removed by an organization administrator.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="border-top:1px solid rgba(156,163,175,0.2);padding-top:24px;" class="dark-border">
+                    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px;text-align:center;" class="dark-notice">
+                      <p style="margin:0;font-size:14px;color:#991b1b;" class="dark-muted">
+                        If you believe this was a mistake, please contact the organization owner or your workspace admin to request reinstatement.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim()
+  };
+}
+function memberRoleChangedEmail(
+  member: string,
+  organizationName: string,
+  memberRole: string
+): { subject: string; html: string } {
+  return {
+    subject: `🔧 ${member}, your role was updated to ${memberRole}`,
+    html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
+      .dark-container { background: rgba(17,24,39,0.9) !important; border-color: rgba(55,65,81,0.8) !important; }
+      .dark-glass { background: rgba(31,41,55,0.8) !important; border-color: rgba(75,85,99,0.6) !important; }
+      .dark-text { color: #f9fafb !important; }
+      .dark-muted { color: #d1d5db !important; }
+      .dark-border { border-color: rgba(75,85,99,0.4) !important; }
+      .dark-notice { background: rgba(59,130,246,0.15) !important; border-color: rgba(59,130,246,0.3) !important; }
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; color: #3b82f6;
+    }
+    .glass-container {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    }
+    .glass-inner {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 16px;
+    }
+    .blob-bg {
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(253,230,138,0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139,92,246,0.4) 0%, transparent 50%),
+        radial-gradient(circle at 40% 70%, rgba(236,72,153,0.4) 0%, transparent 50%);
+      border-radius: 24px; overflow: hidden;
+    }
+    .pill {
+      display:inline-block;padding:6px 12px;border-radius:9999px;
+      background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);
+      font-weight:700;font-size:12px;letter-spacing:.02em;
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fce7f3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;min-height:100vh;" class="dark-mode">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:transparent;">
+    <tr>
+      <td align="center" style="padding:60px 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;position:relative;" class="glass-container dark-container">
+          <tr><td style="position:absolute;inset:0;"><div class="blob-bg"></div></td></tr>
+          <tr>
+            <td style="padding:80px 50px;position:relative;z-index:10;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td align="center" style="padding-bottom:40px;">
+                    <h1 style="margin:0;font-size:48px;font-weight:900;line-height:1;letter-spacing:-0.02em;" class="gradient-text">Role Updated</h1>
+                    <h2 style="margin:16px 0 0 0;font-size:24px;font-weight:800;color:#374151;" class="dark-muted">${organizationName}</h2>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="glass-inner dark-glass" style="margin-bottom:24px;">
+                <tr>
+                  <td style="padding:32px;">
+                    <p style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#111827;" class="dark-text">Hi ${member},</p>
+                    <p style="margin:0;color:#6b7280;font-size:16px;" class="dark-muted">
+                      Your role in <strong>${organizationName}</strong> has been changed.
+                    </p>
+                    <div style="margin-top:16px;text-align:center;">
+                      <span class="pill">New role: ${memberRole}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="border-top:1px solid rgba(156,163,175,0.2);padding-top:24px;" class="dark-border">
+                    <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px;text-align:center;" class="dark-notice">
+                      <p style="margin:0;font-size:14px;color:#1e40af;" class="dark-muted">
+                        Changes take effect immediately. If you didn’t expect this update, contact your workspace admin.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim()
+  };
+}
+
+
+export type TemplateType = | 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished' | 'memberRemovedEmail' | 'memberRoleChangedEmail'
 export interface TemplateParamMap {
   VerifyEmail: { verifyUrl: string }
   ResetPassword: { resetUrl: string }
@@ -613,8 +845,22 @@ export interface TemplateParamMap {
     email: string
     organizationName: string
     tempPassword: string
-    fallbackUrl: string
+    fallbackUrl: string,
+    userExists: boolean
   }
+
+  memberRemovedEmail: {
+    member: string
+    organizationName: string
+  }
+  memberRoleChangedEmail: {
+    organizationName: string
+    member: string
+    memberRole: string
+  }
+
+  
+
 }
 type TemplateResult = { subject: string; html: string }
 const templates: { [K in TemplateType]: (params: TemplateParamMap[K]) => TemplateResult } = {
@@ -637,8 +883,11 @@ const templates: { [K in TemplateType]: (params: TemplateParamMap[K]) => Templat
       p.email,
       p.organizationName,
       p.tempPassword,
-      p.fallbackUrl
+      p.fallbackUrl,
+      p.userExists
     ),
+  memberRemovedEmail: (p) => memberRemovedEmail(p.member, p.organizationName),
+  memberRoleChangedEmail: (p) => memberRoleChangedEmail(p.member, p.organizationName, p.memberRole),
 }
 export function generateTemplate<T extends TemplateType>(
   template: T,

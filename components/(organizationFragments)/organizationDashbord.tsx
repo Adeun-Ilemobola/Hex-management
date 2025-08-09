@@ -1,11 +1,11 @@
 'use client'
-import React, {  useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Nav } from '../Nav'
 import { authClient } from '@/lib/auth-client'
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Users, Shield, Clock, CheckCircle2, XCircle, Building2, Crown, User } from 'lucide-react';
+import { Users, Shield, Clock, CheckCircle2, XCircle, Building2, Crown, User, Ellipsis } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -23,6 +23,25 @@ import InputBox, { SelectorBox } from '../InputBox';
 import DropBack from '../DropBack';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type invitations = {
     id: string;
@@ -64,14 +83,36 @@ export interface XOrganization {
     members: member;
 }
 
+
 export default function OrganizationDashbord() {
     const searchParams = useSearchParams()
     const OrgId = searchParams.get('id')
     const slug = searchParams.get('slug')
-    const { data: getOrganization, isPending ,refetch } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
+    const { data: getOrganization, isPending, refetch } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
     const [organization, setOrganization] = React.useState<XOrganization | null>(null)
     const { data } = authClient.useSession()
     const [AddMemberDialogOpen, setAddMemberDialogOpen] = React.useState(false)
+    const { mutate: updateMemberRole , isPending: updateMemberRoleLoading } = api.organization.updateMemberRole.useMutation({
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message, { id: 'update-member-role' });
+                refetch();
+            } else {
+                toast.error(data.message, { id: 'update-member-role' });
+            }
+        },
+        onError(error) {
+            toast.error(error.message || 'Failed to update member role.', { id: 'update-member-role' });
+            console.log(error);
+        }
+    })
+    const [alertActions, setAlertActions] = React.useState({
+        open: false,
+        ActionType: "remove" as | "admin" | "remove" | "owner" | "member",
+        memberId: "",
+        memberName: "",
+        memberEmail: ""
+    })
 
     useEffect(() => {
         const info = getOrganization?.value
@@ -113,6 +154,22 @@ export default function OrganizationDashbord() {
         }
     }, [getOrganization])
 
+    function handleRoleChange() {
+        if(!organization){
+            toast.error("Organization not found")
+            return;
+        }
+        updateMemberRole({
+            ActionType: alertActions.ActionType,
+            memberId: alertActions.memberId,
+            organizationId: organization.id,
+            memberEmail: alertActions.memberEmail,
+            memberName: alertActions.memberName,
+            organizationName: organization.name
+        })
+        setAlertActions({ open: false, ActionType: "remove", memberId: "", memberName: "", memberEmail: "" })
+
+    }
 
     const T = `
      bg-white/98
@@ -136,7 +193,7 @@ export default function OrganizationDashbord() {
     `
 
     return (
-        <DropBack is={isPending} >
+        <DropBack is={isPending || updateMemberRoleLoading} >
             <div className="min-h-screen relative">
                 <style jsx>{`
                 @keyframes float {
@@ -253,7 +310,7 @@ export default function OrganizationDashbord() {
 
                                         />
                                         <Button
-                                        variant={"ghost"}
+                                            variant={"ghost"}
                                             onClick={() => {
                                                 // Handle invite member logic here
                                                 setAddMemberDialogOpen(true)
@@ -266,6 +323,7 @@ export default function OrganizationDashbord() {
                                                 <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Member</TableHead>
                                                 <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Role</TableHead>
                                                 <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Joined</TableHead>
+                                                <TableHead className="text-gray-700 dark:text-slate-200 font-semibold">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -303,6 +361,43 @@ export default function OrganizationDashbord() {
                                                         <p className="text-sm text-gray-600 dark:text-slate-300">
                                                             {member.createdAt.toLocaleDateString()}
                                                         </p>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger ><Ellipsis /></DropdownMenuTrigger>
+                                                            <DropdownMenuContent>
+                                                                <DropdownMenuSeparator />
+
+                                                                {(  member.role !== "owner") ? (<>
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setAlertActions({ open: true, memberId: member.id, ActionType: "admin", memberName: member.user.name , memberEmail: member.user.email })
+                                                                    }}
+                                                                >set as Admin</DropdownMenuItem>
+                                                                {/* <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setAlertActions({ open: true, memberId: member.id, ActionType: "owner", memberName: member.user.name })
+                                                                    }}
+                                                                >set as Owner</DropdownMenuItem> */}
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setAlertActions({ open: true, memberId: member.id, ActionType: "member", memberName: member.user.name, memberEmail: member.user.email })
+                                                                    }}
+                                                                >set as Member</DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    variant='destructive'
+                                                                    onClick={() => {
+                                                                        setAlertActions({ open: true, memberId: member.id, ActionType: "remove", memberName: member.user.name, memberEmail: member.user.email })
+                                                                    }}>Remove</DropdownMenuItem>
+
+                                                                    </>) : (<>
+                                                                    <p>
+                                                                        <span className="font-semibold">Owner</span>
+                                                                    </p>
+                                                                    </>)}
+
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -384,6 +479,8 @@ export default function OrganizationDashbord() {
                                     refetch();
                                 }}
                             />
+
+                            <AlertDialogCon alertActions={alertActions} setAlertActions={setAlertActions} next={() =>  handleRoleChange()} />
                         </div>
 
                     )}
@@ -456,7 +553,7 @@ function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMem
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogOverlay className="fixed inset-0 min-h-screen backdrop-blur-md bg-fuchsia-400/30 dark:bg-fuchsia-900/30 " />
-            <DialogContent>
+            <DialogContent >
                 <DialogHeader>
                     <DialogTitle>Add New Member</DialogTitle>
                     <DialogDescription>
@@ -486,7 +583,7 @@ function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMem
                         options={[
                             { value: 'member', label: 'Member' },
                             { value: 'admin', label: 'Admin' },
-                            { value: 'owner', label: 'Owner' },
+                            // { value: 'owner', label: 'Owner' },
                         ]}
                         label="Role"
                         ClassName="w-full"
@@ -498,11 +595,60 @@ function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMem
 
                 <DialogFooter >
                     <Button disabled={onboardUser.isPending} onClick={handleAddMember} className='ml-auto'>
-                       {onboardUser.isPending ? 'Adding...' : 'Add Member'}
-                        </Button>
+                        {onboardUser.isPending ? 'Adding...' : 'Add Member'}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    )
+
+}
+
+
+interface AlertDialogConProps {
+    alertActions: {
+        open: boolean;
+        ActionType: "remove" | "admin" | "owner" | "member";
+        memberId: string;
+        memberName: string;
+         memberEmail: string;
+    }
+    setAlertActions: React.Dispatch<React.SetStateAction<{
+        open: boolean;
+        ActionType: "admin" | "remove" | "owner" | "member";
+        memberId: string;
+        memberName: string;
+        memberEmail: string;
+    }>>
+
+    next:() => void
+
+}
+
+function AlertDialogCon({ alertActions, setAlertActions , next }: AlertDialogConProps) {
+
+    return (
+        <AlertDialog
+            open={alertActions.open}
+            onOpenChange={(v) => setAlertActions((prev) => ({ ...prev, open: v }))}
+        >
+            <AlertDialogTrigger>Open</AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        {`Are you sure you want to ${alertActions.ActionType === "remove" ? `remove ${alertActions.memberName}` : `set ${alertActions.memberName} as ${alertActions.ActionType}`} ?`}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {`This action will ${alertActions.ActionType === "remove" ? `remove ${alertActions.memberName}` : `set ${alertActions.memberName} as ${alertActions.ActionType}`} .`}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={() => next()}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     )
 
 }

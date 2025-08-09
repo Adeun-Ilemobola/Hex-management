@@ -9,7 +9,7 @@ import { XOrganization } from "@/components/(organizationFragments)/organization
 
 export const organizationRouter = createTRPCRouter({
 
-    onboardUserToOrg: protectedProcedure.input(z.object({ name: z.string(), email: z.string(), organizationId: z.string()  ,  role: z.enum(["member", "admin", "owner"]) }))
+    onboardUserToOrg: protectedProcedure.input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
             try {
                 let userId = ""
@@ -18,7 +18,7 @@ export const organizationRouter = createTRPCRouter({
                     email: input.email,
                     password: `${input.name}${Math.floor(Math.random() * 1000)}`,
                 }
-                const userExists = await  ctx.prisma.user.findUnique({ where: { email: input.email } })
+                const userExists = await ctx.prisma.user.findUnique({ where: { email: input.email } })
                 if (userExists) {
                     userId = userExists.id
                 } else {
@@ -53,7 +53,8 @@ export const organizationRouter = createTRPCRouter({
                         organizationName: input.name,
                         email: input.email,
                         tempPassword: newUserbody.password,
-                        fallbackUrl: `${process.env.NEXTAUTH_URL}/login`
+                        fallbackUrl: `${process.env.NEXTAUTH_URL}/login`,
+                        userExists: !!userExists
                     }
                 })
                 if (!newEmailSend.success) {
@@ -121,55 +122,55 @@ export const organizationRouter = createTRPCRouter({
     getOrganization: protectedProcedure
         .input(z.object({ id: z.string(), slug: z.string() }))
         .query(async ({ input, ctx }) => {
-           try {
-            console.log(input);
-            
-             const data = await auth.api.getFullOrganization({
-                query: {
-                    organizationId: input.id,
-                    organizationSlug: input.slug,
-                },
-                headers: ctx.headers
-            });
+            try {
+                console.log(input);
 
-            if (!data) {
-                console.error("Failed to get organization"  ,data );
+                const data = await auth.api.getFullOrganization({
+                    query: {
+                        organizationId: input.id,
+                        organizationSlug: input.slug,
+                    },
+                    headers: ctx.headers
+                });
+
+                if (!data) {
+                    console.error("Failed to get organization", data);
+                    return {
+                        message: "Failed to get organization",
+                        success: false,
+                        value: null
+                    }
+                }
+                const fullData: XOrganization = {
+                    metadata: JSON.parse(data?.metadata || "{}") as OrganizationMetadata,
+                    id: data.id,
+                    name: data.name,
+                    slug: data.slug,
+                    logo: data.logo,
+                    createdAt: data.createdAt,
+                    invitations: data.invitations,
+                    members: data.members,
+
+                }
+                console.log("fullData ====", fullData);
+
+
+                return {
+                    message: "Successfully got organization",
+                    success: true,
+                    value: fullData
+                }
+
+            } catch (error) {
+                console.log("Error in getOrganization:", error);
                 return {
                     message: "Failed to get organization",
                     success: false,
                     value: null
                 }
-            }
-            const fullData:XOrganization = {
-                metadata: JSON.parse(data?.metadata || "{}") as OrganizationMetadata,
-                id: data.id,
-                name: data.name,
-                slug: data.slug,
-                logo: data.logo,
-                createdAt: data.createdAt,
-                invitations: data.invitations,
-                members: data.members,
-                
-            }
-            console.log("fullData ====", fullData);
-            
 
-            return {
-                message: "Successfully got organization",
-                success: true,
-                value: fullData
+
             }
-            
-           } catch (error) {
-            console.log("Error in getOrganization:", error);
-            return {
-                message: "Failed to get organization",
-                success: false,
-                value: null
-            }
-            
-            
-           }
 
         }),
 
@@ -253,6 +254,89 @@ export const organizationRouter = createTRPCRouter({
 
             }
         }),
+
+
+    updateMemberRole: protectedProcedure.input(z.object({
+        organizationId: z.string(),
+        memberId: z.string(),
+        memberName: z.string(),
+        ActionType: z.enum(["admin", "remove", "owner", "member"]),
+        organizationName: z.string(),
+        memberEmail: z.string(),
+    })).mutation(async ({ input, ctx }) => {
+        try {
+            console.log("Updating member role:", input);
+
+            if (input.ActionType === "remove") {
+                const data = await auth.api.removeMember({
+                    body: {
+                        memberIdOrEmail: input.memberId, // required
+                        organizationId: input.organizationId,
+                    },
+                    headers: ctx.headers
+                });
+                if (!data) {
+                    console.error("Failed to remove member from organization");
+                    return {
+                        message: "Failed to remove member from organization",
+                        success: false,
+                    }
+                }
+                await sendEmail({
+                    templateText: "memberRemovedEmail",
+                    to: input.memberEmail,
+                    params: {
+                        member: input.memberName,
+                        organizationName: input.organizationName
+                    }
+                })
+                return {
+                    message: "Successfully removed member from organization",
+                    success: true,
+                }
+            }
+            else if (input.ActionType === "admin" || input.ActionType === "owner" || input.ActionType === "member") {
+               const dataRole = await auth.api.updateMemberRole({
+                    body: {
+                        role: input.ActionType,
+                        memberId: input.memberId,
+                        organizationId: input.organizationId,
+                    },
+                    headers: ctx.headers
+                });
+                if (!dataRole) {
+                    console.error("Failed to update member role");
+                    return {
+                        message: "Failed to update member role",
+                        success: false,
+                    }
+                }
+                await sendEmail({
+                    templateText: "memberRoleChangedEmail",
+                    to: input.memberEmail,
+                    params: {
+                        member: input.memberName,
+                        organizationName: input.organizationName,
+                        memberRole: dataRole.role
+                    }
+                });
+                console.log("Member role updated successfully:", dataRole);
+            }
+            return {
+                message: "Successfully updated member role",
+                success: true,
+            }
+
+        } catch (error) {
+            console.error("Error in updateMemberRole:", error);
+            return {
+                message: "Failed to update member role",
+                success: false,
+
+            }
+
+        }
+    })
 
 });
 
