@@ -94,6 +94,15 @@ export const auth = betterAuth({
       //   });
       // }
 
+      /**
+       * Whether the user is allowed to create an organization
+       * @returns A boolean indicating whether the user can create an organization
+       * @remarks
+       * The function uses the user's current plan tier to determine whether they can create an organization
+       * - If the user is on the free tier, the function returns false
+       * - If the user is on the Deluxe or Premium tier, the function returns true
+       * - Otherwise, the function returns false
+       */
       allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
         const { data: plan } = await caller.user.getUserPlan();

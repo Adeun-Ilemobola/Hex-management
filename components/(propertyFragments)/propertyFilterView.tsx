@@ -40,8 +40,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
         if (!vSearch.success) {
             vSearch.error.errors.forEach(error => {
                 toast.warning(`${error.path[0]}: ${error.message}`)
-            })
-            
+            }) 
         }
         router.push(`/home?${urlData.status ? `status=${urlData.status} ` : ""}${urlData.searchText ? `&searchText=${urlData.searchText}` : ""}`)
 
