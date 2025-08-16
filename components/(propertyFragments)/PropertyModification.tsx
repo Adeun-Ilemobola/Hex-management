@@ -9,8 +9,7 @@ import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
 import PropertyGIF from './PropertyGIF'
-import { ImgBoxList } from '../ImgBox'
-import { TextAreaBox } from '../InputBox'
+
 import InvestmentSummary from './InvestmentSummary'
 import InvestmentBlockSection from './InvestmentBlockSection'
 import PoolInvestorsSection from './PoolInvestorsSection'
@@ -40,6 +39,8 @@ export default function PropertyModification() {
     } = usePropertyModification(id)
 
     const [section, Setsection] = useState(1)
+    console.log(sub);
+    
 
 
     function validation() {
@@ -148,65 +149,18 @@ export default function PropertyModification() {
                     {section === 1 && (
                         <div className=" mx-auto px-4 py-6">
                             <div className="flex flex-col lg:flex-row gap-6">
-                                {/* LEFT: Property GIF - flexible */}
-                                <section className="lg:flex-[1_1_0%] min-w-3xl">
+                              
                                     <PropertyGIF
                                         disable={disableInput}
                                         setPropertyInfo={setPropertyInfo}
                                         propertyInfo={propertyInfo}
+                                        RemoveImage={(id  , supabaseID)=>{
+                                             RemoveImage({ id, supabaseID });
+
+                                        }}
+                                        handleSSubscriptionRequirement={handleSSubscriptionRequirement}
                                     />
-                                </section>
-
-                                {/* RIGHT: Images and Description - grows up to max-w-4xl */}
-                                <section className="min-w-0 lg:flex-[1_1_48rem] lg:max-w-4xl">
-                                    <div className="flex flex-col gap-6 w-full">
-                                        <div className="w-full">
-                                            <ImgBoxList
-                                                className="w-full"
-                                                fileList={propertyInfo.images}
-                                                disabled={disableInput}
-                                                setData={(list) =>
-                                                    setPropertyInfo((prev) => ({
-                                                        ...prev,
-                                                        images: [...prev.images, ...list],
-                                                    }))
-                                                }
-                                                SetMainImg={(idx) => {
-                                                    setPropertyInfo((pre) => ({
-                                                        ...pre,
-                                                        images: pre.images.map((item, i) => ({
-                                                            ...item,
-                                                            thumbnail: idx === i,
-                                                        })),
-                                                    }));
-                                                }}
-                                                del={(id, index, supabaseID) => {
-                                                    setPropertyInfo((pre) => ({
-                                                        ...pre,
-                                                        images: pre.images.filter((_, i) => i !== index),
-                                                    }));
-                                                    if (id.length > 0 && supabaseID.length > 0) {
-                                                        RemoveImage({ id, supabaseID });
-                                                    }
-                                                }}
-                                                maxImg={ handleSSubscriptionRequirement() }
-                                                
-                                            />
-                                        </div>
-
-                                        <div className="w-full">
-                                            <TextAreaBox
-                                                value={propertyInfo.description}
-                                                onChange={(val) =>
-                                                    setPropertyInfo((pre) => ({ ...pre, description: val }))
-                                                }
-                                                label="Description"
-                                                disabled={false}
-                                                className="w-full h-[20rem] resize-none"
-                                            />
-                                        </div>
-                                    </div>
-                                </section>
+                               
                             </div>
                         </div>
                     )}

@@ -294,7 +294,7 @@ export type FinalPlanResultFull = {
     inOrganization: {
         name: string;
         id: string;
-        metadata: string | null;
+        role: string;
     } | null;
 }
 
@@ -341,7 +341,12 @@ export async function Final(userId: string): Promise<FinalPlanResultFull> {
             planTier: metadata.planType,
             isActive: (metadata.planType !== "Free"),
             daysLeft: logedUserPlan.daysLeft,
-            inOrganization: userInOrg.organization || null
+            inOrganization: {
+                name: userInOrg.organization.name,
+                id: userInOrg.organization.id,
+                role: userInOrg.role
+                
+            }
 
         }
     } catch (error) {

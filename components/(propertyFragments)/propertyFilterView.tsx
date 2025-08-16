@@ -30,7 +30,6 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     const router = useRouter();
 
     const { data: session, isPending, error } = authClient.useSession();
-    console.log({ session, isPending, error, data });
 
     const {data:getProperties , isPending:getPropertiesPending} = api.Propertie.getUserProperties.useQuery({data: data })
      const [isEdit, setIsEdit] = useState(false)
