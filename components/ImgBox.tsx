@@ -112,7 +112,7 @@ interface ImgBoxListProps {
   className?: string;
   SetMainImg: (index: number) => void;
   setData: (list: FileUploadResult[]) => void;
-  del: (id: string , index: number , supabaseID: string) => void,
+  del: (id: string, index: number, supabaseID: string) => void,
   maxImg?: number
 
 }
@@ -192,7 +192,7 @@ export function ImgBoxList({
   return (
     <div
       className={clsx(
-        "flex flex-col  h-80 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm overflow-hidden",
+        "flex flex-col h-85 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm min-w-0",
         isDisabled && "opacity-50 pointer-events-none",
         className
       )}
@@ -220,14 +220,27 @@ export function ImgBoxList({
       </div>
 
       {/* Image Grid with Horizontal Scroll */}
-      <div className="flex-1 p-5">
+      <div className="flex-1 p-5 min-w-0">
         {fileList.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto pb-2 h-full">
+          <div
+            className="flex gap-4 overflow-x-auto overflow-y-hidden pb-2 h-full
+                   min-w-0 max-w-full snap-x snap-mandatory touch-pan-x"
+            role="list"
+            aria-label="Property images"
+            tabIndex={0}
+            style={{ WebkitOverflowScrolling: 'touch' }}
+            // onWheel={(e) => {
+            //   if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            //     e.currentTarget.scrollLeft += e.deltaY; // accumulate, don’t replace
+            //     e.preventDefault();
+            //   }
+            // }}
+          >
             {fileList.map((file, i) => (
               <div
                 key={i}
                 className={clsx(
-                  "relative flex-shrink-0 w-48 h-full group cursor-pointer",
+                  "relative shrink-0 w-48 h-full group cursor-pointer snap-start",
                   "rounded-lg overflow-hidden border-2 transition-all duration-200 ease-in-out",
                   "bg-gray-50 dark:bg-gray-900",
                   file.thumbnail
@@ -277,7 +290,7 @@ export function ImgBoxList({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        del(file.id, i , file.supabaseID);
+                        del(file.id, i, file.supabaseID);
                       }}
                       className="w-7 h-7 bg-black/70 hover:bg-red-600/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors"
                       disabled={isDisabled}

@@ -8,6 +8,7 @@ export interface PlanResult {
         planTier: string;
         isActive: boolean;
         daysLeft: number | null;
+        userId: string;
     };
 }
 export interface PlanResultFull {
@@ -31,6 +32,36 @@ export interface userOrgMembershipPayload {
     isExpired: boolean;
 }
 
+
+async function UpdateOrganization(ownerId: string, isExpired: boolean, planType: string) {
+    const ownerOrganizations = await prisma.member.findMany({
+        where: {
+            userId: ownerId,
+            role: "owner"
+        },
+        select: {
+            organizationId: true
+        }
+
+    })
+    await Promise.all(ownerOrganizations.map(async (org) => {
+        const metadata: OrganizationMetadata = {
+            planType,
+            seatLimit: seatPlan(planType),
+            isExpired
+        };
+        await prisma.organization.update({
+            where: {
+                id: org.organizationId
+            },
+            data: {
+                metadata: JSON.stringify(metadata)
+            }
+        })
+    }))
+
+
+}
 
 async function fetchUserPlan(userId: string): Promise<PlanResult> {
     try {
@@ -93,12 +124,14 @@ async function fetchUserPlan(userId: string): Promise<PlanResult> {
                 },
             });
 
+
             return {
                 success: true,
                 data: {
                     planTier: subName,
                     isActive: paidSub.status === "active",
-                    daysLeft: daysLeft
+                    daysLeft: daysLeft,
+                    userId
                 }
             }
 
@@ -146,13 +179,16 @@ async function fetchUserPlan(userId: string): Promise<PlanResult> {
                     stripeCustomerId: null
                 },
             });
+            await UpdateOrganization(userId, isExpired, freeSub.planTier);
+
 
             return {
                 success: true,
                 data: {
                     planTier: "Free",
                     isActive: freeSub.isActive,
-                    daysLeft: null
+                    daysLeft: null,
+                    userId
                 }
             }
 
@@ -160,12 +196,15 @@ async function fetchUserPlan(userId: string): Promise<PlanResult> {
 
         }
 
+        await UpdateOrganization(userId, isExpired, isActive?.planTier || "Free");
+
         return {
             success: true,
             data: {
                 planTier: isActive?.planTier || "Free",
                 isActive: isActive?.isActive || false,
-                daysLeft: daysLeft
+                daysLeft: daysLeft,
+                userId
             }
         }
 
@@ -176,7 +215,9 @@ async function fetchUserPlan(userId: string): Promise<PlanResult> {
             success: false, data: {
                 planTier: "Free",
                 isActive: false,
-                daysLeft: null
+                daysLeft: null,
+                userId
+
             }
         }
     }
@@ -225,7 +266,7 @@ export async function fetchUserPlanFull(userId: string): Promise<PlanResultFull>
         return {
             success: true, data: {
                 ...usePlan.data,
-               organizationList: userOrgMembership,
+                organizationList: userOrgMembership,
 
             }
         }
@@ -244,4 +285,89 @@ export async function fetchUserPlanFull(userId: string): Promise<PlanResultFull>
         }
 
     }
+}
+
+export type FinalPlanResultFull = {
+    planTier: string;
+    isActive: boolean;
+    daysLeft: number | null;
+    inOrganization: {
+        name: string;
+        id: string;
+        role: string;
+    } | null;
+}
+
+
+export async function Final(userId: string): Promise<FinalPlanResultFull> {
+    try {
+        const { data: logedUserPlan } = await fetchUserPlan(userId);
+        const userInOrg = await prisma.member.findFirst({
+            where: {
+                userId: logedUserPlan.userId,
+                role: {
+                    in: ["member", "admin"]
+                }
+            },
+            select: {
+                organizationId: true,
+                userId: true,
+                role: true,
+                organization: {
+                    select: {
+                        id: true,
+                        name: true,
+                        metadata: true
+                    }
+                }
+            }
+        })
+
+        if (!userInOrg) {
+            return {
+
+                planTier: logedUserPlan.planTier,
+                isActive: logedUserPlan.isActive,
+                daysLeft: logedUserPlan.daysLeft,
+                inOrganization: null
+
+            }
+        }
+
+        const metadata = JSON.parse(userInOrg.organization.metadata || "{}") as OrganizationMetadata;
+
+        return {
+
+            planTier: metadata.planType,
+            isActive: (metadata.planType !== "Free"),
+            daysLeft: logedUserPlan.daysLeft,
+            inOrganization: {
+                name: userInOrg.organization.name,
+                id: userInOrg.organization.id,
+                role: userInOrg.role
+                
+            }
+
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+
+            planTier: "Free",
+            isActive: false,
+            daysLeft: null,
+            inOrganization: null
+
+        }
+
+    }
+}
+
+export function seatPlan(planType: string): number {
+  switch (planType) {
+    case 'Premium': return 50;
+    case 'Deluxe': return 15;
+    case 'Free':
+    default: return 3;
+  }
 }

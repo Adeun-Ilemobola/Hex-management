@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { OrganizationMetadata } from "@/server/actions/subscriptionService";
+import { OrganizationMetadata, seatPlan } from "@/server/actions/subscriptionService";
 import { sendEmail } from "@/server/actions/sendEmail";
 import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 
@@ -189,9 +189,9 @@ export const organizationRouter = createTRPCRouter({
                 const userSub = ctx.plan
                 const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
                 const metadata = {
-                    planType: userSub.data.planTier,
-                    seatLimit: seatPlan(userSub.data.planTier),
-                    isExpired: (ctx.plan.data.daysLeft || 0) <= 0
+                    planType: userSub.planTier,
+                    seatLimit: seatPlan(userSub.planTier),
+                    isExpired: userSub.daysLeft ? userSub.daysLeft <= 0 : true
                 }
                 console.log({
                     userSub,
@@ -341,14 +341,3 @@ export const organizationRouter = createTRPCRouter({
 });
 
 
-function seatPlan(params: string) {
-    switch (params) {
-        case "Deluxe":
-            return 5;
-        case "Premium":
-            return 30;
-        default:
-            return 0;
-    }
-
-}

@@ -46,7 +46,7 @@ const subscriptionPlans = [
   },
 ];
 
-export default function SubscriptionPage() {
+export default function Page() {
   const { isPending: sessionLoading } = authClient.useSession();
   const [subscriptionList, setSubscriptionList] = React.useState(subscriptionPlans);
   const getUserPlan = api.user.getUserPlan.useQuery()
@@ -67,13 +67,18 @@ export default function SubscriptionPage() {
     if (getUserPlan.data) {
       console.log(getUserPlan.data);
 
-      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.tier === getUserPlan.data.data.planTier) })));
+      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.tier === getUserPlan.data.value?.planTier) })));
     }
 
 
   }, [getUserPlan.data]);
 
   function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium') {
+    const inOrganization = getUserPlan.data?.value?.inOrganization;
+    if (inOrganization) {
+      toast.warning("You are changing your plan within an organization contact your admin for any issues of the organization");
+      return;
+    }
     subscriptionMutation.mutate({ tier });
   };
 

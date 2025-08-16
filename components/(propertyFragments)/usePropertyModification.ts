@@ -27,7 +27,7 @@ export function usePropertyModification(id: string) {
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
     const Session = authClient.useSession();
-    const getUserPlan = api.user.getUserPlan.useQuery();
+    const {data: plan , isPending:planLoading} = api.user.getUserPlan.useQuery();
 
 
 
@@ -339,8 +339,8 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: { planTier: getUserPlan.data?.data?.planTier || "Free", isActive: getUserPlan.data?.data?.isActive || false, daysLeft: getUserPlan.data?.data?.daysLeft || null },
-        isLoading: getUserPlan.isPending || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
+        sub: { planTier: plan?.value?.planTier || "Free", isActive: plan?.value?.isActive || false, daysLeft: plan?.value?.daysLeft || null , inOrganization: plan?.value?.inOrganization || null },
+        isLoading: planLoading || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,
         UpdateProperty: updateProperty.mutate,

@@ -96,17 +96,19 @@ export const auth = betterAuth({
 
       allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
-        const { data: plan } = await caller.user.getUserPlan();
+        const { value: plan } = await caller.user.getUserPlan();
+        if (!plan) {
+          return false;
+        }
         if (plan.planTier === "Free") {
           return false
         } else if (plan.planTier === "Deluxe" || plan.planTier === "Premium") {
           return true
         }
-
         return false
+        
       }
     })
   ]
-
 
 });

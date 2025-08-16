@@ -105,7 +105,8 @@ export default function Page() {
         organizationName: "Adekunle's Org",
         email: "adeun2020@gmail.com",
         fallbackUrl: "https://google.com",
-        tempPassword: "password"
+        tempPassword: "password",
+          userExists: false
       }
     }),
     onSuccess: (data) => {

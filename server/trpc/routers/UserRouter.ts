@@ -8,6 +8,14 @@ import { Delete } from 'lucide-react';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
 
+type userOrganizationContributor = {
+    name: string;
+    id: string;
+    permission: "admin" | "member"
+    organizationProperties: string[];
+   
+}
+
 
 export const PropertiesRouter = createTRPCRouter({
     getUserProperties: protectedProcedure
