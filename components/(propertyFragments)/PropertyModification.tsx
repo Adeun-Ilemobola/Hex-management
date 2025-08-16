@@ -152,7 +152,7 @@ export default function PropertyModification() {
     }
 
     function orgListClean() {
-        let cleaned = orgList?.value.map(org => ({
+        const cleaned = orgList?.value.map(org => ({
             id: org.id,
             name: org.name,
             selected: propertyInfo.ownerId === org.id,
