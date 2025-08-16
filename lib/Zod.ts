@@ -360,7 +360,7 @@ export const propertySchema = z
     videoTourUrl: z.string().url("Invalid URL").optional().nullable(),
   })
 
-const ownerType = z.union([z.literal("USER"), z.literal("ORGANIZATION")]);
+ export const ownerType = z.union([z.literal("USER"), z.literal("ORGANIZATION")]);
 export type ownerTypeT = z.infer<typeof ownerType>;
 
 

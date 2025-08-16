@@ -24,7 +24,7 @@ import { Label } from "../ui/label";
 type org = {
   id: string;
   name: string;
-  selected:boolean
+  selected: boolean
   type: ownerTypeT
 }
 interface PropertyGIFProps {
@@ -316,69 +316,77 @@ interface OwnershipConfigProps {
 
 function OwnershipConfig({ data, loading, handleSelectOrg }: OwnershipConfigProps) {
   const [showConfidential, setShowConfidential] = useState(false);
-  
+
 
   return (
     <>
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border bg-muted/30 border-border/60">
-      <div className="flex-1 min-w-[200px]">
-        <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-          Current Owner
-        </p>
-        <p className="text-lg sm:text-xl font-mono font-bold tracking-wider">
-          {
-            data.find((org) => org.selected)?.name || "No owner selected"
-          }
-        </p>
-      </div>
-      <Button
-        onClick={() => {
-          setShowConfidential((prev) => !prev);
-        }}
-        className="h-11 w-full sm:w-auto"
-        aria-label="Generate new access code"
-      >
-        Update Ownership
-      </Button>
-    </div>
-
-
-
-    <Dialog open={showConfidential} onOpenChange={setShowConfidential}>
-      <DialogOverlay className=" bg-purple-700/30 backdrop-blur-md" />
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Select the owner.</DialogTitle>
-      <DialogDescription>
-        Please select the owner of this property.
-      </DialogDescription>
-    </DialogHeader>
-    <div className="grid gap-4">
-      {data.map((org , i) => (
-        <Label key={i} className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
-        <Checkbox
-          id={`toggle-${i}`}
-          checked={org.selected}
-          onCheckedChange={() => {
-            handleSelectOrg(org.id, org.type);
-            
-          }}
-          className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-        />
-        <div className="grid gap-1.5 font-normal">
-          <p className="text-sm leading-none font-medium">
-            {org.name}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-lg border bg-muted/30 border-border/60">
+        <div className="flex-1 min-w-[200px]">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+            Current Owner
           </p>
-          <p className="text-muted-foreground text-sm">
-            {org.type}
+          <p className="text-lg sm:text-xl font-mono font-bold tracking-wider">
+            {
+              data.find((org) => org.selected)?.name || "No owner selected"
+            }
           </p>
         </div>
-      </Label>
-      ))}
-    </div>
-  </DialogContent>
-</Dialog>
-  </>
+        <Button
+          onClick={() => {
+            setShowConfidential((prev) => !prev);
+          }}
+          className="h-11 w-full sm:w-auto"
+          aria-label="Generate new access code"
+        >
+          Update Ownership
+        </Button>
+      </div>
+
+
+
+      <Dialog open={showConfidential} onOpenChange={setShowConfidential}>
+        <DialogOverlay className=" bg-purple-700/30 backdrop-blur-md" />
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select the owner.</DialogTitle>
+            <DialogDescription>
+              Please select the owner of this property.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+
+            {loading ? (
+              <p>Loading...</p>
+            ) : data.length === 0 ? (
+              <p>No organizations found.</p>
+            ) : (<>
+              {data.map((org, i) => (
+                <Label key={i} className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
+                  <Checkbox
+                    id={`toggle-${i}`}
+                    checked={org.selected}
+                    onCheckedChange={() => {
+                      handleSelectOrg(org.id, org.type);
+
+                    }}
+                    className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                  />
+                  <div className="grid gap-1.5 font-normal">
+                    <p className="text-sm leading-none font-medium">
+                      {org.name}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {org.type}
+                    </p>
+                  </div>
+                </Label>
+              ))}
+            </>)}
+
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
 
   )
 
