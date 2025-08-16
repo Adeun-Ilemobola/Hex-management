@@ -30,6 +30,8 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     const router = useRouter();
 
     const { data: session, isPending } = authClient.useSession();
+    const {data: plan , isPending:planLoading} = api.user.getUserPlan.useQuery();
+    console.log(plan?.value);
 
     const {data:getProperties , isPending:getPropertiesPending} = api.Propertie.getUserProperties.useQuery({data: data })
      const [isEdit, setIsEdit] = useState(false)
@@ -48,7 +50,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     }
     return (
         <DropBack 
-        is={isPending || getPropertiesPending}
+        is={isPending || getPropertiesPending || planLoading}
         isTextMessage={{data:"" }}
         >
             <div className=' flex-1 flex flex-col gap-2.5'>

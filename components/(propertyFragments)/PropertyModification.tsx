@@ -1,10 +1,10 @@
 "use client"
-import React, { Suspense, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
 import { Button } from '../ui/button'
-import { investmentBlockSchema, propertySchema, } from '@/lib/Zod'
+import { investmentBlockSchema, ownerTypeT, propertySchema, } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
@@ -17,6 +17,7 @@ import { useSearchParams } from 'next/navigation'
 import { usePropertyModification } from './usePropertyModification'
 import Loading from '../Loading'
 import PayWall from '../PayWall'
+import { api } from '@/lib/trpc'
 
 export default function PropertyModification() {
     const searchParams = useSearchParams();
@@ -37,11 +38,22 @@ export default function PropertyModification() {
         isLoading,
         sub
     } = usePropertyModification(id)
+    const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
+
 
     const [section, Setsection] = useState(1)
     console.log(sub);
-    
 
+    useEffect(() => {
+        if (sub.inOrganization && sub.inOrganization.role !== "owner") {
+            const oid = sub.inOrganization.id
+            setPropertyInfo(prev => ({
+                ...prev,
+                ownerId: oid,
+                ownerType: "ORGANIZATION"
+            }));
+        }
+    }, [sub]);
 
     function validation() {
         const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
@@ -89,7 +101,8 @@ export default function PropertyModification() {
                 CreateProperty({
                     property: {
                         ...data,
-                        images: [...uploadedImages]
+                        images: [...uploadedImages],
+
                     },
                     investmentBlock: {
                         ...investmentBlock,
@@ -127,16 +140,34 @@ export default function PropertyModification() {
         }
     }
     function handleSSubscriptionRequirement() {
-    const  tier  = sub.planTier
-    if (tier === 'Free') {
-      return 5
-    } else if (tier === 'Deluxe') {
-      return 35
-    } else if (tier === 'Premium') {
-      return 100
+        const tier = sub.planTier
+        if (tier === 'Free') {
+            return 5
+        } else if (tier === 'Deluxe') {
+            return 35
+        } else if (tier === 'Premium') {
+            return 100
+        }
+        return 5;
     }
-    return 5;
-  }
+
+    function orgListClean() {
+        let cleaned = orgList?.value.map(org => ({
+            id: org.id,
+            name: org.name,
+            selected: propertyInfo.ownerId === org.id,
+            type:"ORGANIZATION" as ownerTypeT
+        })) || [];
+        if (Session.data?.user) {
+            cleaned.push({
+                id: Session.data.user.id,
+                name: Session.data.user.name,
+                selected: propertyInfo.ownerId === Session.data.user.id,
+                type:"USER" as ownerTypeT
+            });
+        }
+        return cleaned;
+    }
 
 
     const isSubscribed = sub.isActive && sub.planTier !== "free" || sub.planTier !== "Free"
@@ -149,22 +180,31 @@ export default function PropertyModification() {
                     {section === 1 && (
                         <div className=" mx-auto px-4 py-6">
                             <div className="flex flex-col lg:flex-row gap-6">
-                              
-                                    <PropertyGIF
-                                        disable={disableInput}
-                                        setPropertyInfo={setPropertyInfo}
-                                        propertyInfo={propertyInfo}
-                                        RemoveImage={(id  , supabaseID)=>{
-                                             RemoveImage({ id, supabaseID });
 
-                                        }}
-                                        handleSSubscriptionRequirement={handleSSubscriptionRequirement}
-                                    />
-                               
+                                <PropertyGIF
+                                    disable={disableInput}
+                                    setPropertyInfo={setPropertyInfo}
+                                    propertyInfo={propertyInfo}
+                                    RemoveImage={(id, supabaseID) => {
+                                        RemoveImage({ id, supabaseID });
+
+                                    }}
+                                    handleSSubscriptionRequirement={handleSSubscriptionRequirement}
+                                    orgInfo={
+                                        {
+                                            data: orgListClean(),
+                                            loading: organizationsQuery.isLoading,
+                                            userId: Session.data?.user.id || "",
+                                            refetch: organizationsQuery.refetch,
+                                            showOwnershipConfig: (sub.inOrganization && sub.inOrganization.role === "owner") || false
+                                        }
+                                     }
+                                />
+
                             </div>
                         </div>
                     )}
-                    
+
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
                             <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
