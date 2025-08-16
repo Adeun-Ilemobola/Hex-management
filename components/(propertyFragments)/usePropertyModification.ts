@@ -15,6 +15,7 @@ import {
     StatusEnumType,
 
     ExternalInvestorInput,
+    ownerTypeT,
 } from "@/lib/Zod";
 import { DeleteImages, } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
@@ -199,6 +200,8 @@ export function usePropertyModification(id: string) {
                 status: property.status as StatusEnumType,
                 propertyType: property.propertyType as PropertyTypeEnumType,
                 description: property.description || "",
+                ownerId: property.ownerId || "",
+                ownerType: property.ownerType as ownerTypeT
             });
 
             if (investmentBlock) {
@@ -212,6 +215,7 @@ export function usePropertyModification(id: string) {
                     saleDuration: investmentBlock.saleDuration,
                     leaseCycle: investmentBlock.leaseCycle,
                     depreciationYears: investmentBlock.depreciationYears
+                    
                 });
             }
         }

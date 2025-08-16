@@ -353,11 +353,16 @@ export const propertySchema = z
       .string()
       .length(12, "Access code must be exactly 12 characters."),
     // Nested relationship inputs:
-  
+    ownerId: z.string(),
+    ownerType:z.union([z.literal("USER"), z.literal("ORGANIZATION")]),
+
     images: z.array(imageSchema),
     videoTourUrl: z.string().url("Invalid URL").optional().nullable(),
   })
- 
+
+const ownerType = z.union([z.literal("USER"), z.literal("ORGANIZATION")]);
+export type ownerTypeT = z.infer<typeof ownerType>;
+
 
 //
 // ─── SUBSCRIPTION ────────────────────────────────────────────────────────────────
@@ -546,7 +551,9 @@ export const defaultPropertyInput: PropertyInput = {
   status: "active",
   ownerName: "",
   contactInfo: "",
-  accessCode: "",            // e.g. nanoid(12)
+  accessCode: "",  
+  ownerId: "",
+  ownerType: "ORGANIZATION",  // e.g. nanoid(12)
 
   images: [],
   videoTourUrl: undefined,

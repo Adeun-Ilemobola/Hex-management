@@ -8,12 +8,21 @@ import { Delete } from 'lucide-react';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
 
-type userOrganizationContributor = {
-    name: string;
+// type userOrganizationContributor = {
+//     name: string;
+//     id: string;
+//     permission: "admin" | "member"
+//     organizationProperties: string[];
+
+// }
+
+export type CleanProperty = {
     id: string;
-    permission: "admin" | "member"
-    organizationProperties: string[];
-   
+    img?: string;
+    name: string;
+    address: string;
+    status: string;
+    saleStatus: string;
 }
 
 
@@ -25,52 +34,100 @@ export const PropertiesRouter = createTRPCRouter({
             )
         }))
         .query(async ({ ctx, input }) => {
-            const { data } = input;
-            const getP = await prisma.propertie.findMany(
-                {
-                    where: {
-                        userId: ctx.user.id,
-                        ...(data.status && { leavingstatus: data.status as string }),
-                        ...(data.searchText && {
-                            name: {
-                                contains: data.searchText as string,
-                                mode: "insensitive"
-                            }
-                        })
-                    },
-                    select: {
-                        id: true,
-                        name: true,
-                        address: true,
-                        status: true,
-                        images: { select: { url: true } },
-                        investBlock: { select: { typeOfSale: true } }
+
+            try {
+                let itemList: CleanProperty[] = [];
+
+                const { data } = input;
+                const getOrgItems = await prisma.propertie.findMany(
+                    {
+                        where: {
+                            ownerId: ctx.plan.inOrganization?.id || "",
+                            ownerType: "ORGANIZATION",
+                            ...(data.status && { leavingstatus: data.status as string }),
+                            ...(data.searchText && {
+                                name: {
+                                    contains: data.searchText as string,
+                                    mode: "insensitive"
+                                }
+                            })
+                        },
+                        select: {
+                            id: true,
+                            name: true,
+                            address: true,
+                            status: true,
+                            images: { select: { url: true } },
+                            investBlock: { select: { typeOfSale: true } }
+                        }
                     }
+                )
+
+                itemList = getOrgItems.map(item => {
+
+                    const { investBlock } = item
+                    return {
+                        id: item.id,
+                        img: item.images.length === 0 ? undefined : item.images[0].url,
+                        name: item.name,
+                        address: item.address,
+                        status: item.status as string,
+                        saleStatus: investBlock?.typeOfSale as string
+                    }
+                })
+
+
+                if (ctx.plan.inOrganization && ctx.plan.inOrganization.role === "owner") {
+                    const getUserItems = await prisma.propertie.findMany({
+                        where: {
+                            ownerId: ctx.user.id,
+                            ownerType: "USER",
+                            ...(data.status && { leavingstatus: data.status as string }),
+                            ...(data.searchText && {
+                                name: {
+                                    contains: data.searchText as string,
+                                    mode: "insensitive"
+                                }
+                            })
+                        },
+                        select: {
+                            id: true,
+                            name: true,
+                            address: true,
+                            status: true,
+                            images: { select: { url: true } },
+                            investBlock: { select: { typeOfSale: true } }
+                        }
+                    })
+                    itemList = itemList.concat(getUserItems.map(item => {
+
+                        const { investBlock } = item
+                        return {
+                            id: item.id,
+                            img: item.images.length === 0 ? undefined : item.images[0].url,
+                            name: item.name,
+                            address: item.address,
+                            status: item.status as string,
+                            saleStatus: investBlock?.typeOfSale as string
+                        }
+                    }))
+
                 }
-            )
-            if (!getP) {
+
+                console.log(itemList);
+                
+
+                return {
+                    data: itemList,
+                }
+
+            } catch (error) {
+                console.log(error);
                 return {
                     data: [],
                 }
+
             }
-            const cleanP = getP.map(item => {
-
-                const { investBlock } = item
-                return {
-                    id: item.id,
-                    img: item.images.length === 0 ? undefined : item.images[0].url,
-                    name: item.name,
-                    address: item.address,
-                    status: item.status as string,
-                    saleStatus: investBlock?.typeOfSale as string
-                }
-            })
-
-            return {
-                data: cleanP,
-            }
-
-
         }),
 
     getPropertie: protectedProcedure
@@ -87,7 +144,7 @@ export const PropertiesRouter = createTRPCRouter({
                 const getP = await prisma.propertie.findUnique({
                     where: {
                         id: input.pID,
-                        userId: ctx.user.id
+                       
                     },
                     include: {
                         images: true,
@@ -143,6 +200,10 @@ export const PropertiesRouter = createTRPCRouter({
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             try {
+                let ownerShip = {
+                    name: ctx.user.name,
+                    email: ctx.user.email
+                }
                 const { images } = input.property;
                 const { externalInvestors, ...investmentBlock } = input.investmentBlock
                 const { id, propertyId, ...cleanInvestmentBlock } = investmentBlock;
@@ -152,19 +213,45 @@ export const PropertiesRouter = createTRPCRouter({
                     const { id, ...rest } = item;
                     return { ...rest, };
                 })
+                if (propertyData.ownerType === "ORGANIZATION") {
+                    const getOrgOwner = await ctx.prisma.member.findFirst({
+                        where: {
+                            organizationId: propertyData.ownerId,
+                        },
+                        select:{
+                            user:{
+                                select:{
+                                    name: true,
+                                    email: true
+                                }
+                            }
+                        }
+                    });
+
+                    if (getOrgOwner) {
+                        ownerShip = {
+                            name: getOrgOwner.user.name,
+                            email: getOrgOwner.user.email
+                        }
+                    }
+                    
+                }
+
 
                 console.log('propertyData:', propertyData);
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
                         ...propertyData,
-                        userId: ctx.user.id,
+                        ownerName: ownerShip.name,
+                        contactInfo: ownerShip.email,
+
                         images: {
                             createMany: {
                                 data: [...cleanImages]
                             }
                         },
-                       
+
 
                     }
                 });
@@ -178,19 +265,19 @@ export const PropertiesRouter = createTRPCRouter({
                     })
 
                     if (makeIB) {
-                       const makeEI = await Promise.all(externalInvestors.map(async (item) => {
-                        const { id, ...rest } = item
+                        const makeEI = await Promise.all(externalInvestors.map(async (item) => {
+                            const { id, ...rest } = item
                             return await ctx.prisma.externalInvestor.create({
                                 data: {
                                     ...rest,
                                     investmentBlockId: makeIB.id
-                                    
+
                                 }
                             })
-                       }))
+                        }))
                         await Promise.all(
-                            makeEI.map(async(item) => {
-                                const { id , investmentBlockId, ...rest } = item;
+                            makeEI.map(async (item) => {
+                                const { id, investmentBlockId, ...rest } = item;
                                 await sendEmail({
                                     templateText: "VerifyExternalInvestor",
                                     to: rest.email,
@@ -203,14 +290,14 @@ export const PropertiesRouter = createTRPCRouter({
                                         DollarValueReturn: rest.dollarValueReturn,
                                         propertyName: makeP.name
                                     }
-                                        
-                                       
+
+
                                 })
                             })
                         );
                     }
                 }
-                  
+
 
 
                 if (!makeP) {
@@ -277,7 +364,8 @@ export const PropertiesRouter = createTRPCRouter({
                 const updataData = await ctx.prisma.propertie.update({
                     where: {
                         id: pId,
-                        userId: ctx.user.id
+                        ownerId:propertyData.ownerId
+                        
                     },
                     data: {
                         ...propertyData,
@@ -316,10 +404,10 @@ export const PropertiesRouter = createTRPCRouter({
                     );
 
                     if (newExternalInvestors.length > 0) {
-                       const res = await Promise.all(
+                        const res = await Promise.all(
                             newExternalInvestors.map(item => {
                                 const { id, ...rest } = item;
-                                
+
                                 return ctx.prisma.externalInvestor.create({
                                     data: {
                                         ...rest,
@@ -329,8 +417,8 @@ export const PropertiesRouter = createTRPCRouter({
                             })
                         )
                         await Promise.all(
-                            res.map(async(item) => {
-                                const { id , investmentBlockId, ...rest } = item;
+                            res.map(async (item) => {
+                                const { id, investmentBlockId, ...rest } = item;
                                 await sendEmail({
                                     templateText: "VerifyExternalInvestor",
                                     to: rest.email,
@@ -343,8 +431,8 @@ export const PropertiesRouter = createTRPCRouter({
                                         DollarValueReturn: rest.dollarValueReturn,
                                         propertyName: updataData.name
                                     }
-                                        
-                                       
+
+
                                 })
                             })
                         );

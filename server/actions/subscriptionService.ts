@@ -305,9 +305,7 @@ export async function Final(userId: string): Promise<FinalPlanResultFull> {
         const userInOrg = await prisma.member.findFirst({
             where: {
                 userId: logedUserPlan.userId,
-                role: {
-                    in: ["member", "admin"]
-                }
+               
             },
             select: {
                 organizationId: true,

@@ -188,7 +188,7 @@ model propertie {
 
   // Relationships
   ownerId      String
-  ownerType    String @default("user") // "user" or "organization"
+  ownerType    String @default("ORGANIZATION") // "user" or "organization"
 
   
   investBlock investmentBlock?
