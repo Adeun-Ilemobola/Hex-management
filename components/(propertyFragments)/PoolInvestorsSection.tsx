@@ -21,7 +21,7 @@ interface propertyIFProps {
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
     reLoad: () => void; // Optional prop to reload data after mutation
 }
-export default function PoolInvestorsSection({ mebers, setMebers, reLoad }: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
     const [maxContribution, setMaxContribution] = useState(0)
