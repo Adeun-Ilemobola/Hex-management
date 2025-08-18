@@ -39,11 +39,12 @@ interface PropertyGIFProps {
     userId: string;
     refetch?: () => void
     showOwnershipConfig: boolean;
+    disabled: boolean
 
   }
 }
 
-export default function PropertyGIF({
+export default function PropertyDetails({
   propertyInfo,
   setPropertyInfo,
   disable,
@@ -150,7 +151,7 @@ export default function PropertyGIF({
           </div>
 
           {/* Property Type & Status */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h3 className="text-base sm:text-lg font-semibold border-b border-border pb-2">
               Type & Status
             </h3>
@@ -173,7 +174,7 @@ export default function PropertyGIF({
           </div>
 
           {/* Features */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h3 className="text-base sm:text-lg font-semibold border-b border-border pb-2">
               Features
             </h3>
@@ -197,7 +198,7 @@ export default function PropertyGIF({
           </div>
 
           {/* Access Code */}
-          <div className="space-y-3">
+          <div className="space-y-6">
             <h3 className="text-base sm:text-lg font-semibold border-b border-border pb-2">
               Access Code
             </h3>
@@ -277,6 +278,7 @@ export default function PropertyGIF({
             data={orgInfo.data}
             loading={orgInfo.loading}
             handleSelectOrg={handleSelectOrg}
+            disabled={orgInfo.disabled}
           />
         </section>
       </div>
@@ -309,12 +311,13 @@ const typeOfSaleOP = [
 interface OwnershipConfigProps {
   data: org[];
   loading: boolean;
+  disabled: boolean;
 
   handleSelectOrg(id: string, type: "USER" | "ORGANIZATION"): void
 }
 
 
-function OwnershipConfig({ data, loading, handleSelectOrg }: OwnershipConfigProps) {
+function OwnershipConfig({ data, loading, handleSelectOrg , disabled }: OwnershipConfigProps) {
   const [showConfidential, setShowConfidential] = useState(false);
 
 
@@ -337,6 +340,7 @@ function OwnershipConfig({ data, loading, handleSelectOrg }: OwnershipConfigProp
           }}
           className="h-11 w-full sm:w-auto"
           aria-label="Generate new access code"
+          disabled={disabled}
         >
           Update Ownership
         </Button>

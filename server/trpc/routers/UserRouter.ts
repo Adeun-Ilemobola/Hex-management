@@ -3,8 +3,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { prisma } from '@/lib/prisma';
-import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, SaleTypeEnumType, PropertyTypeEnumType } from '@/lib/Zod';
-import { Delete } from 'lucide-react';
+import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
 
@@ -286,8 +285,8 @@ export const PropertiesRouter = createTRPCRouter({
                                         email: rest.email,
                                         verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
                                         propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
-                                        contributionPercent: rest.contributionPercentage,
-                                        DollarValueReturn: rest.dollarValueReturn,
+                                        contributionPercent: rest.contributionPercentage.toNumber(),
+                                        DollarValueReturn: rest.dollarValueReturn.toNumber(),
                                         propertyName: makeP.name
                                     }
 
@@ -402,6 +401,8 @@ export const PropertiesRouter = createTRPCRouter({
                             });
                         })
                     );
+                    console.log("newExternalInvestors", newExternalInvestors);
+                    
 
                     if (newExternalInvestors.length > 0) {
                         const res = await Promise.all(
@@ -415,7 +416,9 @@ export const PropertiesRouter = createTRPCRouter({
                                     }
                                 });
                             })
+                            
                         )
+                         console.log("res", res);   
                         await Promise.all(
                             res.map(async (item) => {
                                 const { id, investmentBlockId, ...rest } = item;
@@ -427,8 +430,8 @@ export const PropertiesRouter = createTRPCRouter({
                                         email: rest.email,
                                         verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
                                         propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
-                                        contributionPercent: rest.contributionPercentage,
-                                        DollarValueReturn: rest.dollarValueReturn,
+                                        contributionPercent: rest.contributionPercentage.toNumber(),
+                                        DollarValueReturn: rest.dollarValueReturn.toNumber(),
                                         propertyName: updataData.name
                                     }
 

@@ -28,7 +28,7 @@ export function usePropertyModification(id: string) {
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
     const Session = authClient.useSession();
-    const {data: plan , isPending:planLoading} = api.user.getUserPlan.useQuery();
+    const { data: plan, isPending: planLoading } = api.user.getUserPlan.useQuery();
 
 
 
@@ -91,7 +91,7 @@ export function usePropertyModification(id: string) {
 
 
     const financials = useMemo(() => {
-        const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle,depreciationYears } = investmentBlock;
+        const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle, depreciationYears } = investmentBlock;
         let result = 0;
         let duration = 0;
         let markedUpPrice = 0;
@@ -105,7 +105,7 @@ export function usePropertyModification(id: string) {
             duration = 12;
         }
         else if (typeOfSale === 'RENT') {
-           
+
             const base = initialInvestment / (depreciationYears * 12);
             const pay = base * (1 + margin / 100);
             result = pay * (1 - discountPercentage / 100);
@@ -113,7 +113,7 @@ export function usePropertyModification(id: string) {
 
         }
         else if (typeOfSale === 'LEASE') {
-              
+
             const base = initialInvestment / (depreciationYears * leaseCycle);       // per‐cycle cost
             const pay = base * (1 + margin / 100);
             result = pay * (1 - discountPercentage / 100);
@@ -194,6 +194,7 @@ export function usePropertyModification(id: string) {
         if (getProperty.data?.success && getProperty.data?.value) {
             const { externalInvestors, property, investmentBlock, images } = getProperty.data.value;
 
+
             setPropertyInfo({
                 ...property,
                 images,
@@ -205,22 +206,32 @@ export function usePropertyModification(id: string) {
             });
 
             if (investmentBlock) {
-                setExternalInvestor(externalInvestors);
+                const externalInvestorsCleaned = externalInvestors.map(inv => ({
+                    ...inv,
+                    contributionPercentage: Number(inv.contributionPercentage) || 0,
+                    returnPercentage: Number(inv.returnPercentage) || 0,
+                    dollarValueReturn: Number(inv.dollarValueReturn) || 0,
+                    updatedAt: inv.updatedAt ? new Date(inv.updatedAt) : undefined,
+                    createdAt: inv.createdAt ? new Date(inv.createdAt) : undefined,
+                    fundedAt: inv.fundedAt ? new Date(inv.fundedAt) : undefined,
+                }));
+                setExternalInvestor(externalInvestorsCleaned);
                 setInvestmentBlock({
                     ...investmentBlock,
                     typeOfInvestment: investmentBlock.typeOfInvestment as InvestmentTypeEnumType,
                     typeOfSale: investmentBlock.typeOfSale as SaleTypeEnumType,
-                    externalInvestors,
+                    externalInvestors: externalInvestorsCleaned,
                     propertyId: property.id,
                     saleDuration: investmentBlock.saleDuration,
                     leaseCycle: investmentBlock.leaseCycle,
                     depreciationYears: investmentBlock.depreciationYears
-                    
+
                 });
             }
         }
 
         const user = Session?.data?.user;
+        const userPlan = plan?.value;
         if (user?.name && user?.email && id.length === 0) {
             setPropertyInfo(prev => ({
                 ...prev,
@@ -229,9 +240,18 @@ export function usePropertyModification(id: string) {
             }));
         }
 
+        if (userPlan && userPlan.inOrganization && userPlan.inOrganization.role !== "owner") {
+            const oid = userPlan.inOrganization.id
+            setPropertyInfo(prev => ({
+                ...prev,
+                ownerId: oid,
+                ownerType: "ORGANIZATION"
+            }));
+        }
 
 
-    }, [Session, id, getProperty.data]);
+
+    }, [Session, id, getProperty.data, plan?.value]);
 
 
     useEffect(() => {
@@ -285,49 +305,49 @@ export function usePropertyModification(id: string) {
     }, [investorCalculations.updatedInvestors]);
 
 
-    useEffect(() => {
-        if (!Session?.data?.user) return;
-        if(externalInvestor.length === 0) return;
-        const name = Session.data.user.name;
-        const email = Session.data.user.email;
-        if (!name || !email) return;
+    // useEffect(() => {
+    //     if (!Session?.data?.user) return;
+    //     if(externalInvestor.length === 0) return;
+    //     const name = Session.data.user.name;
+    //     const email = Session.data.user.email;
+    //     if (!name || !email) return;
 
-        setExternalInvestor(prev => {
-            // Separate lead and others
-            const others = prev.filter(inv => !(inv.email === email && inv.name === name));
-            const lead = prev.find(inv => inv.email === email && inv.name === name);
+    //     setExternalInvestor(prev => {
+    //         // Separate lead and others
+    //         const others = prev.filter(inv => !(inv.email === email && inv.name === name));
+    //         const lead = prev.find(inv => inv.email === email && inv.name === name);
 
-            const sumOthers = others.reduce(
-                (sum, investor) => sum + (investor.contributionPercentage || 0),
-                0
-            );
-            const desiredLeadContribution = Math.max(0, 100 - sumOthers);
+    //         const sumOthers = others.reduce(
+    //             (sum, investor) => sum + (investor.contributionPercentage || 0),
+    //             0
+    //         );
+    //         const desiredLeadContribution = Math.max(0, 100 - sumOthers);
 
-            if (lead) {
-                if (lead.contributionPercentage === desiredLeadContribution) {
-                    return prev;
-                }
-                return others.concat({
-                    ...lead,
-                    contributionPercentage: desiredLeadContribution,
-                });
-            } else {
-                // create lead with remainder
-                const newLead: ExternalInvestorInput = {
-                    name,
-                    email,
-                    contributionPercentage: desiredLeadContribution,
-                    returnPercentage: 0,
-                    isInternal: false,
-                    accessRevoked: false,
-                    dollarValueReturn: 0,
-                    investmentBlockId: "",
-                    id: "",
-                };
-                return [...others, newLead];
-            }
-        });
-    }, [ externalInvestor , Session]);
+    //         if (lead) {
+    //             if (lead.contributionPercentage === desiredLeadContribution) {
+    //                 return prev;
+    //             }
+    //             return others.concat({
+    //                 ...lead,
+    //                 contributionPercentage: desiredLeadContribution,
+    //             });
+    //         } else {
+    //             // create lead with remainder
+    //             const newLead: ExternalInvestorInput = {
+    //                 name,
+    //                 email,
+    //                 contributionPercentage: desiredLeadContribution,
+    //                 returnPercentage: 0,
+    //                 isInternal: false,
+    //                 accessRevoked: false,
+    //                 dollarValueReturn: 0,
+    //                 investmentBlockId: "",
+    //                 id: "",
+    //             };
+    //             return [...others, newLead];
+    //         }
+    //     });
+    // }, [ externalInvestor , Session]);
 
 
 
@@ -343,12 +363,15 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: { planTier: plan?.value?.planTier || "Free", isActive: plan?.value?.isActive || false, daysLeft: plan?.value?.daysLeft || null , inOrganization: plan?.value?.inOrganization || null },
+        sub: { planTier: plan?.value?.planTier || "Free", isActive: plan?.value?.isActive || false, daysLeft: plan?.value?.daysLeft || null, inOrganization: plan?.value?.inOrganization || null },
         isLoading: planLoading || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,
         UpdateProperty: updateProperty.mutate,
-        RemoveImage: delImage.mutate
+        RemoveImage: delImage.mutate,
+        reFresh: () => {
+            getProperty.refetch();
+        }
 
     }
 

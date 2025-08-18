@@ -121,7 +121,11 @@ export const zodRegisterSchema = z
 //
 export const InvestmentTypeEnum = z.enum(["INDIVIDUAL", "POOLED", "TIC"]);
 export type InvestmentTypeEnumType = z.infer<typeof InvestmentTypeEnum>;
-
+export const InvestmentBlockStatusSchema =z.enum([
+  "DRAFT",
+  "FINALIZED",   // allocations sum to 100%, funding in progress/escrow
+  "LOCKED",      // funds cleared; cap table immutable
+]);
 export const PropertyTypeEnum = z.enum([
   "House",
   "Apartment",
@@ -153,7 +157,7 @@ export const PlanTierEnum = z.enum(["Free", "Deluxe", "Premium"]);
 // ─── IMAGE ──────────────────────────────────────────────────────────────────────
 //
 export const imageSchema = z.object({
-  id : z.string().default(""),
+  id: z.string().default(""),
   name: z.string().min(1, "Image must have a name."),
   url: z.string().url("Invalid image URL."),
   size: z.number().int().nonnegative("Size must be ≥ 0."),
@@ -175,9 +179,14 @@ export const messageSchema = z.object({
 //
 export const externalInvestorSchema = z
   .object({
-    id: z.string().default(""),
+    status:InvestmentBlockStatusSchema,
+    id: z.string().default(""), // Prisma uuid
     name: z.string().min(2, "Name is required."),
     email: z.string().email("Valid email required."),
+
+    investorUserId: z.string().uuid().optional().nullable(), // optional link to User
+
+    // economics
     contributionPercentage: z
       .number()
       .min(0, "Must be ≥ 0%")
@@ -186,18 +195,26 @@ export const externalInvestorSchema = z
       .number()
       .min(0, "Must be ≥ 0%")
       .max(100, "Cannot exceed 100%"),
+    dollarValueReturn: z.number().nonnegative(),
+
+    // states/flags
     isInternal: z
       .boolean()
       .default(false)
       .describe("true = existing user, false = external"),
     accessRevoked: z.boolean().default(false),
-    dollarValueReturn: z.number().nonnegative(),
-    investmentBlockId: z
-      .string()
-      .default(""),
-  })
-  .strict();
+    funded: z.boolean().default(false),
+    fundedAt: z.date().optional().nullable(),
 
+    // parent
+    investmentBlockId: z.string().default(""),
+
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
+  })
+ 
+
+export type InvestmentBlockStatusType = z.infer<typeof InvestmentBlockStatusSchema>;
 //
 // ─── INVESTMENT BLOCK ────────────────────────────────────────────────────────────
 //
@@ -243,41 +260,63 @@ export const investmentBlockSchema = z
       .string()
       .default(""),
     externalInvestors: z.array(externalInvestorSchema),
-    depreciationYears:z.number().min(1).nonnegative().default(1),  
+    depreciationYears: z.number().min(1).nonnegative().default(1),
 
   })
   .superRefine((data, ctx) => {
     // rent or lease require higher minimums
-     const { initialInvestment, margin } = data;
-      if (
-        data.initialInvestment !== initialInvestment
-      ) {
+    const { initialInvestment, margin, externalInvestors } = data;
+    if (externalInvestors.length > 0) {
+      const totalContribution = externalInvestors.reduce(
+        (sum, investor) => sum + investor.contributionPercentage,
+        0
+      );
+      if (totalContribution > 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["investmentBlock", "initialInvestment"],
-          message:
-            "investmentBlock.initialInvestment must match top-level initialInvestment.",
+          path: ["investmentBlock", "externalInvestors"],
+          message: "Total contribution must not exceed 100%.",
         });
       }
-      if (data.margin !== margin) {
+      if (totalContribution < 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["investmentBlock", "margin"],
-          message:
-            "investmentBlock.margin must match top-level margin.",
+          path: ["investmentBlock", "externalInvestors"],
+          message: "Total contribution must equal 100%.",
         });
       }
+    }
 
-      if (data.typeOfInvestment === "POOLED") {
-        // 1) require at least two investors
-        if (data.externalInvestors.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ["investmentBlock", "externalInvestors"],
-            message: "Pooled investments require at least two external investors.",
-          });
-        }
+
+
+
+    if (data.initialInvestment !== initialInvestment) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["investmentBlock", "initialInvestment"],
+        message:
+          "investmentBlock.initialInvestment must match top-level initialInvestment.",
+      });
+    }
+    if (data.margin !== margin) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["investmentBlock", "margin"],
+        message:
+          "investmentBlock.margin must match top-level margin.",
+      });
+    }
+
+    if (data.typeOfInvestment === "POOLED") {
+      // 1) require at least two investors
+      if (data.externalInvestors.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["investmentBlock", "externalInvestors"],
+          message: "Pooled investments require at least two external investors.",
+        });
       }
+    }
     if (data.typeOfSale === "RENT" || data.typeOfSale === "LEASE") {
       if (data.initialInvestment <= 1000) {
         ctx.addIssue({
@@ -309,7 +348,7 @@ export const investmentBlockSchema = z
 // ─── PROPERTY ────────────────────────────────────────────────────────────────────
 //
 export const propertySchema = z
-  .object({
+.object({
     id: z.string().default(""),
     name: z
       .string()
@@ -336,7 +375,7 @@ export const propertySchema = z
       .number()
       .int()
       .gte(1800, "Year unrealistic.")
-      .lte(new Date().getFullYear(), "Year cannot be in the future."),
+      .lte(new Date().getFullYear()+5, "Year cannot be in the future."),
     squareFootage: z
       .number()
       .int()
@@ -354,13 +393,13 @@ export const propertySchema = z
       .length(12, "Access code must be exactly 12 characters."),
     // Nested relationship inputs:
     ownerId: z.string(),
-    ownerType:z.union([z.literal("USER"), z.literal("ORGANIZATION")]),
+    ownerType: z.union([z.literal("USER"), z.literal("ORGANIZATION")]),
 
     images: z.array(imageSchema),
     videoTourUrl: z.string().url("Invalid URL").optional().nullable(),
   })
 
- export const ownerType = z.union([z.literal("USER"), z.literal("ORGANIZATION")]);
+export const ownerType = z.union([z.literal("USER"), z.literal("ORGANIZATION")]);
 export type ownerTypeT = z.infer<typeof ownerType>;
 
 
@@ -388,7 +427,7 @@ export const subscriptionSchema = z
 
 
 
-  export const userSchema = z.object({
+export const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email format"),
   emailVerified: z.boolean(),
@@ -440,7 +479,7 @@ export const PropertyListingSchema = z.object({
 });
 
 
-  
+
 
 
 
@@ -478,7 +517,7 @@ export const defaultPropertyListingInput: PropertyListingInput = {
     leaseCycle: 0,
   },
   id: "",
-  
+
 }
 export const defaultUserInput: UserInput = {
   name: "",
@@ -514,6 +553,12 @@ export const defaultExternalInvestorInput: ExternalInvestorInput = {
   dollarValueReturn: 0,
   investmentBlockId: "",
   id: "",
+  status: "DRAFT", // default status
+  investorUserId: undefined, // optional link to User
+  funded: false,
+  fundedAt: undefined, // optional date when funds were received
+  createdAt: undefined, // optional creation date
+  updatedAt: undefined, // optional last update date
 };
 
 export const defaultInvestmentBlockInput: InvestmentBlockInput = {
@@ -551,7 +596,7 @@ export const defaultPropertyInput: PropertyInput = {
   status: "active",
   ownerName: "",
   contactInfo: "",
-  accessCode: "",  
+  accessCode: "",
   ownerId: "",
   ownerType: "ORGANIZATION",  // e.g. nanoid(12)
 
@@ -668,7 +713,7 @@ export const defaultSubscriptionInput: SubscriptionInput = {
 //     saleStatus: "SELL",
 //   },
 // ];
-export  const amenitiesItems: { value: string; label: string }[] = [
+export const amenitiesItems: { value: string; label: string }[] = [
   { value: "elevator", label: "Elevator" },
   { value: "gym", label: "Gym" },
   { value: "fireplace", label: "Fireplace" },
