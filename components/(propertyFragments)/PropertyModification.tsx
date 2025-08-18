@@ -1,5 +1,5 @@
 "use client"
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense , useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
@@ -8,7 +8,7 @@ import { investmentBlockSchema, ownerTypeT, propertySchema, } from '@/lib/Zod'
 import { toast } from 'sonner'
 import { FileUploadResult } from '@/lib/utils'
 import { DeleteImages, UploadImageList } from '@/lib/supabase'
-import PropertyGIF from './PropertyGIF'
+import PropertyDetails from './PropertyDetails'
 
 import InvestmentSummary from './InvestmentSummary'
 import InvestmentBlockSection from './InvestmentBlockSection'
@@ -36,24 +36,12 @@ export default function PropertyModification() {
         UpdateProperty,
         disableInput,
         isLoading,
-        sub
+        sub,
+        reFresh
     } = usePropertyModification(id)
     const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
 
-
     const [section, Setsection] = useState(1)
-    console.log(sub);
-
-    useEffect(() => {
-        if (sub.inOrganization && sub.inOrganization.role !== "owner") {
-            const oid = sub.inOrganization.id
-            setPropertyInfo(prev => ({
-                ...prev,
-                ownerId: oid,
-                ownerType: "ORGANIZATION"
-            }));
-        }
-    }, [sub]);
 
     function validation() {
         const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
@@ -81,16 +69,19 @@ export default function PropertyModification() {
     }
 
     async function handleSubmit() {
-        if (Session.data?.user?.id === undefined) {
-            toast.error("User session not found. Please log in.");
-            return;
-        }
+
         let uploadedImages: FileUploadResult[] = [];
         try {
-            const data = validation()
+              const data = validation()
             if (!data) {
                 return
             }
+            if (Session.data?.user?.id === undefined) {
+                toast.error("User session not found. Please log in.");
+                return;
+            }
+          
+
 
             // Prevent duplications uploads
             const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
@@ -156,14 +147,14 @@ export default function PropertyModification() {
             id: org.id,
             name: org.name,
             selected: propertyInfo.ownerId === org.id,
-            type:"ORGANIZATION" as ownerTypeT
+            type: "ORGANIZATION" as ownerTypeT
         })) || [];
         if (Session.data?.user) {
             cleaned.push({
                 id: Session.data.user.id,
                 name: Session.data.user.name,
                 selected: propertyInfo.ownerId === Session.data.user.id,
-                type:"USER" as ownerTypeT
+                type: "USER" as ownerTypeT
             });
         }
         return cleaned;
@@ -181,7 +172,7 @@ export default function PropertyModification() {
                         <div className=" mx-auto px-4 py-6">
                             <div className="flex flex-col lg:flex-row gap-6">
 
-                                <PropertyGIF
+                                <PropertyDetails
                                     disable={disableInput}
                                     setPropertyInfo={setPropertyInfo}
                                     propertyInfo={propertyInfo}
@@ -196,9 +187,11 @@ export default function PropertyModification() {
                                             loading: organizationsQuery.isLoading,
                                             userId: Session.data?.user.id || "",
                                             refetch: organizationsQuery.refetch,
-                                            showOwnershipConfig: (sub.inOrganization && sub.inOrganization.role === "owner") || false
+                                            showOwnershipConfig: (sub.inOrganization && sub.inOrganization.role === "owner") || false,
+                                            disabled: (sub.inOrganization && sub.inOrganization.role !== "owner") || false
+
                                         }
-                                     }
+                                    }
                                 />
 
                             </div>
@@ -211,7 +204,7 @@ export default function PropertyModification() {
 
                             {Session.data?.user && (
                                 <PayWall allowed={isSubscribed}>
-                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} />
+                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} reLoad={reFresh} />
                                 </PayWall>
                             )}
 

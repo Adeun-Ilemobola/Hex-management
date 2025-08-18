@@ -94,19 +94,43 @@ model Subscription {
   subscriptionArchivesId String?
 }
 
+enum InvestmentBlockStatus {
+  DRAFT
+  FINALIZED   // allocations sum to 100%, funding in progress/escrow
+  LOCKED      // funds cleared; cap table immutable
+}
+
 model externalInvestor {
   id                     String  @id @default(uuid())
   name                   String
-  email                  String  @unique
-  contributionPercentage Float // how much percentage does this user provide for the investment?
-  returnPercentage       Float // the percentage returns for the investor
-  isInternal             Boolean // is this user exist in our system or is an external user?
-  accessRevoked          Boolean // the ability to revoke this user from being a partner
-  dollarValueReturn      Float // the external investors return percentage in a dollar value
+  email                  String
+    status       InvestmentBlockStatus @default(DRAFT)
 
-  investmentBlockId String
-  investmentBlock   investmentBlock @relation(fields: [investmentBlockId], references: [id])
+  investorUserId         String? // optional link to a User if they do exist
+  // relation if you have a User model:
+  // user                   User?   @relation(fields: [investorUserId], references: [id])
+
+  // economics
+  contributionPercentage Decimal @db.Decimal(8, 4)   // was Float
+  returnPercentage       Decimal @db.Decimal(8, 4)   // was Float
+  dollarValueReturn      Decimal @db.Decimal(18, 2)  // was Float
+
+  // states/flags
+  isInternal             Boolean
+  accessRevoked          Boolean @default(false)
+  funded                 Boolean @default(false)
+  fundedAt               DateTime?
+
+  // parent
+  investmentBlockId      String
+  investmentBlock        investmentBlock @relation(fields: [investmentBlockId], references: [id])
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@unique([investmentBlockId, email]) 
 }
+
 
 model investmentBlock {
   id               String         @id @default(uuid())
