@@ -15,7 +15,18 @@ function sanitizeFilename(name: string): string {
         .replace(/[^a-zA-Z0-9._-]/g, ""); // remove invalid characters
 }
 
-export function UploadImage(file: FileUploadResult, userID: string): Promise<FileUploadResult> {
+interface UploadImageOptions {
+    userID: string;
+    file: FileUploadResult;
+    patHex:'chat'|"notChat"
+}
+// interface UploadImageOptionsConstructor {
+//     userID: string;
+//     file: FileUploadResult[];
+//     patHex:'chat'|"notChat"
+// }
+
+export function UploadImage({ userID, file , patHex = "notChat" }: UploadImageOptions ): Promise<FileUploadResult> {
     return new Promise(async (resolve, reject) => {
 
         if (!file) {
@@ -26,8 +37,14 @@ export function UploadImage(file: FileUploadResult, userID: string): Promise<Fil
             reject(new Error('No path provided for upload'));
             return;
         }
-        const path = `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
-        const { data: uploadData, error } = await supabase.storage.from("img").upload(path, base64ToBlob(file.url, file.type));
+        function newPath() {
+            if (patHex === "chat") {
+                return `${userID}/chat/${Date.now()}-${sanitizeFilename(file.name)}`;
+            }
+            return `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
+        }
+        // const path = `${userID}/${Date.now()}-${sanitizeFilename(file.name)}`;
+        const { data: uploadData, error } = await supabase.storage.from("img").upload(newPath(), base64ToBlob(file.url, file.type));
         if (error) {
             throw new Error(`Upload failed: ${error.message}`);
         }
@@ -57,12 +74,12 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     return result;
 }
 
-export function UploadImageList(files: FileUploadResult[], userID: string): Promise<FileUploadResult[]> {
+export function UploadImageList(files: FileUploadResult[], userID: string , patHex: 'chat'|"notChat"): Promise<FileUploadResult[]> {
     return new Promise(async (resolve) => {
         const uploadedImages: FileUploadResult[] = [];
 
         for (const chunk of chunkArray(files, 3)) {
-            const chunkResult = await Promise.allSettled(chunk.map(f => UploadImage(f, userID)));
+            const chunkResult = await Promise.allSettled(chunk.map(f => UploadImage({userID, file: f, patHex: patHex})));
             for (const result of chunkResult) {
                 if (result.status === "fulfilled") {
                     uploadedImages.push(result.value);

@@ -478,10 +478,68 @@ export const PropertyListingSchema = z.object({
   yearBuilt: z.number(),
 });
 
+// ─── Chat ────────────────────────────
+
+export const ChatRoomMemberSchema = z.object({
+  id:z.string().default(""),
+  roomId: z.string().default(""),            // @relation(fields: [roomId], references: [id])
+  userId: z.string().default(""),
+  isAdmin: z.boolean().default(false),
+  notificationCount: z.number().int().nonnegative().default(0),
+  joinedAt: z.date().default(new Date()),           // @default(now())
+  // room relation omitted to avoid cycles
+})
+export const ChatImageSchema = z.object({
+  id: z.string().default(""),
+  name :z.string(),
+  url: z.string().url("Invalid image URL."),
+  size :z.number().int().nonnegative("Size must be ≥ 0."),       
+  type :z.string().min(1),        
+  lastModified: z.number().int().nonnegative(), 
+  createdAt :z.date().default(new Date()),  
+  updatedAt: z.date().default(new Date()),    
+  supabaseID :z.string().default(""), 
+  ChatRoomID :z.string().default(""),
+  chatOwnerID: z.string().default(""),
+  messageId :z.string().default(""),
+
+})
+export const MessageSchema = z.object({
+  id: z.string().default(""),
+  roomId: z.string().default(""),            // @relation(fields: [roomId], references: [id])
+  authorId: z.string().default(""),
+  text: z.string().optional().nullable(), // String? in Prisma → nullable (and we allow undefined in inputs)
+  createdAt: z.date().default(new Date()),          // @default(now())
+  isDeleted: z.boolean().default(false),
+  images: z.array(ChatImageSchema).default([]),
+  // room relation omitted to avoid cycles; include if you need it:
+  // room: z.lazy(() => ChatRoomSchema).optional()
+
+})
+
+
+export const ChatRoomSchema = z.object({
+  id: z.string().default(""),
+  title: z.string().min(1),
+  participants: z.array(z.lazy(() => ChatRoomMemberSchema)).default([]),
+  chats: z.array(z.lazy(() => MessageSchema)).default([])
+})
 
 
 
 
+// ─── TYPES ────────────────────────────
+
+export type ChatRoomMember = z.infer<typeof ChatRoomMemberSchema>;
+export type ChatImage = z.infer<typeof ChatImageSchema>;
+export type Message = z.infer<typeof MessageSchema>;
+export type ChatRoom = z.infer<typeof ChatRoomSchema>;
+export type TemplateType = "welcome" | "passwordReset" | "notification";
+export type TemplateParamMap = {
+  welcome: { name: string; verificationLink: string };
+  passwordReset: { name: string; resetLink: string };
+  notification: { title: string; message: string };
+};
 
 export type PropertyListingInput = z.infer<typeof PropertyListingSchema>;
 export type UserInput = z.infer<typeof userSchema>;
@@ -493,6 +551,37 @@ export type SubscriptionInput = z.infer<typeof subscriptionSchema>;
 
 
 // ─── Defaults ──────────────────────────────────────────────────────────────────
+export const defaultChatRoomMember: ChatRoomMember = {
+  id: "",
+  roomId: "",
+  userId: "",
+  isAdmin: false,
+  notificationCount: 0,
+  joinedAt: new Date(),
+};
+export const defaultChatImage: ChatImage = {
+  id: "",
+  name: "",
+  url: "",
+  size: 0,
+  type: "",
+  lastModified: Date.now(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  supabaseID: "",
+  ChatRoomID: "",
+  chatOwnerID: "",
+  messageId: "",
+};
+export const defaultMessage: Message = {
+  id: "",
+  roomId: "",
+  authorId: "",
+  text: "",
+  createdAt: new Date(),
+  isDeleted: false,
+  images: [],
+}
 
 export const defaultPropertyListingInput: PropertyListingInput = {
   name: "",

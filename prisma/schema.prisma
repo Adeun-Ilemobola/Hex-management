@@ -44,9 +44,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  rooms    ChatRoomMember[]
-  messages Message[]
-  images   ChatImage[]
+ 
 
   SubscriptionArchives SubscriptionArchives?
   Subscription         Subscription?
@@ -267,7 +265,7 @@ model Session {
 
 model ChatRoom {
   id           String           @id @default(uuid())
-  title        String[] // this will be an arry of the two users name so you can switch depends on who is viewing it
+  title        String // this will be an arry of the two users name so you can switch depends on who is viewing it
   participants ChatRoomMember[]
 
   chats Message[]
@@ -279,10 +277,10 @@ model Message {
   id        String      @id @default(uuid())
   room      ChatRoom    @relation(fields: [roomId], references: [id])
   roomId    String
-  author    User        @relation(fields: [authorId], references: [id])
   authorId  String
   text      String?
   createdAt DateTime    @default(now())
+  isDeleted Boolean     @default(false)
   images    ChatImage[]
 }
 
@@ -290,8 +288,10 @@ model ChatRoomMember {
   id       String   @id @default(uuid())
   room     ChatRoom @relation(fields: [roomId], references: [id])
   roomId   String
-  user     User     @relation(fields: [userId], references: [id])
   userId   String
+  userName String
+  isAdmin  Boolean  @default(false) // Whether the user is an admin of the chat room
+  notificationCount Int      @default(0) // Number of unread messages or notifications for this user in the room
   joinedAt DateTime @default(now())
 
   @@unique([roomId, userId])
@@ -306,7 +306,6 @@ model ChatImage {
   lastModified BigInt // Last modified timestamp in milliseconds since epoch
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  thumbnail    Boolean // Whether this image is a thumbnail or not
   supabaseID   String // The ID of the image in Supabase storage, if applicable
 
   ChatRoomID  String // what chat room owns this image?
@@ -314,8 +313,8 @@ model ChatImage {
 
   message   Message @relation(fields: [messageId], references: [id])
   messageId String
-  owner     User    @relation(fields: [ownerId], references: [id])
-  ownerId   String
+  
+  
 }
 
 model Organization {

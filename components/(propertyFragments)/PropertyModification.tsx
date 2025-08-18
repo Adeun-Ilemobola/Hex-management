@@ -86,7 +86,7 @@ export default function PropertyModification() {
             // Prevent duplications uploads
             const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
-            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id , "notChat")
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
             if (id.length <= 0) {
                 CreateProperty({

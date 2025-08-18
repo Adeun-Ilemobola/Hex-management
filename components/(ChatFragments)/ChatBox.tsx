@@ -7,9 +7,12 @@ interface Props {
     id: string;
     text: string;
     img: FileUploadResult[]
+    authorId:string
+    roomId:string
+    isUser:boolean
 }
 
-export default function ChatBox({ id, text, img }: Props) {
+export default function ChatBox({ id, text, img ,isUser }: Props) {
     function getFileIcon(type: string) {
         if (type.startsWith('image/')) return FileImage;
         if (type.startsWith('video/')) return FileVideo;
@@ -24,7 +27,7 @@ export default function ChatBox({ id, text, img }: Props) {
     }
 
     return (
-        <div className='flex justify-start w-full px-4 py-2'>
+        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}  w-full px-4 py-2`}>
             {/* chat bubble */}
             <div className='flex flex-col max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl overflow-hidden shadow-sm'>
 
