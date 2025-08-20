@@ -16,16 +16,27 @@ export interface Base64FileResult {
   thumbnail:boolean
 }
 
+
 export interface FileUploadResult {
   supabaseID: string;
   name: string;
   url: string;
   size: number; // in bytes
   type: string;
-  lastModified: number;
+  lastModified: bigint;
   thumbnail:boolean,
   id:string
 }
+export interface FileUploadResultImageChat extends FileUploadResult{
+  ChatRoomID:string ;
+   messageId :string;
+    chatOwnerID:string
+  
+  
+}
+export type fullFile = FileUploadResultImageChat | FileUploadResult 
+export type fullFileList = FileUploadResultImageChat[] | FileUploadResult[] 
+
 
 
 export const toB64 = (file: File): Promise<FileUploadResult> => {
@@ -39,7 +50,7 @@ export const toB64 = (file: File): Promise<FileUploadResult> => {
         url: base64String,
         size: file.size,
         type: file.type,
-        lastModified: file.lastModified,
+        lastModified: BigInt(file.lastModified),
         thumbnail:false,
         supabaseID: "",
         id:""

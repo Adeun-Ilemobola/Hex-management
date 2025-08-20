@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { userCongiRouter } from './userCongi';
 import { createServerCaller } from '../caller';
 import { organizationRouter } from './organization';
+import { ChatRoomRouter } from './ChatRoom';
 //import { headers } from "next/headers";
 
 export const appRouter = createTRPCRouter({
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   Propertie: PropertiesRouter,
   user: userCongiRouter,
   organization:organizationRouter,
+  ChatRoom: ChatRoomRouter,
 
   // Add other routers here as needed
   makeSubscription: protectedProcedure

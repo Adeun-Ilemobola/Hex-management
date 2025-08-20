@@ -89,10 +89,16 @@ export default function PropertyModification() {
             uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id , "notChat")
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
             if (id.length <= 0) {
+                const imagesClean = uploadedImages.map(img => {
+                    return {
+                        ...img,
+                       lastModified: Number(img.lastModified)
+                    }
+                })
                 CreateProperty({
                     property: {
                         ...data,
-                        images: [...uploadedImages],
+                        images: [...imagesClean],
 
                     },
                     investmentBlock: {
@@ -102,10 +108,16 @@ export default function PropertyModification() {
                 });
 
             } else {
+                const imagesClean = [...uploadedImages, ...uploadedImagesDB].map(img => {
+                    return {
+                        ...img,
+                        lastModified: Number(img.lastModified)
+                    }
+                })
                 UpdateProperty({
                     property: {
                         ...data,
-                        images: [...uploadedImages, ...uploadedImagesDB],
+                        images: [...imagesClean],
 
                     },
                     investmentBlock: {

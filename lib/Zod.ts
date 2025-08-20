@@ -484,6 +484,7 @@ export const ChatRoomMemberSchema = z.object({
   id:z.string().default(""),
   roomId: z.string().default(""),            // @relation(fields: [roomId], references: [id])
   userId: z.string().default(""),
+  userName: z.string().default(""),
   isAdmin: z.boolean().default(false),
   notificationCount: z.number().int().nonnegative().default(0),
   joinedAt: z.date().default(new Date()),           // @default(now())
@@ -495,9 +496,7 @@ export const ChatImageSchema = z.object({
   url: z.string().url("Invalid image URL."),
   size :z.number().int().nonnegative("Size must be ≥ 0."),       
   type :z.string().min(1),        
-  lastModified: z.number().int().nonnegative(), 
-  createdAt :z.date().default(new Date()),  
-  updatedAt: z.date().default(new Date()),    
+  lastModified: z.bigint().nonnegative(), 
   supabaseID :z.string().default(""), 
   ChatRoomID :z.string().default(""),
   chatOwnerID: z.string().default(""),
@@ -557,6 +556,7 @@ export const defaultChatRoomMember: ChatRoomMember = {
   userId: "",
   isAdmin: false,
   notificationCount: 0,
+  userName: "",
   joinedAt: new Date(),
 };
 export const defaultChatImage: ChatImage = {
@@ -565,9 +565,7 @@ export const defaultChatImage: ChatImage = {
   url: "",
   size: 0,
   type: "",
-  lastModified: Date.now(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  lastModified: BigInt(2053),
   supabaseID: "",
   ChatRoomID: "",
   chatOwnerID: "",

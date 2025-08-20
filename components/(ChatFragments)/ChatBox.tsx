@@ -1,12 +1,12 @@
-import { FileUploadResult } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react'
 import { File, FileText, FileImage, FileVideo, FileAudio } from 'lucide-react';
+import { ChatImage } from '@/lib/Zod';
 
 interface Props {
     id: string;
     text: string;
-    img: FileUploadResult[]
+    img: ChatImage[]
     authorId:string
     roomId:string
     isUser:boolean

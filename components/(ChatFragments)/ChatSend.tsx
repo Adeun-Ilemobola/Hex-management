@@ -1,5 +1,5 @@
 "use client"
-import { FileUploadResult } from '@/lib/utils'
+import {  fullFile } from '@/lib/utils'
 import Image from 'next/image';
 import React, { useState } from 'react'
 import { Textarea } from '../ui/textarea';
@@ -11,15 +11,15 @@ import { toast } from 'sonner';
 import { DeleteImages, UploadImageList } from '@/lib/supabase';
 
 interface ChatSendProps {
-    sendMessage: (data: { message: Message, file: FileUploadResult[] }) => void
+    sendMessage: (data: Message) => void
     userId: string;
     roomId: string;
 }
 
 export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps) {
-    const [message, setMessage] = useState<{ message: Message, file: FileUploadResult[] }>({ 
-        message: {...defaultMessage , roomId , authorId: userId}, 
-        file: [] 
+    const [message, setMessage] = useState< Message>({ 
+       ...defaultMessage , roomId , authorId: userId 
+        
     });
     const [isUploading, setUploading] = useState(false);
     const [isMounted, setMounted] = useState(false);
@@ -34,7 +34,7 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     }, []);
 
    async function send() {
-        const vMessage = MessageSchema.safeParse(message.message);
+        const vMessage = MessageSchema.safeParse(message);
         if (!vMessage.success) {
             if (vMessage.error.errors) {
                 const errors = vMessage.error.errors
@@ -46,14 +46,23 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
             }
             return;
         }
-         let uploadedImages: FileUploadResult[] = [];
+         let uploadedImages: fullFile[] = [];
         try {
-             uploadedImages = await UploadImageList(message.file, userId, "chat")
-            sendMessage({ message: vMessage.data, file: uploadedImages });
+            const I = vMessage.data.images.map(img => ({
+                ...img,
+                thumbnail: false,
+                ChatRoomID: roomId
+            }))
+            
+            
+             uploadedImages = await UploadImageList(I, userId, "chat")
+            sendMessage( vMessage.data);
+            setMessage(defaultMessage);
+            setUploading(false);
             
         } catch (error) {
-            if (message.file.length > 0) {
-                await DeleteImages(message.file.map(img => img.supabaseID));
+            if (message.images.length > 0) {
+                await DeleteImages(message.images.map(img => img.supabaseID));
             }
             console.error("Error uploading images:", error);
             toast.error("Failed to upload images");
@@ -65,7 +74,7 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     function removeFile(index: number) {
         setMessage(prev => ({
             ...prev,
-            file: prev.file.filter((_, i) => i !== index)
+            file: prev.images.filter((_, i) => i !== index)
         }));
     }
 
@@ -92,9 +101,9 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     return (
         <div className='flex flex-col w-full gap-1'>
             {/* File Preview Section - Horizontal Scroll */}
-            {isMounted && message.file && message.file.length > 0 && (
+            {isMounted && message.images && message.images.length > 0 && (
                 <div className='flex overflow-x-auto gap-2 px-2 pb-1'>
-                    {message.file.map((file, index) => {
+                    {message.images.map((file, index) => {
                         const IconComponent = getFileIcon(file.type);
                         return (
                             <div
@@ -132,12 +141,12 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
             {/* Input Section */}
             <div className='flex items-end gap-2 p-2'>
                 <Textarea
-                    value={message.message.text || ''}
+                    value={message.text || ''}
                     onChange={(e) => {
                         setMessage(prev => ({
                             ...prev,
                             message: {
-                                ...prev.message,
+                                ...prev,
                                 text: e.target.value
                             }
                         }))

@@ -1,6 +1,6 @@
 // lib/supabase.ts
 import { createClient } from '@supabase/supabase-js'
-import {  base64ToBlob, FileUploadResult } from './utils'
+import {  base64ToBlob, FileUploadResult, FileUploadResultImageChat } from './utils'
 
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -17,7 +17,7 @@ function sanitizeFilename(name: string): string {
 
 interface UploadImageOptions {
     userID: string;
-    file: FileUploadResult;
+    file: FileUploadResult | FileUploadResultImageChat;
     patHex:'chat'|"notChat"
 }
 // interface UploadImageOptionsConstructor {
@@ -26,7 +26,7 @@ interface UploadImageOptions {
 //     patHex:'chat'|"notChat"
 // }
 
-export function UploadImage({ userID, file , patHex = "notChat" }: UploadImageOptions ): Promise<FileUploadResult> {
+export function UploadImage({ userID, file , patHex = "notChat" }: UploadImageOptions ): Promise<FileUploadResult | FileUploadResultImageChat> {
     return new Promise(async (resolve, reject) => {
 
         if (!file) {
@@ -74,7 +74,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     return result;
 }
 
-export function UploadImageList(files: FileUploadResult[], userID: string , patHex: 'chat'|"notChat"): Promise<FileUploadResult[]> {
+export function UploadImageList(files: FileUploadResult[] | FileUploadResultImageChat[], userID: string , patHex: 'chat'|"notChat"): Promise<FileUploadResult[] | FileUploadResultImageChat[]> {
     return new Promise(async (resolve) => {
         const uploadedImages: FileUploadResult[] = [];
 

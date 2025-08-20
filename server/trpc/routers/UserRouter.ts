@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
+import { rateLimit } from '../middlewares/rateLimit';
 
 // type userOrganizationContributor = {
 //     name: string;
@@ -114,7 +115,7 @@ export const PropertiesRouter = createTRPCRouter({
                 }
 
                 console.log(itemList);
-                
+
 
                 return {
                     data: itemList,
@@ -143,7 +144,7 @@ export const PropertiesRouter = createTRPCRouter({
                 const getP = await prisma.propertie.findUnique({
                     where: {
                         id: input.pID,
-                       
+
                     },
                     include: {
                         images: true,
@@ -196,6 +197,7 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
+        .use(rateLimit())
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             try {
@@ -217,9 +219,9 @@ export const PropertiesRouter = createTRPCRouter({
                         where: {
                             organizationId: propertyData.ownerId,
                         },
-                        select:{
-                            user:{
-                                select:{
+                        select: {
+                            user: {
+                                select: {
                                     name: true,
                                     email: true
                                 }
@@ -233,11 +235,10 @@ export const PropertiesRouter = createTRPCRouter({
                             email: getOrgOwner.user.email
                         }
                     }
-                    
+
                 }
 
 
-                console.log('propertyData:', propertyData);
 
                 const makeP = await ctx.prisma.propertie.create({
                     data: {
@@ -331,6 +332,7 @@ export const PropertiesRouter = createTRPCRouter({
 
 
     updataPropertie: protectedProcedure
+        .use(rateLimit())
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             try {
@@ -363,8 +365,8 @@ export const PropertiesRouter = createTRPCRouter({
                 const updataData = await ctx.prisma.propertie.update({
                     where: {
                         id: pId,
-                        ownerId:propertyData.ownerId
-                        
+                        ownerId: propertyData.ownerId
+
                     },
                     data: {
                         ...propertyData,
@@ -392,18 +394,17 @@ export const PropertiesRouter = createTRPCRouter({
                     const newExternalInvestors = externalInvestors.filter(item => !item.id || item.id === "")
                     const oldExternalInvestors = externalInvestors.filter(item => item.id || item.id !== "")
 
-                    await Promise.all(
-                        oldExternalInvestors.map(item => {
-                            const { id, ...rest } = item;
-                            return ctx.prisma.externalInvestor.update({
-                                where: { id },
-                                data: rest
-                            });
-                        })
-                    );
-                    console.log("newExternalInvestors", newExternalInvestors);
-                    
-
+                    if (oldExternalInvestors.length > 0) {
+                        await Promise.all(
+                            oldExternalInvestors.map(item => {
+                                const { id, ...rest } = item;
+                                return ctx.prisma.externalInvestor.update({
+                                    where: { id },
+                                    data: rest
+                                });
+                            })
+                        );
+                    }
                     if (newExternalInvestors.length > 0) {
                         const res = await Promise.all(
                             newExternalInvestors.map(item => {
@@ -416,9 +417,9 @@ export const PropertiesRouter = createTRPCRouter({
                                     }
                                 });
                             })
-                            
+
                         )
-                         console.log("res", res);   
+                    
                         await Promise.all(
                             res.map(async (item) => {
                                 const { id, investmentBlockId, ...rest } = item;
@@ -471,6 +472,7 @@ export const PropertiesRouter = createTRPCRouter({
         }),
 
     deleteImage: protectedProcedure
+        .use(rateLimit())
         .input(z.object({ id: z.string(), supabaseID: z.string() }))
         .mutation(async ({ input, ctx }) => {
             try {
