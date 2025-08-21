@@ -16,9 +16,9 @@ export default function ChatRoom ({chats , userId , roomId}:ChatRoomListProps) {
         id={chat.id}
         text={chat.text||""}
         img={chat.images.map((img)=>{
-            const { chatOwnerID , createdAt , ...rest } = img;
+           
             return {
-                ...rest,
+                ...img,
                 thumbnail:false
             };
         })}

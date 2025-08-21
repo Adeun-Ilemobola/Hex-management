@@ -69,7 +69,18 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
             
             
              uploadedImages = await UploadImageList(I, userId, "chat")
-            sendMessage( vMessage.data);
+            sendMessage( {
+                ...vMessage.data,
+                images: uploadedImages.map(img => ({
+                    ...img,
+                    ChatRoomID: roomId,
+                    id:"",
+                    messageId: "",
+                    chatOwnerID: userId
+
+                   
+                }))
+            });
             setText("");
             setFile([]);
             setUploading(false);

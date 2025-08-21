@@ -2,14 +2,14 @@
 import { authClient } from '@/lib/auth-client';
 import { api } from '@/lib/trpc';
 import {  Message } from '@/lib/Zod';
-import React, { useEffect, useState, useCallback, use } from 'react'
+import React, { useEffect, useState } from 'react'
 import Chatheader from './Chatheader';
 import Loading from '../Loading';
 import ChatBox from './ChatBox';
 import ChatSend from './ChatSend';
 import ChatRoomCard from './ChatRoomCard';
 import { Nav } from '../Nav';
-import { Inbox, Sparkles } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isEqual } from '@/lib/utils';
 import DropBack from '../DropBack';
