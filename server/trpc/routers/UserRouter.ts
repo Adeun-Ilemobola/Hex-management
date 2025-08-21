@@ -7,6 +7,8 @@ import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInpu
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
 import { rateLimit } from '../middlewares/rateLimit';
+import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
+import { TRPCError } from '@trpc/server';
 
 // type userOrganizationContributor = {
 //     name: string;
@@ -200,6 +202,8 @@ export const PropertiesRouter = createTRPCRouter({
         .use(rateLimit())
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
+            let propertyIdGo: string | null = null;
+            let supabaseIDList: string[] = [];
             try {
                 let ownerShip = {
                     name: ctx.user.name,
@@ -253,28 +257,53 @@ export const PropertiesRouter = createTRPCRouter({
                         },
 
 
+                    },
+                    include: {
+                        images: true
                     }
                 });
 
-                if (makeP) {
-                    const makeIB = await ctx.prisma.investmentBlock.create({
-                        data: {
-                            ...cleanInvestmentBlock,
-                            propertieid: makeP.id
+                if (!makeP) {
+                    return {
+                        message: "failed to create property",
+                        success: false,
+                        data: null
+                    }
+
+                }
+                propertyIdGo = makeP.id;
+                supabaseIDList = makeP.images.map((item) => {
+                    return item.supabaseID
+                })
+
+
+                const makeIB = await ctx.prisma.investmentBlock.create({
+                    data: {
+                        ...cleanInvestmentBlock,
+                        propertieid: makeP.id
+                    }
+                })
+
+                if (makeIB) {
+                    const makeEI = await Promise.all(externalInvestors.map(async (item) => {
+                        const { id, ...rest } = item
+                        return await ctx.prisma.externalInvestor.create({
+                            data: {
+                                ...rest,
+                                investmentBlockId: makeIB.id
+
+                            }
+                        })
+                    }))
+                    if (makeEI.length > 0) {
+                        const getEmail = makeEI.map((item) => {
+                            return item.email
+                        })
+                        const createChatRoom = await CreateGroupChat({ PropertyName: makeP.name, members: getEmail, currentAdminId: ctx.user.id })
+                        if (!createChatRoom.success) {
+                            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create chat room" })
+                           
                         }
-                    })
-
-                    if (makeIB) {
-                        const makeEI = await Promise.all(externalInvestors.map(async (item) => {
-                            const { id, ...rest } = item
-                            return await ctx.prisma.externalInvestor.create({
-                                data: {
-                                    ...rest,
-                                    investmentBlockId: makeIB.id
-
-                                }
-                            })
-                        }))
                         await Promise.all(
                             makeEI.map(async (item) => {
                                 const { id, investmentBlockId, ...rest } = item;
@@ -296,18 +325,14 @@ export const PropertiesRouter = createTRPCRouter({
                             })
                         );
                     }
+
+
                 }
 
 
 
-                if (!makeP) {
-                    return {
-                        message: "failed to create property",
-                        success: false,
-                        data: null
-                    }
 
-                }
+
 
                 return {
                     message: "successfully created property listing",
@@ -318,6 +343,24 @@ export const PropertiesRouter = createTRPCRouter({
 
 
             } catch (error) {
+                if (propertyIdGo) {
+                    await ctx.prisma.propertie.delete({
+                        where: {
+                            id: propertyIdGo
+                        }
+                    })
+
+                }
+                if (supabaseIDList.length > 0) {
+                    await ctx.prisma.image.deleteMany({
+                        where: {
+                            supabaseID: {
+                                in: supabaseIDList
+                            }
+                        }
+                    })
+                    await DeleteImages(supabaseIDList)
+                }
                 console.error("Error in postPropertie:", error);
                 return {
                     message: "something went wrong while creating property listing ",
@@ -419,7 +462,7 @@ export const PropertiesRouter = createTRPCRouter({
                             })
 
                         )
-                    
+
                         await Promise.all(
                             res.map(async (item) => {
                                 const { id, investmentBlockId, ...rest } = item;

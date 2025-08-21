@@ -121,7 +121,7 @@ model externalInvestor {
 
   // parent
   investmentBlockId      String
-  investmentBlock        investmentBlock @relation(fields: [investmentBlockId], references: [id])
+  investmentBlock        investmentBlock @relation(fields: [investmentBlockId], references: [id] , onDelete: Cascade )
 
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
@@ -152,7 +152,7 @@ model investmentBlock {
   discountPercentage Float @default(0) // Discount percentage for the property, if applicable
 
   propertieid       String             @unique
-  propertie         propertie          @relation(fields: [propertieid], references: [id])
+  propertie         propertie          @relation(fields: [propertieid], references: [id] ,onDelete: Cascade)
   externalInvestors externalInvestor[]
 
   @@unique([id])

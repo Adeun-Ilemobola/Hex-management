@@ -162,7 +162,7 @@ export const imageSchema = z.object({
   url: z.string().url("Invalid image URL."),
   size: z.number().int().nonnegative("Size must be ≥ 0."),
   type: z.string().min(1),
-  lastModified: z.number().int().nonnegative(),
+  lastModified: z.bigint(),
   thumbnail: z.boolean().default(false),
   supabaseID: z.string().default(""),
 });
@@ -507,7 +507,7 @@ export const MessageSchema = z.object({
   id: z.string().default(""),
   roomId: z.string().default(""),            // @relation(fields: [roomId], references: [id])
   authorId: z.string().default(""),
-  text: z.string().optional().nullable(), // String? in Prisma → nullable (and we allow undefined in inputs)
+  text: z.string().default(""), // String? in Prisma → nullable (and we allow undefined in inputs)
   createdAt: z.date().default(new Date()),          // @default(now())
   isDeleted: z.boolean().default(false),
   images: z.array(ChatImageSchema).default([]),
@@ -624,7 +624,7 @@ export const defaultImageInput: ImageInput = {
   url: "",
   size: 0,
   type: "",
-  lastModified: Date.now(),
+  lastModified: BigInt(2053),
   thumbnail: false,
   supabaseID: "",
   id: "",

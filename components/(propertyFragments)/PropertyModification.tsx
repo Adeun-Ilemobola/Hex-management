@@ -92,7 +92,7 @@ export default function PropertyModification() {
                 const imagesClean = uploadedImages.map(img => {
                     return {
                         ...img,
-                       lastModified: Number(img.lastModified)
+                       
                     }
                 })
                 CreateProperty({
@@ -111,7 +111,7 @@ export default function PropertyModification() {
                 const imagesClean = [...uploadedImages, ...uploadedImagesDB].map(img => {
                     return {
                         ...img,
-                        lastModified: Number(img.lastModified)
+                        
                     }
                 })
                 UpdateProperty({

@@ -1,7 +1,7 @@
 "use client"
 import { authClient } from '@/lib/auth-client';
 import { api } from '@/lib/trpc';
-import { ChatRoom } from '@/lib/Zod';
+import {  Message } from '@/lib/Zod';
 import React, { useEffect, useState, useCallback, use } from 'react'
 import Chatheader from './Chatheader';
 import Loading from '../Loading';
@@ -9,19 +9,20 @@ import ChatBox from './ChatBox';
 import ChatSend from './ChatSend';
 import ChatRoomCard from './ChatRoomCard';
 import { Nav } from '../Nav';
-interface RoomDataProps {
+import { Inbox, Sparkles } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { isEqual } from '@/lib/utils';
+import DropBack from '../DropBack';
+import { toast } from 'sonner';
+interface RoomData {
     id: string;
-    member: {
-        name: string;
-        id: string;
-        userId: string;
-        isAdmin: boolean;
-        joinedAt: string;
-    }[];
-    roomId: string;
-    isAdmin: boolean;
+    title: string;
     notificationCount: number;
-    joinedAt: string;
+    participants: {
+        name: string;
+        isAdmin: boolean;
+        joinedAt: Date;
+    }[];
 
 }
 
@@ -140,142 +141,266 @@ const fakeChatRooms: ChatRoomCardProps[] = [
 
 export { fakeChatRooms, type ChatRoomCardProps };
 export default function ChartView() {
-    const { data: session, isPending } = authClient.useSession();
-    const [roonId, setRoomId] = useState("");
-    const [room, setRoom] = useState<ChatRoom | null>(null);
-    const roomChatsFetch = api.ChatRoom.getRoomChatById.useQuery({ roomId: roonId }, {
-        // polling
-
-        refetchIntervalInBackground: true,
-        // chat usually wants zero stale tolerance
-        staleTime: 0,
-        // don't spam re-fetch just by remounting
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        // optional: trim/normalize to avoid needless re-renders
-        //   select: React.useCallback(
-        //     (data: { messages: Array<{ id: string; createdAt: string } & any> }) => {
-        //       // sort & dedupe by id (server should do this too)
-        //       const seen = new Set<string>();
-        //       const msgs = data.messages
-        //         .slice()
-        //         .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
-        //         .filter(m => (seen.has(m.id) ? false : (seen.add(m.id), true)));
-        //       return { messages: msgs };
-        //     },
-        //     []
-        //   ),
-        // structural sharing keeps referential stability when unchanged
-        structuralSharing: true,
-
-    })
+    const { data: session  , isPending:sessionPending} = authClient.useSession();
+    const [room, setRoom] = useState<RoomData | null>(null);
+    const roomId = room?.id ?? null;
+    const utils = api.useUtils(); // tRPC v10 helpers
+    const [messages, setMessages] = useState<Message[]>([]);
+    const getChats = api.ChatRoom.getUserChats.useQuery(
+        { roomId: roomId! },
+        {
+            enabled: !!roomId,                      // only run when a room is selected
+            staleTime: 0,
+            refetchOnMount: true,
+            refetchOnReconnect: true,
+            refetchOnWindowFocus: true,
+            refetchInterval: roomId ? 4000 : false, // polling (pull) while a room is open
+            placeholderData: {
+                message: "",
+                success: true,
+                value: messages || []
+            },    // smooth room switches
+        }
+    );
+    const { data: rooms , isPending } = api.ChatRoom.getUserRooms.useQuery()
     const messageSend = api.ChatRoom.newMessage.useMutation({
+        onMutate: async (vars) => {
+            if (!roomId) return;
+            const formMessage: Message = {
+                id: vars.id || "",
+                text: vars.text || "",
+                authorId: vars.authorId || "",
+                roomId: vars.roomId || "",
+                isDeleted: false,
+                createdAt: vars.createdAt || new Date(),
+                images: vars.images?.map((img , i) => ({
+                    ...img,
+                    id: vars.id || "",
+                    ChatRoomID:vars.images?.[i]?.ChatRoomID || "",
+                    chatOwnerID: vars.images?.[i]?.chatOwnerID || "",
+                    messageId: vars.images?.[i]?.messageId || "",
+                    supabaseID: vars.images?.[i]?.supabaseID || "",
+
+                })) || [],
+
+
+            }
+
+            await utils.ChatRoom.getUserChats.cancel({ roomId });
+            const prev = utils.ChatRoom.getUserChats.getData({ roomId });
+
+            utils.ChatRoom.getUserChats.setData({ roomId }, (old) => {
+                if (old) {
+                    return {
+                        message: "",
+                        success: true,
+                        value: [...old.value, formMessage],
+                    };
+                }
+                return {
+                    message: "",
+                    success: true,
+                    value: [formMessage],
+                };
+            })
+
+
+            return { prev };
+        },
+        onError: (err, _vars, ctx) => {
+            if (ctx?.prev && roomId) {
+                utils.ChatRoom.getUserChats.setData({ roomId }, ctx.prev); // rollback
+            }
+            toast.error(err.message);
+        },
+        onSettled: async () => {
+            if (roomId) {
+                await utils.ChatRoom.getUserChats.invalidate({ roomId });  // devalue & refetch
+            }
+        },
 
     })
     useEffect(() => {
-        const data = roomChatsFetch.data?.value;
-        if (data) {
-            const cleanedData = {
-                ...data,
-                chats: data.chats.map((msg) => ({
-                    ...msg,
-                    createdAt: new Date(msg.createdAt),
-                    images: msg.images.map(img => {
-                        const { ...rest } = img;
-                        return {
-                            ...rest,
-                            createdAt: new Date(img.createdAt),
-                            updatedAt: new Date(img.updatedAt),
-                        };
-                    })
-                })),
-                participants: data.participants.map(participant => ({
-                    ...participant,
-                    joinedAt: new Date(participant.joinedAt),
-                }))
-            }
-
-            setRoom(cleanedData);
+        const Same = isEqual(messages, getChats.data?.value || []);
+        if (!Same) {
+            const info = (  getChats.data?.value || []).map((item) => {
+                return{
+                    ...item,
+                    text: item.text|| "",
+                }
+            })
+            setMessages(info);
         }
-    }, [roomChatsFetch]);
+    }, [getChats.data?.value]);
     return (
+        <DropBack is={sessionPending}>
         <>
             <Nav session={session} SignOut={authClient.signOut} />
 
 
-            <div className='flex flex-col flex-1 m-auto min-w-[38rem] overflow-y-auto overflow-x-hidden p-2.5'>
-                <div className='relative flex flex-col w-full flex-1  overflow-hidden p-2.5'>
-                    {/* show when room is selected  the chat header*/}
-                    {room && <Chatheader
-                        Back={() => setRoomId("")}
-                        mebers={room?.participants.map(participant => participant.userName) || []}
-                        title={room?.title}
-                    />}
-                    {/* show when room is selected the chat room */}
-                    {(room && roonId) && (
-                        <>
-                            {roomChatsFetch.isPending ? (<div className='flex flex-1 items-center justify-center h-full '><Loading full={false} /></div>)
-                                : (<>
-                                    <div className='  overflow-y-auto flex flex-1 flex-col gap-5 '>
+          
+    <section
+      className={`
+        relative mx-auto flex w-full flex-1 flex-col
+        px-3 py-2 sm:px-4 md:px-6 md:py-4
+        max-w-6xl
+      `}
+      aria-label="Chat workspace"
+    >
+      {/* Decorative gradient + glass frame */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-primary/10 via-transparent to-transparent"
+      />
+      <div
+        className="
+          relative flex min-h-[60vh] flex-1 flex-col overflow-hidden
+          rounded-3xl border border-border/50
+          bg-background/60 backdrop-blur-xl
+          shadow-[0_10px_30px_-10px_rgba(0,0,0,0.25)]
+          supports-[backdrop-filter]:bg-background/50
+        "
+      >
+        {/* Header (sticky when room selected) */}
+        {room && (
+          <div className="sticky top-0 z-20">
+            <Chatheader
+              Back={() => setRoom(null)}
+              mebers={room.participants.map((p) => p.name) || []}
+              title={room.title}
+            />
+            <div aria-hidden className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          </div>
+        )}
 
-                                        {room.chats.map((message) => (
-                                            <ChatBox
-                                                key={message.id}
-                                                id={message.id}
-                                                text={message.text || ""}
-                                                img={message.images || []}
+        {/* Chat room selected */}
+        {room && (
+          <>
+            {/* Messages */}
+            <ScrollArea
+              className="flex-1"
+              type="auto"
+              aria-live="polite"
+              aria-relevant="additions"
+            >
+              <div
+                className="
+                  relative mx-auto flex w-full max-w-3xl flex-col gap-4
+                  px-3 py-4 sm:px-4 md:px-6 md:py-6
+                "
+              >
+                {/* Background accents */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-10 opacity-60 [mask-image:radial-gradient(60%_40%_at_50%_20%,black,transparent)]"
+                  style={{
+                    background:
+                      "radial-gradient(1200px 350px at 50% -10%, rgba(99,102,241,0.15), transparent 60%), radial-gradient(800px 300px at 80% 0%, rgba(236,72,153,0.08), transparent 60%)",
+                  }}
+                />
+                {messages.map((message) => (
+                  <ChatBox
+                    key={message.id}
+                    id={message.id}
+                    text={message.text || ""}
+                    img={message.images || []}
+                    authorId={message.authorId}
+                    roomId={room.id}
+                    isUser={message.authorId === session?.user?.id}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
 
-                                                authorId={message.authorId}
-                                                roomId={roonId}
-                                                isUser={message.authorId === session?.user.id}
-
-                                            />
-                                        ))}
-                                    </div>
-                                </>
-                                )}
-
-                        </>
-                    )}
-                    {/* show when no room is selected foe the room list */}
-                    {(!room  ) && (
-                        <>
-                        {}
-                        <div className=' overflow-y-auto flex flex-1 flex-col p-0.5  gap-3 items-center'>
-                            {fakeChatRooms.map((room) => (
-                                <ChatRoomCard
-                                    key={room.id}
-                                    id={room.id}
-                                    title={room.title}
-                                    notificationCount={room.notificationCount}
-                                    participants={room.participants}
-                                    select={room.select}
-                                />
-                            ))}
-
-                        </div>
-                        
-                        </>
-                    )}
-
-
-
-                    {room && (<>
-                        <div className=' overflow-y-auto'>
-                            <ChatSend
-                                roomId={roonId}
-                                sendMessage={(data) => messageSend.mutate(data)}
-                                userId={session?.user.id || ""}
-
-                            />
-
-
-                        </div>
-                    </>)}
-
-                </div>
+            {/* Composer */}
+            <div
+              className="
+                sticky bottom-0 z-20 w-full border-t border-border/60
+                bg-background/80 backdrop-blur-xl
+              "
+            >
+              <div className="mx-auto max-w-3xl px-3 py-2 sm:px-4 md:px-6 md:py-3">
+                <ChatSend
+                  roomId={room.id}
+                  sendMessage={(data) => messageSend.mutate(data)}
+                  userId={session?.user?.id || ""}
+                />
+              </div>
             </div>
+          </>
+        )}
+
+        {/* Room list when no room selected */}
+        {!room && (
+          <>
+          {isPending ? (<>
+          <div className="flex flex-1">
+            <Loading full={false}/>
+          </div>
+          
+          
+          </>) :(<>
+            {rooms?.value.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center p-8 text-center">
+                <div className="flex max-w-md flex-col items-center gap-3">
+                  <div className="relative">
+                    <div className="absolute inset-0 -z-10 animate-pulse rounded-full bg-primary/20 blur-2xl" />
+                    <Inbox className="h-10 w-10 text-muted-foreground" aria-hidden />
+                  </div>
+                  <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                    No rooms available
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Create or join a room to start a conversation.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <ScrollArea className="flex-1" type="auto">
+                <div
+                  className="
+                    mx-auto grid w-full gap-1 px-1 py-2 sm:gap-2 sm:px-4 md:max-w-5xl md:grid-cols-2 md:gap-3 md:px-4
+                  "
+                >
+                  {rooms?.value.map((r) => (
+                    <ChatRoomCard
+                        key={r.id}
+                        id={r.id}
+                        title={r.title}
+                        notificationCount={r.notificationCount}
+                        participants={r.member.map((m) => ({
+                          name: m.name,
+                          isAdmin: m.isAdmin,
+                        }))}
+                        select={() =>
+                          setRoom({
+                            id: r.id,
+                            title: r.title,
+                            notificationCount: r.notificationCount,
+                            participants: r.member.map((m) => ({
+                              name: m.name,
+                              isAdmin: m.isAdmin,
+                              joinedAt: m.joinedAt,
+                            })),
+                          })
+                        }
+                      />
+                  ))}
+                </div>
+              </ScrollArea>
+            )  }
+
+            </>)} 
+          </>
+        )}
+
+
+          {/* Header (sticky when room selected) */}
+      
+      </div>
+    </section>
 
         </>
+        </DropBack>
     )
 }

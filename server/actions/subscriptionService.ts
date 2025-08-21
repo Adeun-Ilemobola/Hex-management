@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
+import { seatPlan } from "@/lib/utils";
 import { DateTime } from "luxon";
 
 export interface PlanResult {
@@ -361,11 +362,4 @@ export async function Final(userId: string): Promise<FinalPlanResultFull> {
     }
 }
 
-export function seatPlan(planType: string): number {
-  switch (planType) {
-    case 'Premium': return 50;
-    case 'Deluxe': return 15;
-    case 'Free':
-    default: return 3;
-  }
-}
+

@@ -6,7 +6,7 @@ import { Textarea } from '../ui/textarea';
 import FileBtu from '../FileBtu';
 import { Button } from '../ui/button';
 import { Send, X, File, FileText, FileImage, FileVideo, FileAudio } from 'lucide-react';
-import { defaultMessage, Message, MessageSchema } from '@/lib/Zod';
+import {  defaultMessage, Message, MessageSchema } from '@/lib/Zod';
 import { toast } from 'sonner';
 import { DeleteImages, UploadImageList } from '@/lib/supabase';
 
@@ -17,10 +17,10 @@ interface ChatSendProps {
 }
 
 export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps) {
-    const [message, setMessage] = useState< Message>({ 
-       ...defaultMessage , roomId , authorId: userId 
-        
-    });
+    
+    const [file, setFile] = useState<fullFile[]>([]);
+    const[text,setText] = useState("");
+
     const [isUploading, setUploading] = useState(false);
     const [isMounted, setMounted] = useState(false);
 
@@ -33,8 +33,21 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
         }
     }, []);
 
+
    async function send() {
-        const vMessage = MessageSchema.safeParse(message);
+        const vMessage = MessageSchema.safeParse({
+            ...defaultMessage,
+            text,
+            roomId , 
+            authorId: userId,
+            images: file.map(img => ({
+                ...img,
+                ChatRoomID: roomId,
+                id:"",
+                messageId: "",
+                chatOwnerID: userId
+            }))
+        });
         if (!vMessage.success) {
             if (vMessage.error.errors) {
                 const errors = vMessage.error.errors
@@ -57,12 +70,13 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
             
              uploadedImages = await UploadImageList(I, userId, "chat")
             sendMessage( vMessage.data);
-            setMessage(defaultMessage);
+            setText("");
+            setFile([]);
             setUploading(false);
             
         } catch (error) {
-            if (message.images.length > 0) {
-                await DeleteImages(message.images.map(img => img.supabaseID));
+            if (file.length > 0) {
+                await DeleteImages(file.map(img => img.supabaseID));
             }
             console.error("Error uploading images:", error);
             toast.error("Failed to upload images");
@@ -72,10 +86,8 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     }
 
     function removeFile(index: number) {
-        setMessage(prev => ({
-            ...prev,
-            file: prev.images.filter((_, i) => i !== index)
-        }));
+        setFile(prev => prev.filter((_, i) => i !== index));
+       
     }
 
     function handleKeyDown(e: React.KeyboardEvent) {
@@ -101,9 +113,9 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     return (
         <div className='flex flex-col w-full gap-1'>
             {/* File Preview Section - Horizontal Scroll */}
-            {isMounted && message.images && message.images.length > 0 && (
+            {isMounted && file && file.length > 0 && (
                 <div className='flex overflow-x-auto gap-2 px-2 pb-1'>
-                    {message.images.map((file, index) => {
+                    {file.map((file, index) => {
                         const IconComponent = getFileIcon(file.type);
                         return (
                             <div
@@ -141,15 +153,9 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
             {/* Input Section */}
             <div className='flex items-end gap-2 p-2'>
                 <Textarea
-                    value={message.text || ''}
+                    value={text}
                     onChange={(e) => {
-                        setMessage(prev => ({
-                            ...prev,
-                            message: {
-                                ...prev,
-                                text: e.target.value
-                            }
-                        }))
+                        setText(e.target.value);
                     }}
                     onKeyDown={handleKeyDown}
                     className='flex-1 resize-none min-h-[40px] max-h-32'
@@ -160,10 +166,7 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
                     <FileBtu
                         isUploading={setUploading}
                         setUploadList={(list) => {
-                            setMessage(prev => ({
-                                ...prev,
-                                file: list
-                            }))
+                            setFile(prev => [...prev, ...list]);
                         }}
                     />
 

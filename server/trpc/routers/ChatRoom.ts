@@ -1,10 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
-import { sendEmail } from "@/server/actions/sendEmail";
-import { get } from "http";
 import { MessageSchema } from "@/lib/Zod";
 import { rateLimit } from "../middlewares/rateLimit";
-import { no } from "zod/v4/locales";
+
 
 
 
@@ -26,6 +24,7 @@ export const ChatRoomRouter = createTRPCRouter({
                         isAdmin: true,
                         joinedAt: true,
                         notificationCount: true,
+                        
 
                         room: {
                             include: {
@@ -50,6 +49,7 @@ export const ChatRoomRouter = createTRPCRouter({
                     isAdmin: room.isAdmin,
                     joinedAt: room.joinedAt,
                     notificationCount: room.notificationCount,
+                    title:room.room.title
 
                 }))
                 return { success: true, value: cleanedRooms, message: "Rooms fetched successfully" };
@@ -88,9 +88,6 @@ export const ChatRoomRouter = createTRPCRouter({
 
             return {
                 success: true, value: {
-                    id: getRoom.id,
-                    title: getRoom.title,
-                    participants: getRoom.participants,
                     chats: roomChat
                 }, message: "Room fetched successfully"
             };
@@ -127,6 +124,19 @@ export const ChatRoomRouter = createTRPCRouter({
                     }
                 })
             }))
+
+            await ctx.prisma.chatRoomMember.updateMany({
+                where: {
+                    roomId: input.roomId,
+                    
+                },
+                data: {
+                    notificationCount: {
+                        increment: 1
+                    }
+                }
+                
+            })
             return { success: true, value: message, message: "Message sent successfully" };
 
         } catch (error) {
@@ -165,9 +175,50 @@ export const ChatRoomRouter = createTRPCRouter({
                         .map((member) => ({ 
                             name: member.userName,
                             isAdmin: member.isAdmin,
+                            joinedAt: member.joinedAt
                         })),
                 }))
                 return { success: true, value: cleanedRooms, message: "Rooms fetched successfully" };
+
+            } catch (error) {
+                console.error("Error in getUserRooms:", error);
+                return { success: false, message: "Failed to fetch rooms", value: [] };
+
+            }
+        }),
+
+        getUserChats: protectedProcedure
+        .input(z.object({ roomId: z.string() }))
+        .query(async ({ ctx , input }) => {
+            try {
+                const user = ctx.session?.user;
+                if (!user) {
+                    return { success: false, message: "User not authenticated", value: [] };
+                }
+                const  chats = await ctx.prisma.message.findMany({
+                    where: {
+                        roomId: input.roomId
+                    },
+                    orderBy: {
+                        createdAt: 'asc'
+                    },
+                    include: {
+                        images: true
+                    }
+                })
+                const cleanChats = chats.map((chat) => ({
+                   ...chat,
+                   text: chat.text||null,
+                   images: chat.images.map((img) => {
+                       const { createdAt ,updatedAt, ...rest } = img;
+                       return {
+                           ...rest,
+                         
+                       };
+                   })
+                }))
+               
+                return { success: true, value: cleanChats, message: "Rooms fetched successfully" };
 
             } catch (error) {
                 console.error("Error in getUserRooms:", error);

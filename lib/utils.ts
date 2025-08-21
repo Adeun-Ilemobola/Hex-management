@@ -72,7 +72,27 @@ export function base64ToBlob(base64: string, contentType = ''): Blob {
 }
 
 
+export function seatPlan(planType: string): number {
+  switch (planType) {
+    case 'Premium': return 50;
+    case 'Deluxe': return 15;
+    case 'Free':
+    default: return 3;
+  }
+}
 
+export function isEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+  
+}
 
  export const countries = [
   // North America
