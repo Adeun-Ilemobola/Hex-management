@@ -1,7 +1,6 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '@/server/trpc/routers/_app';
 import { createTRPCContext } from '@/server/trpc/init';
-import superjson from "superjson";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
