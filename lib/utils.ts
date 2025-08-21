@@ -12,7 +12,7 @@ export interface Base64FileResult {
   url: string;
   size: number; // in bytes
   type: string;
-  lastModified: number;
+ lastModified: bigint;
   thumbnail:boolean
 }
 
