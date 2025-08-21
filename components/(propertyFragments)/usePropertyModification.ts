@@ -198,7 +198,14 @@ export function usePropertyModification(id: string) {
     }, [financials.totalProfit, investmentBlock.initialInvestment]);
 
     useEffect(() => {
-          if (externalInvestor.length === 0) return;
+        if (financials.result !== investmentBlock.finalResult) {
+            setInvestmentBlock({
+                ...investmentBlock,
+                finalResult: financials.result,
+            });
+        }
+
+         if (externalInvestor.length === 0) return;
 
         const isSame = JSON.stringify(investorCalculations.updatedInvestors) === JSON.stringify(externalInvestor);
         if (!isSame) {
@@ -324,11 +331,14 @@ export function usePropertyModification(id: string) {
 
     useEffect(() => {
         if (getProperty.data?.success && getProperty.data?.value) {
-            const { externalInvestors, property, investmentBlock: ib, images } = getProperty.data.value;
+            const { externalInvestors, property, investmentBlock: ib, images:files } = getProperty.data.value;
 
             setPropertyInfo({
                 ...property,
-                images,
+                images: files.map((img) => ({
+                    ...img,
+                    lastModified: BigInt(img.lastModified),
+                })),
                 status: property.status as StatusEnumType,
                 propertyType: property.propertyType as PropertyTypeEnumType,
                 description: property.description || "",

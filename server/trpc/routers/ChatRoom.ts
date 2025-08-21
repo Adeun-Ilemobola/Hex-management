@@ -44,7 +44,7 @@ export const ChatRoomRouter = createTRPCRouter({
                             isAdmin: member.isAdmin,
                             joinedAt: member.joinedAt,
                         })),
-                    id: room.id,
+                    chatRoomMemberId: room.id,
                     roomId: room.roomId,
                     isAdmin: room.isAdmin,
                     joinedAt: room.joinedAt,
@@ -100,6 +100,8 @@ export const ChatRoomRouter = createTRPCRouter({
     }),
     newMessage: protectedProcedure .use(rateLimit()).input(MessageSchema).mutation(async ({ input, ctx }) => {
         try {
+            console.log("Input:", input);
+            
             const { id, images, ...rest } = input;
             const user = ctx.session?.user;
             if (!user) {
@@ -128,6 +130,9 @@ export const ChatRoomRouter = createTRPCRouter({
             await ctx.prisma.chatRoomMember.updateMany({
                 where: {
                     roomId: input.roomId,
+                    userId: {
+                        not: user.id
+                    }
                     
                 },
                 data: {

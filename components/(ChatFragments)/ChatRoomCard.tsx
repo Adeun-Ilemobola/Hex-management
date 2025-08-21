@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge'
 import { Users, MessageCircle } from 'lucide-react'
 
 interface ChatRoomCardProps {
-    id: string;
+    
     title: string;
     notificationCount: number;
     participants: {
@@ -15,7 +15,7 @@ interface ChatRoomCardProps {
 }
 
 export default function ChatRoomCard({
-    id,
+  
     title,
     notificationCount,
     participants,
@@ -23,7 +23,7 @@ export default function ChatRoomCard({
 }: ChatRoomCardProps) {
     return (
         <div
-            data-id={id}
+          
             className='relative group flex flex-col sm:flex-row gap-4 p-5 sm:p-6 
                        bg-gradient-to-br from-white/95 to-gray-50/90 
                        dark:from-gray-800/95 dark:to-gray-900/90

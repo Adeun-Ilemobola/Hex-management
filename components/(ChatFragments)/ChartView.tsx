@@ -220,6 +220,8 @@ export default function ChartView() {
         },
 
     })
+    console.log(rooms?.value);
+    
     useEffect(() => {
         const Same = isEqual(messages, getChats.data?.value || []);
         if (!Same) {
@@ -285,8 +287,8 @@ export default function ChartView() {
             >
               <div
                 className="
-                  relative mx-auto flex w-full max-w-3xl flex-col gap-4
-                  px-3 py-4 sm:px-4 md:px-6 md:py-6
+                  relative  flex w-full flex-col gap-4
+                  px-2 py-4 sm:px-2 md:px-3 md:py-3
                 "
               >
                 {/* Background accents */}
@@ -322,7 +324,12 @@ export default function ChartView() {
               <div className="mx-auto max-w-3xl px-3 py-2 sm:px-4 md:px-6 md:py-3">
                 <ChatSend
                   roomId={room.id}
-                  sendMessage={(data) => messageSend.mutate(data)}
+                  sendMessage={(data) => {
+                    console.log(data);
+                    
+
+                    messageSend.mutate(data);
+                  }}
                   userId={session?.user?.id || ""}
                 />
               </div>
@@ -364,8 +371,8 @@ export default function ChartView() {
                 >
                   {rooms?.value.map((r) => (
                     <ChatRoomCard
-                        key={r.id}
-                        id={r.id}
+                        key={r.chatRoomMemberId}
+                       
                         title={r.title}
                         notificationCount={r.notificationCount}
                         participants={r.member.map((m) => ({
@@ -374,7 +381,7 @@ export default function ChartView() {
                         }))}
                         select={() =>
                           setRoom({
-                            id: r.id,
+                            id: r.roomId,
                             title: r.title,
                             notificationCount: r.notificationCount,
                             participants: r.member.map((m) => ({
