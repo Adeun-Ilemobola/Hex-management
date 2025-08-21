@@ -1,15 +1,18 @@
-import { FileUploadResult } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react'
 import { File, FileText, FileImage, FileVideo, FileAudio } from 'lucide-react';
+import { ChatImage } from '@/lib/Zod';
 
 interface Props {
     id: string;
     text: string;
-    img: FileUploadResult[]
+    img: ChatImage[]
+    authorId:string
+    roomId:string
+    isUser:boolean
 }
 
-export default function ChatBox({ id, text, img }: Props) {
+export default function ChatBox({ id, text, img ,isUser }: Props) {
     function getFileIcon(type: string) {
         if (type.startsWith('image/')) return FileImage;
         if (type.startsWith('video/')) return FileVideo;
@@ -24,9 +27,13 @@ export default function ChatBox({ id, text, img }: Props) {
     }
 
     return (
-        <div className='flex justify-start w-full px-4 py-2'>
+        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} w-full px-4 py-2`}>
             {/* chat bubble */}
-            <div className='flex flex-col max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl overflow-hidden shadow-sm'>
+            <div className={`flex flex-col max-w-xs sm:max-w-md lg:max-w-lg xl:max-w-xl ${
+                isUser 
+                    ? 'bg-blue-50 dark:bg-blue-950 ring-1 ring-blue-200 dark:ring-blue-800' 
+                    : 'bg-gray-100 dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700'
+            } rounded-xl overflow-hidden shadow-sm`}>
 
                 {/* Files Section */}
                 {img && img.length > 0 && (
@@ -44,7 +51,7 @@ export default function ChatBox({ id, text, img }: Props) {
                                         className='rounded-lg w-full h-auto max-h-64 object-cover'
                                     />
                                 ) : (
-                                    <div className='flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+                                    <div className='flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg'>
                                         {(() => {
                                             const IconComponent = getFileIcon(img[0].type);
                                             return <IconComponent className='w-8 h-8 text-gray-600 dark:text-gray-400' />;
@@ -74,7 +81,7 @@ export default function ChatBox({ id, text, img }: Props) {
                                                 className='rounded-lg w-full h-full object-cover'
                                             />
                                         ) : (
-                                            <div className='flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-gray-700 rounded-lg p-2'>
+                                            <div className='flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-gray-900 rounded-lg p-2'>
                                                 {(() => {
                                                     const IconComponent = getFileIcon(item.type);
                                                     return <IconComponent className='w-6 h-6 text-gray-600 dark:text-gray-400 mb-1' />;

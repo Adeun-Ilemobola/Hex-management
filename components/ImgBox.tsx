@@ -27,7 +27,8 @@ export default function ImgBox({ disabled, fileList, Class, SetMainImg, setData 
     if (imgRef.current?.files) {
       const files = Array.from(imgRef.current.files);
       const b64 = await Promise.all(files.map(async file => await toB64(file)));
-      setData(b64);
+     const cleanFile = b64.map((file, i) => ({...file , lastModified: BigInt(files[i].lastModified)}))
+      setData(cleanFile);
       imgRef.current.value = '';
     }
   }

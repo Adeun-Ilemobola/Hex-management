@@ -12,9 +12,10 @@ export interface Base64FileResult {
   url: string;
   size: number; // in bytes
   type: string;
-  lastModified: number;
+ lastModified: bigint;
   thumbnail:boolean
 }
+
 
 export interface FileUploadResult {
   supabaseID: string;
@@ -22,10 +23,20 @@ export interface FileUploadResult {
   url: string;
   size: number; // in bytes
   type: string;
-  lastModified: number;
+  lastModified: bigint;
   thumbnail:boolean,
   id:string
 }
+export interface FileUploadResultImageChat extends FileUploadResult{
+  ChatRoomID:string ;
+   messageId :string;
+    chatOwnerID:string
+  
+  
+}
+export type fullFile = FileUploadResultImageChat | FileUploadResult 
+export type fullFileList = FileUploadResultImageChat[] | FileUploadResult[] 
+
 
 
 export const toB64 = (file: File): Promise<FileUploadResult> => {
@@ -39,7 +50,7 @@ export const toB64 = (file: File): Promise<FileUploadResult> => {
         url: base64String,
         size: file.size,
         type: file.type,
-        lastModified: file.lastModified,
+        lastModified: BigInt(file.lastModified),
         thumbnail:false,
         supabaseID: "",
         id:""
@@ -61,7 +72,27 @@ export function base64ToBlob(base64: string, contentType = ''): Blob {
 }
 
 
+export function seatPlan(planType: string): number {
+  switch (planType) {
+    case 'Premium': return 50;
+    case 'Deluxe': return 15;
+    case 'Free':
+    default: return 3;
+  }
+}
 
+export function isEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+  
+}
 
  export const countries = [
   // North America

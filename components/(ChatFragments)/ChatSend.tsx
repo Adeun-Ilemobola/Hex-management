@@ -1,18 +1,26 @@
 "use client"
-import { FileUploadResult } from '@/lib/utils'
+import {  fullFile } from '@/lib/utils'
 import Image from 'next/image';
 import React, { useState } from 'react'
 import { Textarea } from '../ui/textarea';
 import FileBtu from '../FileBtu';
 import { Button } from '../ui/button';
 import { Send, X, File, FileText, FileImage, FileVideo, FileAudio } from 'lucide-react';
+import {  defaultMessage, Message, MessageSchema } from '@/lib/Zod';
+import { toast } from 'sonner';
+import { DeleteImages, UploadImageList } from '@/lib/supabase';
 
 interface ChatSendProps {
-    sendMessage: (data: { message: string, file: FileUploadResult[] }) => void
+    sendMessage: (data: Message) => void
+    userId: string;
+    roomId: string;
 }
 
-export default function ChatSend({ sendMessage }: ChatSendProps) {
-    const [message, setMessage] = useState<{ message: string, file: FileUploadResult[] }>({ message: "", file: [] });
+export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps) {
+    
+    const [file, setFile] = useState<fullFile[]>([]);
+    const[text,setText] = useState("");
+
     const [isUploading, setUploading] = useState(false);
     const [isMounted, setMounted] = useState(false);
 
@@ -25,21 +33,72 @@ export default function ChatSend({ sendMessage }: ChatSendProps) {
         }
     }, []);
 
-    function send() {
-        if ((!message.message || message.message.trim() === "") && (!message.file || message.file.length === 0)) return;
 
-        sendMessage({
-            message: message.message,
-            file: message.file
+   async function send() {
+        const vMessage = MessageSchema.safeParse({
+            ...defaultMessage,
+            text,
+            roomId , 
+            authorId: userId,
+            images: file.map(img => ({
+                ...img,
+                ChatRoomID: roomId,
+                id:"",
+                messageId: "",
+                chatOwnerID: userId
+            }))
         });
-        setMessage({ message: "", file: [] });
+        if (!vMessage.success) {
+            if (vMessage.error.errors) {
+                const errors = vMessage.error.errors
+                errors.forEach(error => {
+                    toast.error(`Validation error in field "${error.path.join('.')}": ${error.message}`);
+
+                })
+                
+            }
+            return;
+        }
+         let uploadedImages: fullFile[] = [];
+        try {
+            const I = vMessage.data.images.map(img => ({
+                ...img,
+                thumbnail: false,
+                ChatRoomID: roomId
+            }))
+            
+            
+             uploadedImages = await UploadImageList(I, userId, "chat")
+            sendMessage( {
+                ...vMessage.data,
+                images: uploadedImages.map(img => ({
+                    ...img,
+                    ChatRoomID: roomId,
+                    id:"",
+                    messageId: "",
+                    chatOwnerID: userId
+
+                   
+                }))
+            });
+            setText("");
+            setFile([]);
+            setUploading(false);
+            
+        } catch (error) {
+            if (file.length > 0) {
+                await DeleteImages(file.map(img => img.supabaseID));
+            }
+            console.error("Error uploading images:", error);
+            toast.error("Failed to upload images");
+            return;
+            
+        }
     }
 
     function removeFile(index: number) {
-        setMessage(prev => ({
-            ...prev,
-            file: prev.file.filter((_, i) => i !== index)
-        }));
+        setFile(prev => prev.filter((_, i) => i !== index));
+       
     }
 
     function handleKeyDown(e: React.KeyboardEvent) {
@@ -65,21 +124,21 @@ export default function ChatSend({ sendMessage }: ChatSendProps) {
     return (
         <div className='flex flex-col w-full gap-1'>
             {/* File Preview Section - Horizontal Scroll */}
-            {isMounted && message.file && message.file.length > 0 && (
+            {isMounted && file && file.length > 0 && (
                 <div className='flex overflow-x-auto gap-2 px-2 pb-1'>
-                    {message.file.map((file, index) => {
+                    {file.map((file, index) => {
                         const IconComponent = getFileIcon(file.type);
                         return (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 className='relative flex-shrink-0 group'
                             >
                                 <div className='w-16 h-16 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center bg-gray-50'>
                                     {isImageFile(file.type) ? (
-                                        <Image 
-                                            src={file.url} 
-                                            alt={file.name} 
-                                            className='w-full h-full object-cover' 
+                                        <Image
+                                            src={file.url}
+                                            alt={file.name}
+                                            className='w-full h-full object-cover'
                                             width={64}
                                             height={64}
                                         />
@@ -104,32 +163,26 @@ export default function ChatSend({ sendMessage }: ChatSendProps) {
 
             {/* Input Section */}
             <div className='flex items-end gap-2 p-2'>
-                <Textarea 
-                    value={message.message} 
+                <Textarea
+                    value={text}
                     onChange={(e) => {
-                        setMessage(prev => ({
-                            ...prev,
-                            message: e.target.value
-                        }))
+                        setText(e.target.value);
                     }}
                     onKeyDown={handleKeyDown}
                     className='flex-1 resize-none min-h-[40px] max-h-32'
-                    placeholder="Type a message..."  
+                    placeholder="Type a message..."
                 />
 
                 <div className='flex items-center gap-2'>
-                    <FileBtu 
-                        isUploading={setUploading} 
+                    <FileBtu
+                        isUploading={setUploading}
                         setUploadList={(list) => {
-                            setMessage(prev => ({
-                                ...prev,
-                                file: list
-                            })) 
+                            setFile(prev => [...prev, ...list]);
                         }}
                     />
 
-                    <Button 
-                        onClick={send} 
+                    <Button
+                        onClick={send}
                         disabled={isUploading}
                     >
                         <Send /> Send

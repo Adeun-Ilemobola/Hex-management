@@ -86,13 +86,19 @@ export default function PropertyModification() {
             // Prevent duplications uploads
             const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
-            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id)
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id , "notChat")
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
             if (id.length <= 0) {
+                const imagesClean = uploadedImages.map(img => {
+                    return {
+                        ...img,
+                       
+                    }
+                })
                 CreateProperty({
                     property: {
                         ...data,
-                        images: [...uploadedImages],
+                        images: [...imagesClean],
 
                     },
                     investmentBlock: {
@@ -102,10 +108,16 @@ export default function PropertyModification() {
                 });
 
             } else {
+                const imagesClean = [...uploadedImages, ...uploadedImagesDB].map(img => {
+                    return {
+                        ...img,
+                        
+                    }
+                })
                 UpdateProperty({
                     property: {
                         ...data,
-                        images: [...uploadedImages, ...uploadedImagesDB],
+                        images: [...imagesClean],
 
                     },
                     investmentBlock: {

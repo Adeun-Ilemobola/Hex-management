@@ -1,15 +1,19 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { OrganizationMetadata, seatPlan } from "@/server/actions/subscriptionService";
+import { OrganizationMetadata } from "@/server/actions/subscriptionService";
 import { sendEmail } from "@/server/actions/sendEmail";
 import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
+import { rateLimit } from '../middlewares/rateLimit';
+import { seatPlan } from "@/lib/utils";
 
 
 
 export const organizationRouter = createTRPCRouter({
 
-    onboardUserToOrg: protectedProcedure.input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
+    onboardUserToOrg: protectedProcedure
+    .use(rateLimit())
+    .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
             try {
                 let userId = ""
@@ -83,6 +87,7 @@ export const organizationRouter = createTRPCRouter({
         }),
 
     getAllOrganization: protectedProcedure
+
         .query(async ({ ctx }) => {
             try {
                 const data = await auth.api.listOrganizations({ headers: ctx.headers });
@@ -120,6 +125,7 @@ export const organizationRouter = createTRPCRouter({
 
 
     getOrganization: protectedProcedure
+     .use(rateLimit())
         .input(z.object({ id: z.string(), slug: z.string() }))
         .query(async ({ input, ctx }) => {
             try {

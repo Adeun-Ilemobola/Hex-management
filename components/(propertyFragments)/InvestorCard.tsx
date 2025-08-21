@@ -10,7 +10,8 @@ import {
     AlertCircle,
     Banknote,
     Activity,
-    ArrowUpRight
+    ArrowUpRight,
+    TrendingUp
 } from 'lucide-react';
 
 interface ExternalInvestorInput {
@@ -61,15 +62,12 @@ function InvestorCard({
     return (
         <div className="group relative overflow-hidden ml-1">
             {/* Background gradient effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute overflow-hidden inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             
             {/* Main card container */}
             <div className="relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 p-6 sm:p-8 hover:shadow-2xl hover:shadow-purple-500/20 dark:hover:shadow-purple-400/10 transition-all duration-500 hover:border-purple-300/50 dark:hover:border-purple-600/50 ">
                 
-                {/* Animated gradient border */}
-                {/* <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 opacity-0 group-hover:opacity-20 blur-xl transition-all duration-700 animate-pulse" /> */}
                 
-                {/* Status badge */}
                 <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
                     <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r ${getStatusColor()} text-white text-xs font-semibold shadow-lg`}>
                         {getStatusIcon()}
@@ -77,7 +75,7 @@ function InvestorCard({
                     </div>
                 </div>
 
-                <div className="relative z-10 space-y-6">
+                <div className="relative z-10 space-y-6 overflow-hidden">
                     {/* Top section - Investor Identity */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
                         {/* Enhanced Avatar */}
@@ -134,7 +132,7 @@ function InvestorCard({
                         </div>
 
                         {/* Return Percentage */}
-                        {/* <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-2xl p-4 border border-blue-200/50 dark:border-blue-700/30">
+                        <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-2xl p-4 border border-blue-200/50 dark:border-blue-700/30">
                             <div className="absolute top-0 right-0 w-20 h-20 bg-blue-400/10 rounded-full blur-2xl" />
                             <div className="relative space-y-1">
                                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
@@ -145,7 +143,7 @@ function InvestorCard({
                                     {member.returnPercentage.toFixed(1)}%
                                 </div>
                             </div>
-                        </div> */}
+                        </div>
 
                         {/* Dollar Return */}
                         <div className="relative flex-1/2 overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100/50 dark:from-green-900/20 dark:to-emerald-800/10 rounded-2xl p-4 border border-green-200/50 dark:border-green-700/30">
@@ -186,7 +184,7 @@ function InvestorCard({
 
                 {/* Decorative elements */}
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-400/20 to-blue-400/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="absolute -top-4 -left-4 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute  -top-4 -left-4 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             </div>
         </div>
     );

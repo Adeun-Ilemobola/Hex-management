@@ -81,7 +81,9 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                         {session ? (
 
                             <>
-                            <Button  variant={'ghost'}>
+                            <Button  variant={'ghost'}
+                            onClick={() => router.push("/home/chat")}
+                            >
                                  <Bell size={38} color='oklch(60% 0.118 184.704)'/>
                                  Notifications
                             </Button>
@@ -122,7 +124,7 @@ export default function UserCard({ go, img, Logout, name, sub }: { name: string,
             <DropdownMenuTrigger asChild>
                 <div className="group flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-all duration-300">
                     <div className="relative">
-                        <Avatar className="h-12 w-12 rounded-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-400 dark:group-hover:border-purple-500 transition-all duration-300 shadow-lg">
+                        <Avatar className="h-12 w-12 rounded-lg border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-400 dark:group-hover:border-purple-500 transition-all duration-300 shadow-lg">
                             <AvatarImage src={img} className="object-cover" />
                             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-lg">
                                 {name.substring(0, 1).toUpperCase()}
