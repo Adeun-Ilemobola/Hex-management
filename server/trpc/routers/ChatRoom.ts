@@ -222,6 +222,17 @@ export const ChatRoomRouter = createTRPCRouter({
                        };
                    })
                 }))
+                await ctx.prisma.chatRoomMember.updateMany({
+                    where: {
+                        roomId: input.roomId,
+                        userId: user.id
+                    },
+                    data: {
+                        notificationCount: {
+                            set: 0
+                        }
+                    }
+                })
                
                 return { success: true, value: cleanChats, message: "Rooms fetched successfully" };
 

@@ -1,5 +1,5 @@
 "use client"
-import React, { Suspense , useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
@@ -72,7 +72,7 @@ export default function PropertyModification() {
 
         let uploadedImages: FileUploadResult[] = [];
         try {
-              const data = validation()
+            const data = validation()
             if (!data) {
                 return
             }
@@ -80,19 +80,19 @@ export default function PropertyModification() {
                 toast.error("User session not found. Please log in.");
                 return;
             }
-          
+
 
 
             // Prevent duplications uploads
             const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
-            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id , "notChat")
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id, "notChat")
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
             if (id.length <= 0) {
                 const imagesClean = uploadedImages.map(img => {
                     return {
                         ...img,
-                       
+
                     }
                 })
                 CreateProperty({
@@ -111,7 +111,7 @@ export default function PropertyModification() {
                 const imagesClean = [...uploadedImages, ...uploadedImagesDB].map(img => {
                     return {
                         ...img,
-                        
+
                     }
                 })
                 UpdateProperty({
@@ -212,11 +212,28 @@ export default function PropertyModification() {
 
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
-                            <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
+                            <InvestmentBlockSection
+                                setInvestmentBlock={setInvestmentBlock}
+                                disable={false}
+                                investmentBlock={investmentBlock}
+                                Locked={() => {
+                                    const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
+                                    return isLocked
+                                }}
+                            />
 
                             {Session.data?.user && (
                                 <PayWall allowed={isSubscribed}>
-                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} reLoad={reFresh} />
+                                    <PoolInvestorsSection
+                                        mebers={externalInvestor}
+                                        setMebers={setExternalInvestor}
+                                        reLoad={reFresh}
+                                         Locked={() => {
+                                    const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
+                                    return isLocked
+                                }}
+
+                                    />
                                 </PayWall>
                             )}
 

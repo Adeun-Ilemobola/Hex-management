@@ -1,7 +1,7 @@
 "use client"
 import {  fullFile } from '@/lib/utils'
 import Image from 'next/image';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Textarea } from '../ui/textarea';
 import FileBtu from '../FileBtu';
 import { Button } from '../ui/button';
@@ -17,14 +17,13 @@ interface ChatSendProps {
 }
 
 export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps) {
-    
     const [file, setFile] = useState<fullFile[]>([]);
     const[text,setText] = useState("");
 
     const [isUploading, setUploading] = useState(false);
     const [isMounted, setMounted] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (!isMounted) {
             setMounted(true);
         }
@@ -33,8 +32,9 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
         }
     }, []);
 
-
+   
    async function send() {
+    
         const vMessage = MessageSchema.safeParse({
             ...defaultMessage,
             text,
@@ -182,7 +182,9 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
                     />
 
                     <Button
-                        onClick={send}
+                        onClick={() => {
+                            send();
+                        }}
                         disabled={isUploading}
                     >
                         <Send /> Send

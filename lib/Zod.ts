@@ -124,7 +124,8 @@ export type InvestmentTypeEnumType = z.infer<typeof InvestmentTypeEnum>;
 export const InvestmentBlockStatusSchema =z.enum([
   "DRAFT",
   "FINALIZED",   // allocations sum to 100%, funding in progress/escrow
-  "LOCKED",      // funds cleared; cap table immutable
+  "LOCKED",  // funds cleared; cap table immutable
+  "VERIFIED"    
 ]);
 export const PropertyTypeEnum = z.enum([
   "House",
@@ -184,7 +185,7 @@ export const externalInvestorSchema = z
     name: z.string().min(2, "Name is required."),
     email: z.string().email("Valid email required."),
 
-    investorUserId: z.string().uuid().optional().nullable(), // optional link to User
+    investorUserId: z.string().nullable(), // optional link to User
 
     // economics
     contributionPercentage: z
@@ -514,7 +515,14 @@ export const MessageSchema = z.object({
   // room relation omitted to avoid cycles; include if you need it:
   // room: z.lazy(() => ChatRoomSchema).optional()
 
-})
+}).superRefine((message, ctx) => {
+  if (message.text === "" && message.images.length === 0) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Message must have either text or images.",
+    });
+  }
+});
 
 
 export const ChatRoomSchema = z.object({
@@ -641,7 +649,7 @@ export const defaultExternalInvestorInput: ExternalInvestorInput = {
   investmentBlockId: "",
   id: "",
   status: "DRAFT", // default status
-  investorUserId: undefined, // optional link to User
+  investorUserId: null, // optional link to User
   funded: false,
   fundedAt: undefined, // optional date when funds were received
   createdAt: undefined, // optional creation date

@@ -20,11 +20,6 @@ interface UploadImageOptions {
     file: FileUploadResult | FileUploadResultImageChat;
     patHex:'chat'|"notChat"
 }
-// interface UploadImageOptionsConstructor {
-//     userID: string;
-//     file: FileUploadResult[];
-//     patHex:'chat'|"notChat"
-// }
 
 export function UploadImage({ userID, file , patHex = "notChat" }: UploadImageOptions ): Promise<FileUploadResult | FileUploadResultImageChat> {
     return new Promise(async (resolve, reject) => {
@@ -73,7 +68,6 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     }
     return result;
 }
-
 export function UploadImageList(files: FileUploadResult[] | FileUploadResultImageChat[], userID: string , patHex: 'chat'|"notChat"): Promise<FileUploadResult[] | FileUploadResultImageChat[]> {
     return new Promise(async (resolve) => {
         const uploadedImages: FileUploadResult[] = [];
@@ -89,11 +83,9 @@ export function UploadImageList(files: FileUploadResult[] | FileUploadResultImag
             }
             await new Promise(res => setTimeout(res, 200));
         }
-
         resolve(uploadedImages);
 
     })
-
 }
 
 

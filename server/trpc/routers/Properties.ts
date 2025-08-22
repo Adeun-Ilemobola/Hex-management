@@ -1,12 +1,12 @@
 //UserRouter
 
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { createTRPCRouter, protectedProcedure, t } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
-import { rateLimit } from '../middlewares/rateLimit';
+import { rateLimit , heavyRateLimit } from '../middlewares/rateLimit';
 import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
 import { TRPCError } from '@trpc/server';
 
@@ -199,7 +199,7 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
     postPropertie: protectedProcedure
-        .use(rateLimit())
+        .use(heavyRateLimit())
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             let propertyIdGo: string | null = null;
@@ -264,11 +264,10 @@ export const PropertiesRouter = createTRPCRouter({
                 });
 
                 if (!makeP) {
-                    return {
-                        message: "failed to create property",
-                        success: false,
-                        data: null
-                    }
+                   throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to create property",
+                    });
 
                 }
                 propertyIdGo = makeP.id;
@@ -292,7 +291,8 @@ export const PropertiesRouter = createTRPCRouter({
                                 ...rest,
                                 investmentBlockId: makeIB.id
 
-                            }
+                            },
+                           
                         })
                     }))
                     if (makeEI.length > 0) {
@@ -306,15 +306,15 @@ export const PropertiesRouter = createTRPCRouter({
                         }
                         await Promise.all(
                             makeEI.map(async (item) => {
-                                const { id, investmentBlockId, ...rest } = item;
+                                const { id, ...rest } = item;
                                 await sendEmail({
                                     templateText: "VerifyExternalInvestor",
                                     to: rest.email,
                                     params: {
                                         name: rest.name,
                                         email: rest.email,
-                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
-                                        propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
+                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&propertieid=${makeP.id}`,
+                                        propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${makeP.id}`,
                                         contributionPercent: rest.contributionPercentage.toNumber(),
                                         DollarValueReturn: rest.dollarValueReturn.toNumber(),
                                         propertyName: makeP.name

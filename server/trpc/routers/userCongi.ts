@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from '../init';
 import { authClient } from '@/lib/auth-client';
 import { auth } from '@/lib/auth';
-import { DateTime } from 'luxon';
-import { stripe } from '@/lib/stripe';
+
 import { Final, OrganizationMetadata } from '@/server/actions/subscriptionService';
 
 
@@ -52,5 +51,29 @@ export const userCongiRouter = createTRPCRouter({
             return { success: false  , value: null };
         }   
     }),
+
+    SearchUserByEmail: protectedProcedure.input(z.object({ email: z.string() }))
+        .mutation(async ({ input , ctx }) => {
+            try {
+                const users = await ctx.prisma.user.findMany({
+                    where: {
+                        email: {
+                            contains: input.email
+                        }
+                        
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true
+                    }
+                })
+                return { success: true, value: users };
+            } catch (error) {
+                console.error("Error in SearchUserByEmail:", error);
+                return { success: false, value: [] };
+            }
+        }), 
 
 })

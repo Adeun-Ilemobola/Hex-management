@@ -1,4 +1,4 @@
-import {  Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { defaultExternalInvestorInput, ExternalInvestorInput, externalInvestorSchema } from '@/lib/Zod'
@@ -12,21 +12,35 @@ import {
     DialogOverlay,
     DialogFooter
 } from "@/components/ui/dialog"
+import {
+    Command,
+
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+
+
+} from "@/components/ui/command"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import InputBox, { NumberBox } from '../InputBox';
 import InvestorCard from './InvestorCard';
+import { api } from '@/lib/trpc';
 
 
 interface propertyIFProps {
     mebers: ExternalInvestorInput[];
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
     reLoad: () => void; // Optional prop to reload data after mutation
+    Locked: () => boolean
 }
-export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers, Locked }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
     const [maxContribution, setMaxContribution] = useState(0)
     const [mode, setMode] = useState<"edit" | "add">("add")
-  
+
     useEffect(() => {
         // Calculate the maximum contribution percentage based on existing members
         const totalContribution = mebers.reduce((acc, member) => acc + member.contributionPercentage, 0);
@@ -67,19 +81,19 @@ export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFPr
             }
 
 
-            if (investor ) {
+            if (investor) {
                 setMebers(prev => [...prev, investor]);
                 setInvestor(null)
                 setShowInvestorMod(false)
                 return
-            }else {
+            } else {
                 toast.error("Invalid Investor")
             }
         }
 
         if (mode === "edit") {
             // update the existing investor
-            if (investor ) {
+            if (investor) {
                 const updatedMembers = mebers.map(member => {
                     if (member.id === investor.id || member.email === investor.email) {
                         return investor;
@@ -94,9 +108,9 @@ export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFPr
                 }
 
                 );
-               
+
                 return
-            }   
+            }
 
         }
 
@@ -144,7 +158,7 @@ export default function PoolInvestorsSection({ mebers, setMebers }: propertyIFPr
                             <InvestorCard
                                 key={index}
                                 member={member}
-                                locked={member.id.length > 0 }
+                                locked={Locked()}
 
                                 onEdit={() => {
                                     console.log('edit investors')
@@ -224,6 +238,9 @@ interface InvestorConfigProps {
 
 
 function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvestorMod, mode, onSubmit, maxContribution }: InvestorConfigProps) {
+    const [searchMode, setSearchMode] = useState<"Manuel" | "Search">("Manuel");
+    const [textSearch, setTextSearch] = useState<string>("");
+    const foundUsers = api.user.SearchUserByEmail.useMutation();
 
     return (
         <Dialog open={showInvestorMod} onOpenChange={setShowInvestorMod} >
@@ -237,20 +254,84 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                         {mode === "edit" ? "Edit existing investor" : "Add new investor"}
                     </DialogDescription>
                 </DialogHeader>
-                <div className='flex flex-col gap-4'>
+                <div className='p-3 flex flex-col gap-2'>
+                    <Button
+                        className='w-[38%] ml-auto'
+                        variant={"outline"}
+                        onClick={() => setSearchMode(searchMode === "Manuel" ? "Search" : "Manuel")}>
+                        
+                        {searchMode}
+                    </Button>
+                    <div className='flex flex-col gap-4'>
+                        {searchMode === "Manuel" && (
+                            <>
+                                <InputBox
+                                    label="Name"
+                                    value={investor.name}
+                                    onChange={(e) => setInvestor({ ...investor, name: e , investorUserId: null })}
+                                />
+                                <InputBox
+                                    label="Email"
+                                    value={investor.email}
+                                    onChange={(e) => setInvestor({ ...investor, email: e , investorUserId: null })}
+                                />
+                            </>
+                        )}
 
-                    <InputBox
-                        label="Name"
-                        value={investor.name}
-                        onChange={(e) => setInvestor({ ...investor, name: e })}
-                    />
-                    <InputBox
-                        label="Email"
-                        value={investor.email}
-                        onChange={(e) => setInvestor({ ...investor, email: e })}
-                    />
 
-                    
+                        {searchMode === "Search" && (
+                            <>
+                                <Command>
+                                    <CommandInput
+                                        placeholder="Type a command or search..."
+                                        value={textSearch}
+                                        onValueChange={(e) => {
+                                            setTextSearch(e);
+                                            foundUsers.mutate({ email: e });
+                                        }}
+                                    />
+                                    <CommandList>
+                                        <CommandEmpty>No user found.</CommandEmpty>
+                                        <CommandGroup heading="Users">
+                                            {foundUsers.data?.value.map((user , i) => (
+                                                <CommandItem
+                                                    key={i}
+                                                    value={user.email}
+                                                    onSelect={() => {
+                                                        setInvestor({ ...investor, name: user.name, email: user.email , investorUserId: user.id });
+                                                       setSearchMode("Manuel");
+                                                    }}
+                                                >
+
+                                                    <div className='flex flex-row gap-2 p-2.5'>
+                                                        <Avatar className="h-12 w-12 rounded-md" >
+                                                            <AvatarImage src={user.image ?? undefined} />
+                                                            <AvatarFallback 
+                                                            className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold"
+                                                            >{user.name.substring(0, 1)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className='flex flex-col'>
+                                                            <span className='font-bold'>{user.name}</span>
+                                                            <span className='text-sm text-gray-500 dark:text-gray-400'>{user.email}</span>
+                                                        </div>
+
+                                                    </div>
+                                                </CommandItem>
+                                            ))}
+
+
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+
+
+
+                            </>
+                        )}
+
+
+
+
                         <NumberBox
                             label="Contribution Percentage"
                             value={investor.contributionPercentage}
@@ -258,8 +339,10 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                             max={maxContribution}
                             min={0}
                         />
-                    
+
+                    </div>
                 </div>
+
                 <DialogFooter className='flex flex-col items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
                     <Button
                         variant="outline"

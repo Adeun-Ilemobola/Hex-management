@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { DateTime } from "luxon";
 
 import { protectedProcedure, createTRPCRouter } from '../init';
-import { PropertiesRouter } from './UserRouter';
+import { PropertiesRouter } from './Properties';
 import { stripe } from '@/lib/stripe';
 import { TRPCError } from "@trpc/server";
 import { userCongiRouter } from './userCongi';

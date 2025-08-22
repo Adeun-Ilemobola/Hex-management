@@ -8,9 +8,10 @@ interface propertyIFProps {
     investmentBlock: InvestmentBlockInput,
     setInvestmentBlock: React.Dispatch<React.SetStateAction<InvestmentBlockInput>>,
     disable: boolean
+    Locked: () => boolean
 }
 
-export default function InvestmentBlockSection({ investmentBlock, setInvestmentBlock, disable }: propertyIFProps) {
+export default function InvestmentBlockSection({ investmentBlock, setInvestmentBlock, disable  , Locked }: propertyIFProps) {
     const handleField = (field: keyof InvestmentBlockInput, val: string | boolean | number, type?: 'number') => {
         setInvestmentBlock(prev => ({ ...prev, [field]: type === 'number' ? Number(val) : val }))
     }
@@ -24,6 +25,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                     <div>
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Investment Block</h2>
                         <p className="text-sm text-gray-600 dark:text-gray-300">Configure your investment parameters</p>
+                        {Locked() && <p className="text-sm text-red-600 dark:text-red-300">Locked</p>}
                     </div>
                 </div>
             </div>
@@ -33,7 +35,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                     <NumberBox
                         label="Investment"
                         value={investmentBlock.initialInvestment}
-                        disabled={disable}
+                        disabled={Locked() ? true : disable}
                         setValue={(val: number) => handleField('initialInvestment', val, 'number')}
                         className="w-52"
                         max={9999999999999}
@@ -41,14 +43,14 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                     <NumberBox
                         label="Margin (%)"
                         value={investmentBlock.margin}
-                        disabled={disable}
+                        disabled={Locked() ? true : disable}
                         setValue={(val: number) => handleField('margin', val, 'number')}
                         className="w-30"
                     />
                     <NumberBox
                         label="Discount (%)"
                         value={investmentBlock.discountPercentage}
-                        disabled={disable}
+                        disabled={Locked() ? true : disable}
                         setValue={(val: number) => handleField('discountPercentage', val, 'number')}
                         className="w-28"
                     />
@@ -57,7 +59,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                         <NumberBox
                             label="Depreciation (years)"
                             value={investmentBlock.depreciationYears}
-                            disabled={disable}
+                            disabled={Locked() ? true : disable}
                             setValue={(val: number) => handleField('depreciationYears', val, 'number')}
                             className="w-40"
                         />
@@ -67,7 +69,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                         <NumberBox
                             label="Cycle (mo)"
                             value={investmentBlock.leaseCycle}
-                            disabled={disable}
+                            disabled={Locked() ? true : disable}
                             setValue={(val: number) => handleField('leaseCycle', val, 'number')}
                             className="w-28"
                         />
@@ -76,7 +78,7 @@ export default function InvestmentBlockSection({ investmentBlock, setInvestmentB
                         label="Sale Type"
                         options={typeOfSaleOP}
                         value={investmentBlock.typeOfSale}
-                        isDisable={disable}
+                        isDisable={Locked() ? true : disable}
                         setValue={(val: string) => handleField('typeOfSale', val)}
                         ClassName="w-30"
                     />

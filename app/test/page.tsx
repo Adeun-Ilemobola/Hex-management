@@ -2,12 +2,21 @@
 import { Button } from '@/components/ui/button';
 import { sendEmail } from '@/server/actions/sendEmail';
 import { useMutation } from '@tanstack/react-query'
-// import ChatBox from '@/components/(ChatFragments)/ChatBox';
-// import ChatSend from '@/components/(ChatFragments)/ChatSend';
-// import { DatePicker } from '@/components/date-picker';
 
-// import {  FileUploadResult } from '@/lib/utils';
+
 import { toast } from 'sonner';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerOverlay
+  
+} from "@/components/ui/drawer"
 
 // Fake data for all tiers
 
@@ -30,7 +39,7 @@ export default function Page() {
       console.error("Error sending email:", error);
       toast.error("Failed to send email", {id: "email-VerifyEmail"});
     }
-  
+
   });
 
   const ResetPassword = useMutation({
@@ -129,6 +138,23 @@ export default function Page() {
 
   return (
     <div className='relative flex flex-col gap-4 p-9  min-h-screen  overflow-hidden'>
+
+      <Drawer preventScrollRestoration direction='right'>
+        <DrawerOverlay className=' bg-purple-500/15 backdrop-blur-sm' />
+        <DrawerTrigger>Open</DrawerTrigger>
+        <DrawerContent className=' min-w-[46rem] sm:min-w-[50rem]'>
+          <DrawerHeader>
+            <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+            <DrawerDescription>This action cannot be undone.</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button>Submit</Button>
+            <DrawerClose>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <div className='flex flex-row  gap-6 items-center justify-center'>
         <Button size={"lg"} onClick={() => VerifyEmail.mutate()}>Send Verify Email</Button>
