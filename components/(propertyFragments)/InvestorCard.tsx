@@ -164,7 +164,7 @@ function InvestorCard({
                     </div>
 
                     {/* Action Buttons */}
-                    {locked && (
+                    {!(["FINALIZED" , "LOCKED" ,  "VERIFIED" ].includes(member.status)) && (
                         <div className="flex gap-3 pt-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
                             <Button
                                 onClick={onEdit}

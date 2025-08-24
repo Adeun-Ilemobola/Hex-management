@@ -90,8 +90,9 @@ export default function Page() {
        propertyLink: "https://google.com",
        email: "adeun2020@gmail.com",
        DollarValueReturn: 1000,
-       verificationLink: "https://google.com",
-       contributionPercent: 10
+       verificationLink: `${process.env.NEXTAUTH_URL}/home/verifyExternalInvestor?investorId=${"533431bc-2e1d-462e-99c3-aec440c75530"}&propertieid=${"d93abec1-d97b-43b1-9e75-5f0591807e86"}`,
+       contributionPercent: 10,
+       accessCode: "P7qG6Pb1qTZW"
       }
     }),
     onSuccess: (data) => {

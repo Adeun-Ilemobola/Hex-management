@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
-import { rateLimit , heavyRateLimit } from '../middlewares/rateLimit';
+import { rateLimit, heavyRateLimit } from '../middlewares/rateLimit';
 import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
 import { TRPCError } from '@trpc/server';
 
@@ -209,7 +209,7 @@ export const PropertiesRouter = createTRPCRouter({
                     name: ctx.user.name,
                     email: ctx.user.email
                 }
-                const { images } = input.property;
+                const { images, accessCode } = input.property;
                 const { externalInvestors, ...investmentBlock } = input.investmentBlock
                 const { id, propertyId, ...cleanInvestmentBlock } = investmentBlock;
                 const { id: pId, ...propertyData } = input.property;
@@ -264,7 +264,7 @@ export const PropertiesRouter = createTRPCRouter({
                 });
 
                 if (!makeP) {
-                   throw new TRPCError({
+                    throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
                         message: "Failed to create property",
                     });
@@ -292,7 +292,7 @@ export const PropertiesRouter = createTRPCRouter({
                                 investmentBlockId: makeIB.id
 
                             },
-                           
+
                         })
                     }))
                     if (makeEI.length > 0) {
@@ -302,7 +302,7 @@ export const PropertiesRouter = createTRPCRouter({
                         const createChatRoom = await CreateGroupChat({ PropertyName: makeP.name, members: getEmail, currentAdminId: ctx.user.id })
                         if (!createChatRoom.success) {
                             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create chat room" })
-                           
+
                         }
                         await Promise.all(
                             makeEI.map(async (item) => {
@@ -313,11 +313,12 @@ export const PropertiesRouter = createTRPCRouter({
                                     params: {
                                         name: rest.name,
                                         email: rest.email,
-                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&propertieid=${makeP.id}`,
+                                        verificationLink: `${process.env.NEXTAUTH_URL}/home/verifyExternalInvestor?investorId=${id}&propertieid=${makeP.id}`,
                                         propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${makeP.id}`,
                                         contributionPercent: rest.contributionPercentage.toNumber(),
                                         DollarValueReturn: rest.dollarValueReturn.toNumber(),
-                                        propertyName: makeP.name
+                                        propertyName: makeP.name,
+                                        accessCode: accessCode
                                     }
 
 
@@ -465,18 +466,19 @@ export const PropertiesRouter = createTRPCRouter({
 
                         await Promise.all(
                             res.map(async (item) => {
-                                const { id, investmentBlockId, ...rest } = item;
+                                const { investmentBlockId, ...rest } = item;
                                 await sendEmail({
                                     templateText: "VerifyExternalInvestor",
                                     to: rest.email,
                                     params: {
                                         name: rest.name,
                                         email: rest.email,
-                                        verificationLink: `${process.env.NEXTAUTH_URL}/verify/externalInvestor?investorId=${id}&blockId=${investmentBlockId}`,
+                                        verificationLink: `${process.env.NEXTAUTH_URL}/home/verifyExternalInvestor?investorId=${item.id}&propertieid=${pId}`,
                                         propertyLink: `${process.env.NEXTAUTH_URL}/propertie/${pId}`,
                                         contributionPercent: rest.contributionPercentage.toNumber(),
                                         DollarValueReturn: rest.dollarValueReturn.toNumber(),
-                                        propertyName: updataData.name
+                                        propertyName: updataData.name,
+                                        accessCode: propertyData.accessCode
                                     }
 
 
@@ -766,6 +768,211 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+    getPropertieNameById: protectedProcedure
+        .input(z.object({ pID: z.string() }))
+        .query(async ({ input, ctx }) => {
+            try {
+                const { pID } = input;
+                const getP = await ctx.prisma.propertie.findUnique({
+                    where: {
+                        id: pID,
+
+                    },
+                    select: {
+                        name: true,
+                    }
+                })
+
+                if (!getP) {
+                    return {
+                        success: false,
+                        message: "property not found",
+                        value: null
+                    }
+                }
+                return {
+                    success: true,
+                    message: "successfully created property listing",
+                    value: getP.name
+                }
+            } catch (error) {
+                console.error("Error in viewProperty:", error);
+                throw new TRPCError({ code: 'NOT_FOUND', message: "property not found" });
+            }
+
+        }),
+
+    acceptInvitePropertie: protectedProcedure
+        .input(z.object({
+            investorId: z.string(),
+            propertieId: z.string(),
+            code: z.string().default(""),
+            accepted: z.boolean().default(false)
+        }))
+        .mutation(async ({ input, ctx }) => {
+            try {
+                const user = ctx.session?.user;
+                if (!user) {
+                    return {
+                        success: false,
+                        message: "user not found"
+                    }
+                }
+                const { investorId, propertieId, code, accepted } = input;
+
+                if (!accepted && code.length < 12) {
+                    return {
+                        success: false,
+                        message: "Invalid code"
+                    }
+
+                }
+                if (!accepted && code.length > 12) {
+                    return {
+                        success: false,
+                        message: "Invalid code"
+                    }
+
+                }
+                const getPropertie = await ctx.prisma.propertie.findUnique({
+                    where: {
+                        id: propertieId,
+                    },
+                    select: {
+                        accessCode: true,
+                        id: true,
+                        investBlock: {
+                            select: {
+                                id: true
+                            }
+                        }
+                    }
+                })
+                if (!getPropertie) {
+                    return {
+                        success: false,
+                        message: "property not found"
+                    }
+
+                }
+                if (!getPropertie.investBlock) {
+                    return {
+                        success: false,
+                        message: "property not found"
+                    }
+                }
+                const Investor = await ctx.prisma.externalInvestor.findUnique({
+                    where: {
+                        investorUserId: user?.id,
+                        id: investorId
+                    },
+                })
+                if (Investor && Investor.status === "VERIFIED") {
+                    return {
+                        success: false,
+                        message: "you are already verified"
+                    }
+
+                }
+                if (accepted) {
+                    if (getPropertie.accessCode !== code) {
+                        return {
+                            success: false,
+                            message: "Invalid code"
+                        }
+
+                    }
+                    console.log({
+                        investorUserId: user.id,
+                        id: investorId,
+                        email: user.email,
+                        investmentBlockId: getPropertie.investBlock.id,
+                        code, accepted 
+
+                    });
+
+                    const data= await ctx.prisma.externalInvestor.updateMany({
+                        where: {
+                            id: investorId,
+                            email: user.email,
+                            investmentBlockId: getPropertie.investBlock.id
+                        },
+                        data: {
+                            status: "VERIFIED",
+                            isInternal: true,
+                            investorUserId: user.id
+                            
+                        }
+
+                    })
+                    if (data.count === 0) {
+                        throw new TRPCError({ code: 'NOT_FOUND', message: 'Investor not found or not owned by user.' });
+                    }
+                    await ctx.prisma.user.update({
+                        where: {
+                            id: user?.id
+                        },
+                        data: {
+                            investments: [getPropertie.id]
+                        }
+                    })
+
+                    return {
+                        success: true,
+                        message: `successfully verified you as investor`,
+
+                    }
+
+                } else {
+                    console.log({
+                        investorUserId: user.id,
+                        id: investorId,
+                        email: user.email,
+                        investmentBlockId: getPropertie.investBlock.id,
+                        code, accepted 
+
+                    });
+
+                    const { count } = await ctx.prisma.externalInvestor.updateMany({
+                        where: {
+                            id: investorId,
+                            email: user.email,
+                            investmentBlockId: getPropertie.investBlock.id
+                        },
+                        data: {
+                            status: "DRAFT",
+                            isInternal: false,
+                            accessRevoked: true,
+                            investorUserId: user.id
+                        }
+
+                    })
+                    if (count===0) {
+                        throw new TRPCError({ code: 'NOT_FOUND', message: 'Investor not found or not owned by user.' });
+
+
+                    }
+
+                    return {
+                        success: true,
+                        message: `successfully denied you as investor`,
+
+                    }
+                }
+
+
+
+
+            } catch (error) {
+                console.error("Error in viewProperty:", error);
+                return {
+                    success: false,
+                    message: "failed to process adding user as investor"
+                }
+
+            }
+        })
 
 
 });

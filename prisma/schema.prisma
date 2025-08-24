@@ -41,6 +41,7 @@ model User {
   country       String?
   createdAt     DateTime
   updatedAt     DateTime
+  investments  String[]
   sessions      Session[]
   accounts      Account[]
 
@@ -104,14 +105,11 @@ model externalInvestor {
   status InvestmentBlockStatus @default(DRAFT)
 
   investorUserId String? // optional link to a User if they do exist
-  // relation if you have a User model:
-  // user                   User?   @relation(fields: [investorUserId], references: [id])
 
   // economics
   contributionPercentage Decimal @db.Decimal(8, 4) // was Float
   returnPercentage       Decimal @db.Decimal(8, 4) // was Float
   dollarValueReturn      Decimal @db.Decimal(18, 2) // was Float
-
   // states/flags
   isInternal    Boolean
   accessRevoked Boolean   @default(false)
