@@ -29,6 +29,7 @@ export default function PropertyModification() {
         setPropertyInfo,
         setInvestmentBlock,
         setExternalInvestor,
+        removeInvestor,
         Session,
         financials,
         RemoveImage,
@@ -44,12 +45,18 @@ export default function PropertyModification() {
     const [section, Setsection] = useState(1)
 
     function validation() {
-        const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
+        
+        const blockForValidation = {
+            ...investmentBlock,
+            externalInvestors: externalInvestor, 
+        };
+
+
+        const vInvestmentBlock = investmentBlockSchema.safeParse(blockForValidation);
+
         const validatedProperty = propertySchema.safeParse({
             ...propertyInfo,
-            ...(section === 3 && {
-                investmentBlock: vInvestmentBlock.data
-            })
+            ...(section === 3 && { investmentBlock: blockForValidation }),
         });
         if (!validatedProperty.success) {
             validatedProperty.error.errors.forEach(err => {
@@ -58,7 +65,7 @@ export default function PropertyModification() {
             );
             return null
         }
-        if (section === 3 && !vInvestmentBlock.success) {
+        if (section === 2 && !vInvestmentBlock.success) {
             vInvestmentBlock.error.errors.forEach(err => {
                 toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
             }
@@ -228,10 +235,11 @@ export default function PropertyModification() {
                                         mebers={externalInvestor}
                                         setMebers={setExternalInvestor}
                                         reLoad={reFresh}
-                                         Locked={() => {
-                                    const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
-                                    return isLocked
-                                }}
+                                        Locked={() => {
+                                            const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
+                                            return isLocked
+                                        }}
+                                        removeInvestor={removeInvestor}
 
                                     />
                                 </PayWall>
@@ -279,10 +287,8 @@ export default function PropertyModification() {
                         size={"lg"}
                         onClick={() => {
                             if (section !== 3) {
-                                if (section === 1) {
-                                    const data = validation()
-                                    if (!data) { return; }
-                                }
+                                const data = validation()
+                                if (!data) { return; }
                                 Setsection(pre => ++pre)
                             } else {
                                 handleSubmit()

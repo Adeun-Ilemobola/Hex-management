@@ -2,6 +2,7 @@ import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from '../ui/badge'
 import { Users, MessageCircle } from 'lucide-react'
+import { ChatRoomType } from '@/lib/Zod';
 
 interface ChatRoomCardProps {
     
@@ -11,6 +12,7 @@ interface ChatRoomCardProps {
         name: string;
         isAdmin: boolean;
     }[];
+    type:ChatRoomType
     select: () => void;
 }
 
@@ -19,7 +21,8 @@ export default function ChatRoomCard({
     title,
     notificationCount,
     participants,
-    select
+    select ,
+    type
 }: ChatRoomCardProps) {
     return (
         <div
@@ -89,6 +92,17 @@ export default function ChatRoomCard({
                     >
                         <Users className='w-3.5 h-3.5' />
                         <span className='font-medium'>{participants.length} Participants</span>
+                    </Badge>
+
+                    <Badge
+                        variant={type === "PRIVATE" ? 'destructive' : 'default'}
+                        className='bg-gray-100/80 dark:bg-gray-700/80 text-gray-700 
+                                   dark:text-gray-300 border-0 backdrop-blur-sm
+                                   flex items-center gap-1.5 px-3 py-1
+                                   hover:bg-gray-200/80 dark:hover:bg-gray-600/80
+                                   transition-colors duration-200'
+                    >
+                        <span className='font-medium'>{type}</span>
                     </Badge>
                 </div>
             </div>

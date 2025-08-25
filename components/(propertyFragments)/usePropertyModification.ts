@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import { authClient } from "@/lib/auth-client";
@@ -26,7 +26,11 @@ export function usePropertyModification(id: string) {
     const [propertyInfo, setPropertyInfo] = useState<PropertyInput>(defaultPropertyInput)
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
-    const getProperty = api.Propertie.getPropertie.useQuery({ pID: id })
+    const getProperty = api.Propertie.getPropertie.useQuery({ pID: id },{
+        enabled: !!id,
+        refetchOnWindowFocus: false
+
+    })
     const Session = authClient.useSession();
     const { data: plan, isPending: planLoading } = api.user.getUserPlan.useQuery();
 
@@ -95,6 +99,10 @@ export function usePropertyModification(id: string) {
         },
 
     })
+
+    const removeInvestor = useCallback((email: string, name: string) => {
+        setExternalInvestor(prev => prev.filter(m => !(m.email === email && m.name === name)));
+    }, []);
 
 
 
@@ -205,7 +213,7 @@ export function usePropertyModification(id: string) {
             });
         }
 
-         if (externalInvestor.length === 0) return;
+        if (externalInvestor.length === 0) return;
 
         const isSame = JSON.stringify(investorCalculations.updatedInvestors) === JSON.stringify(externalInvestor);
         if (!isSame) {
@@ -331,7 +339,7 @@ export function usePropertyModification(id: string) {
 
     useEffect(() => {
         if (getProperty.data?.success && getProperty.data?.value) {
-            const { externalInvestors, property, investmentBlock: ib, images:files } = getProperty.data.value;
+            const { externalInvestors, property, investmentBlock: ib, images: files } = getProperty.data.value;
 
             setPropertyInfo({
                 ...property,
@@ -387,13 +395,14 @@ export function usePropertyModification(id: string) {
                 ownerType: "ORGANIZATION",
             }));
         }
-    }, [id, getProperty.data]);
+    }, [ getProperty.data]);
 
     return {
         propertyInfo,
         setPropertyInfo,
         externalInvestor,
         setExternalInvestor,
+        removeInvestor,
         investmentBlock,
         setInvestmentBlock,
         financials,

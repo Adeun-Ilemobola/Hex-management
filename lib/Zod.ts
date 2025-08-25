@@ -267,11 +267,15 @@ export const investmentBlockSchema = z
   .superRefine((data, ctx) => {
     // rent or lease require higher minimums
     const { initialInvestment, margin, externalInvestors } = data;
-    if (externalInvestors.length > 0) {
-      const totalContribution = externalInvestors.reduce(
+    console.log(externalInvestors);
+    const totalContribution = externalInvestors.reduce(
         (sum, investor) => sum + investor.contributionPercentage,
         0
       );
+
+      
+    if (externalInvestors.length > 0) {
+      
       if (totalContribution > 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -524,12 +528,14 @@ export const MessageSchema = z.object({
   }
 });
 
-
+const ChatRoomTypeX = z.enum(["PRIVATE", "GROUP"]);
+export type ChatRoomType = z.infer<typeof ChatRoomTypeX>;
 export const ChatRoomSchema = z.object({
   id: z.string().default(""),
   title: z.string().min(1),
   participants: z.array(z.lazy(() => ChatRoomMemberSchema)).default([]),
-  chats: z.array(z.lazy(() => MessageSchema)).default([])
+  chats: z.array(z.lazy(() => MessageSchema)).default([]),
+  type: ChatRoomTypeX.default("PRIVATE"),
 })
 
 

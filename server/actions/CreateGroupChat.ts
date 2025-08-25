@@ -24,6 +24,7 @@ export async function CreateGroupChat({  PropertyName, members , currentAdminId 
             const newChatRoon = await prisma.chatRoom.create({
                 data: {
                     title: PropertyName+" Group Chat",
+                    type:"GROUP"
                 }
             })
             const newMembers= await Promise.all(validUsers.map(async (user) => {

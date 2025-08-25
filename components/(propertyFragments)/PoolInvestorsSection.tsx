@@ -33,9 +33,10 @@ interface propertyIFProps {
     mebers: ExternalInvestorInput[];
     setMebers: React.Dispatch<React.SetStateAction<ExternalInvestorInput[]>>;
     reLoad: () => void; // Optional prop to reload data after mutation
+    removeInvestor: (email: string, name: string) => void
     Locked: () => boolean
 }
-export default function PoolInvestorsSection({ mebers, setMebers, Locked }: propertyIFProps) {
+export default function PoolInvestorsSection({ mebers, setMebers, Locked , removeInvestor }: propertyIFProps) {
     const [investor, setInvestor] = useState<ExternalInvestorInput | null>(null)
     const [showInvestorMod, setShowInvestorMod] = useState(false)
     const [maxContribution, setMaxContribution] = useState(0)
@@ -116,9 +117,7 @@ export default function PoolInvestorsSection({ mebers, setMebers, Locked }: prop
 
     }
 
-    const removeInvestor = (index: number) => {
-        setMebers(prev => prev.filter((_, i) => i !== index));
-    };
+    
 
     return (
         <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 min-w-[56rem] max-w-[60rem]">
@@ -168,7 +167,7 @@ export default function PoolInvestorsSection({ mebers, setMebers, Locked }: prop
                                 }}
                                 onRemove={() => {
                                     console.log('remove investors')
-                                    removeInvestor(index)
+                                    removeInvestor(member.email, member.name)
                                 }}
                             />
                         ))}
@@ -259,7 +258,7 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                         className='w-[38%] ml-auto'
                         variant={"outline"}
                         onClick={() => setSearchMode(searchMode === "Manuel" ? "Search" : "Manuel")}>
-                        
+
                         {searchMode}
                     </Button>
                     <div className='flex flex-col gap-4'>
@@ -268,12 +267,12 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                                 <InputBox
                                     label="Name"
                                     value={investor.name}
-                                    onChange={(e) => setInvestor({ ...investor, name: e , investorUserId: null })}
+                                    onChange={(e) => setInvestor({ ...investor, name: e, investorUserId: null })}
                                 />
                                 <InputBox
                                     label="Email"
                                     value={investor.email}
-                                    onChange={(e) => setInvestor({ ...investor, email: e , investorUserId: null })}
+                                    onChange={(e) => setInvestor({ ...investor, email: e, investorUserId: null })}
                                 />
                             </>
                         )}
@@ -293,21 +292,21 @@ function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvesto
                                     <CommandList>
                                         <CommandEmpty>No user found.</CommandEmpty>
                                         <CommandGroup heading="Users">
-                                            {foundUsers.data?.value.map((user , i) => (
+                                            {foundUsers.data?.value.map((user, i) => (
                                                 <CommandItem
                                                     key={i}
                                                     value={user.email}
                                                     onSelect={() => {
-                                                        setInvestor({ ...investor, name: user.name, email: user.email , investorUserId: user.id });
-                                                       setSearchMode("Manuel");
+                                                        setInvestor({ ...investor, name: user.name, email: user.email, investorUserId: user.id });
+                                                        setSearchMode("Manuel");
                                                     }}
                                                 >
 
                                                     <div className='flex flex-row gap-2 p-2.5'>
                                                         <Avatar className="h-12 w-12 rounded-md" >
                                                             <AvatarImage src={user.image ?? undefined} />
-                                                            <AvatarFallback 
-                                                            className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold"
+                                                            <AvatarFallback
+                                                                className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold"
                                                             >{user.name.substring(0, 1)}</AvatarFallback>
                                                         </Avatar>
                                                         <div className='flex flex-col'>

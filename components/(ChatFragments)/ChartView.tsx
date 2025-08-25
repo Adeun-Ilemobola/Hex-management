@@ -146,8 +146,8 @@ export default function ChartView() {
   const [room, setRoom] = useState<RoomData | null>(null);
   const roomId = room?.id ?? null;
   const utils = api.useUtils(); // tRPC v10 helpers
-  const [messages, setMessages] = useState<Message[]>([]);
-  const getChats = api.ChatRoom.getUserChats.useQuery(
+  // const [messages, setMessages] = useState<Message[]>([]);
+  const { data: chatMessages, isPending: chatPending } = api.ChatRoom.getUserChats.useQuery(
     { roomId: roomId! },
     {
       enabled: !!roomId,                      // only run when a room is selected
@@ -159,7 +159,7 @@ export default function ChartView() {
       placeholderData: {
         message: "",
         success: true,
-        value: messages || []
+        value:  []
       },    // smooth room switches
     }
   );
@@ -233,7 +233,7 @@ export default function ChartView() {
       }
     },
   })
-  const list = getChats.data?.value ?? [];       // avoid duplicating state
+  const list = chatMessages?.value|| [];       // avoid duplicating state
   const lastKey = list.at(-1)?.id ?? "__none__";
   const scrollToBottom = () => {
   setTimeout(() => {
@@ -246,19 +246,19 @@ export default function ChartView() {
     scrollToBottom();
    
   }, [ lastKey]);
-  useEffect(() => {
-    const Same = isEqual(messages, getChats.data?.value || []);
-    if (!Same) {
-      const info = (getChats.data?.value || []).map((item) => {
-        return {
-          ...item,
-          text: item.text || "",
-        }
-      })
-      setMessages(info);
-    }
+  // useEffect(() => {
+  //   const Same = isEqual(messages, getChats.data?.value || []);
+  //   if (!Same) {
+  //     const info = (getChats.data?.value || []).map((item) => {
+  //       return {
+  //         ...item,
+  //         text: item.text || "",
+  //       }
+  //     })
+  //     setMessages(info);
+  //   }
 
-  }, [list]);
+  // }, [list]);
   
 
 
@@ -330,7 +330,7 @@ export default function ChartView() {
                           "radial-gradient(1200px 350px at 50% -10%, rgba(99,102,241,0.15), transparent 60%), radial-gradient(800px 300px at 80% 0%, rgba(236,72,153,0.08), transparent 60%)",
                       }}
                     />
-                    {messages.map((message) => (
+                    {list.map((message) => (
                       <ChatBox
                         key={message.id}
                         id={message.id}
@@ -402,6 +402,7 @@ export default function ChartView() {
                         {rooms?.value.map((r) => (
                           <ChatRoomCard
                             key={r.chatRoomMemberId}
+                            type={r.type}
 
                             title={r.title}
                             notificationCount={r.notificationCount}

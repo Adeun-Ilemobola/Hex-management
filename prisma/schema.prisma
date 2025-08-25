@@ -26,6 +26,10 @@ enum SaleType {
   RENT
   LEASE
 }
+enum roomType {
+  PRIVATE
+  GROUP
+}
 
 model User {
   id            String    @id
@@ -261,6 +265,7 @@ model Session {
 model ChatRoom {
   id           String           @id @default(uuid())
   title        String // this will be an arry of the two users name so you can switch depends on who is viewing it
+  type    roomType @default(PRIVATE)
   participants ChatRoomMember[]
 
   chats Message[]

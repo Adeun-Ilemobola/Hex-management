@@ -49,9 +49,12 @@ export const ChatRoomRouter = createTRPCRouter({
                     isAdmin: room.isAdmin,
                     joinedAt: room.joinedAt,
                     notificationCount: room.notificationCount,
-                    title:room.room.title
+                    title:room.room.title,
+                    type:room.room.type
 
                 }))
+                console.log(cleanedRooms);
+                
                 return { success: true, value: cleanedRooms, message: "Rooms fetched successfully" };
 
             } catch (error) {
@@ -239,6 +242,60 @@ export const ChatRoomRouter = createTRPCRouter({
             } catch (error) {
                 console.error("Error in getUserRooms:", error);
                 return { success: false, message: "Failed to fetch rooms", value: [] };
+
+            }
+        }),
+
+
+        createRome:protectedProcedure
+        .input(z.object({ 
+            toId: z.string(),
+         }))
+        .mutation(async ({ ctx , input }) => {
+            try {
+                const user = ctx.session?.user;
+                if (!user) {
+                    return { success: false, message: "User not authenticated" };
+                }
+                const getReceiver = await ctx.prisma.user.findUnique({
+                    where: {
+                        id: input.toId
+                    }
+                })
+                if (!getReceiver) {
+                    return { success: false, message: "Receiver not found" };
+                }
+                const newRoom  = await ctx.prisma.chatRoom.create({
+                    data: {
+                        title: `${user.name} and ${getReceiver.name}`,
+                        type:"PRIVATE",
+                        participants: {
+                            create: [
+                                {
+                                    userId: user.id,
+                                    userName: user.name,
+                                    isAdmin: true,
+                                    joinedAt: new Date()
+                                },
+                                {
+                                    userId: getReceiver.id,
+                                    userName: getReceiver.name,
+                                    joinedAt: new Date()
+                                }
+                            ]
+                        }
+                    }
+                })
+                if (!newRoom) {
+                    return { success: false, message: "Failed to create room" };
+                }
+                return { success: true, value: newRoom, message: "Room created successfully" };
+
+                
+               
+            } catch (error) {
+                console.error("Error in getUserRooms:", error);
+                return { success: false, message: "Failed to fetch rooms" };
 
             }
         }),
