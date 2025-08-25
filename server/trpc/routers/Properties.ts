@@ -198,6 +198,7 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
     postPropertie: protectedProcedure
         .use(heavyRateLimit())
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
@@ -973,7 +974,5 @@ export const PropertiesRouter = createTRPCRouter({
 
             }
         })
-
-
 });
 // export type definition of API

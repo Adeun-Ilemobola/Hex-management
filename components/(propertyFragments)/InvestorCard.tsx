@@ -36,7 +36,7 @@ function InvestorCard({
     member,
     onEdit,
     onRemove,
-    locked
+    
 }: {
     member: ExternalInvestorInput;
     onEdit: () => void;

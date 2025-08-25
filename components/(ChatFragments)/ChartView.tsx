@@ -142,7 +142,6 @@ const fakeChatRooms: ChatRoomCardProps[] = [
 export { fakeChatRooms, type ChatRoomCardProps };
 export default function ChartView() {
   const ScrollBoxRef = useRef<HTMLDivElement>(null);
-  const [stickToBottom, setStickToBottom] = useState(true);
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const [room, setRoom] = useState<RoomData | null>(null);
   const roomId = room?.id ?? null;

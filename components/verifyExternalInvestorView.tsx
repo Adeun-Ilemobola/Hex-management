@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import {
     Card,
-    CardAction,
     CardContent,
     CardDescription,
     CardHeader,
@@ -21,7 +20,7 @@ export default function VerifyExternalInvestorView() {
     const searchParams = useSearchParams()
     const investorId = searchParams.get("investorId")
     const propertieid = searchParams.get("propertieid")
-    const propertyInfo = api.Propertie.getPropertieNameById.useQuery({ pID: propertieid!! })
+    const propertyInfo = api.Propertie.getPropertieNameById.useQuery({ pID: propertieid || "" })
     const startVerification = api.Propertie.acceptInvitePropertie.useMutation({
         onSuccess: (data) => {
             if (data && data.success) {
@@ -42,8 +41,8 @@ export default function VerifyExternalInvestorView() {
     })
     const [info, setInfo] = useState({
         code: "",
-        investorId: investorId!!,
-        propertieid: propertieid!!,
+        investorId: investorId||"",
+        propertieid: propertieid||"",
     })
     function handleAccept(accepted: boolean) {
         startVerification.mutate({
