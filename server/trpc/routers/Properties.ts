@@ -36,15 +36,29 @@ export const PropertiesRouter = createTRPCRouter({
             )
         }))
         .query(async ({ ctx, input }) => {
-
             try {
-                let itemList: CleanProperty[] = [];
+                const user = ctx.session?.user;
+                if (!user) {
+                    console.warn("[getUserProperties] not signed in");
+                    // you can either throw or return a shaped error
+                    throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+                }
+                
+                let itemList: CleanProperty[]
+
+
+                console.log("--------ctx.userOrgMembership-------------", ctx.userOrgMembership);
+                
+
 
                 const { data } = input;
+               
                 const getOrgItems = await prisma.propertie.findMany(
                     {
                         where: {
-                            ownerId: ctx.plan.inOrganization?.id || "",
+                            ownerId: {
+                                in: [ctx.userOrgMembership.isUserAEployeeOfOrg.organizationId]
+                            },
                             ownerType: "ORGANIZATION",
                             ...(data.status && { leavingstatus: data.status as string }),
                             ...(data.searchText && {
@@ -79,10 +93,12 @@ export const PropertiesRouter = createTRPCRouter({
                 })
 
 
-                if (ctx.plan.inOrganization && ctx.plan.inOrganization.role === "owner") {
+                if (!ctx.userOrgMembership.isUserAEployeeOfOrg.isEployee) {
                     const getUserItems = await prisma.propertie.findMany({
                         where: {
-                            ownerId: ctx.user.id,
+                            ownerId: {
+                                in: [...ctx.userOrgMembership.ownerOrganizationIds , user.id]
+                            },
                             ownerType: "USER",
                             ...(data.status && { leavingstatus: data.status as string }),
                             ...(data.searchText && {

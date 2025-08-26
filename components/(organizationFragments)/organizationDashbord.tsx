@@ -42,6 +42,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { subMeta } from '@/lib/Zod';
 
 type invitations = {
     id: string;
@@ -78,7 +79,7 @@ export interface XOrganization {
     slug: string;
     logo?: string | null | undefined;
     createdAt: Date;
-    metadata: OrganizationMetadata;
+    metadata: subMeta;
     invitations: invitations;
     members: member;
 }
@@ -250,7 +251,7 @@ export default function OrganizationDashbord() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Plan</p>
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{organization.metadata.planType}</p>
+                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{organization.metadata.plan}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -262,18 +263,18 @@ export default function OrganizationDashbord() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Seats</p>
-                                            <p className="text-2xl  font-bold text-gray-900 dark:text-white">{organization.members?.length}/{organization.metadata.seatLimit}</p>
+                                            <p className="text-2xl  font-bold text-gray-900 dark:text-white">{organization.members?.length}/{organization.metadata.limits?.orgMembers||0}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className={"rounded-3xl p-6" + " " + G}>
                                     <div className="flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${organization.metadata.isExpired
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${organization.metadata.daysLeft <= 0
                                             ? 'bg-gradient-to-br from-red-500 to-rose-600'
                                             : 'bg-gradient-to-br from-emerald-500 to-green-600'
                                             }`}>
-                                            {organization.metadata.isExpired ? (
+                                            {organization.metadata.daysLeft <= 0 ? (
                                                 <XCircle className="w-6 h-6 text-white" />
                                             ) : (
                                                 <CheckCircle2 className="w-6 h-6 text-white" />
@@ -281,11 +282,11 @@ export default function OrganizationDashbord() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Status</p>
-                                            <p className={`text-2xl font-bold ${organization.metadata.isExpired
+                                            <p className={`text-2xl font-bold ${organization.metadata.daysLeft <= 0
                                                 ? 'text-red-600 dark:text-red-400'
                                                 : 'text-emerald-600 dark:text-emerald-400'
                                                 }`}>
-                                                {organization.metadata.isExpired ? 'Expired' : 'Active'}
+                                                {organization.metadata.daysLeft <= 0 ? 'Expired' : 'Active'}
                                             </p>
                                         </div>
                                     </div>

@@ -11,7 +11,7 @@ import { ShieldCheck } from "lucide-react";
 interface SubscriptionCardProp {
   price: number;
   isMonthly: boolean;
-  tier: "Free" | "Deluxe" | "Premium";
+  tier: "free" | "Deluxe" | "Premium";
   benefits: string[];
   isCurrent: boolean;
 }
@@ -21,14 +21,14 @@ export default function SubscriptionCard({
   onSelect,
 }: {
   data: SubscriptionCardProp;
-  onSelect: (id: "Free" | "Deluxe" | "Premium") => void;
+  onSelect: (id: "free" | "Deluxe" | "Premium") => void;
 }) {
   const { price, isMonthly, tier, benefits, isCurrent } = data;
 
   const tierColors = {
-    Free: "from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800",
+    free: "from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800",
     Deluxe: "from-blue-500 to-cyan-500",
-    Premium: "from-yellow-400 to-orange-500",
+    Premium: "from-yellow-400 to-orange-500",  
   };
 
   return (

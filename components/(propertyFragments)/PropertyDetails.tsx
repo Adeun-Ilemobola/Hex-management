@@ -31,7 +31,7 @@ interface PropertyGIFProps {
   propertyInfo: PropertyInput;
   setPropertyInfo: React.Dispatch<React.SetStateAction<PropertyInput>>;
   disable: boolean;
-  handleSSubscriptionRequirement: () => 5 | 35 | 100;
+  handleSSubscriptionRequirement: () => number;
   RemoveImage: (id: string, supabaseID: string) => void;
   orgInfo: {
     data: org[],

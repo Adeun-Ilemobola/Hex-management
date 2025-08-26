@@ -121,11 +121,11 @@ export const zodRegisterSchema = z
 //
 export const InvestmentTypeEnum = z.enum(["INDIVIDUAL", "POOLED", "TIC"]);
 export type InvestmentTypeEnumType = z.infer<typeof InvestmentTypeEnum>;
-export const InvestmentBlockStatusSchema =z.enum([
+export const InvestmentBlockStatusSchema = z.enum([
   "DRAFT",
   "FINALIZED",   // allocations sum to 100%, funding in progress/escrow
   "LOCKED",  // funds cleared; cap table immutable
-  "VERIFIED"    
+  "VERIFIED"
 ]);
 export const PropertyTypeEnum = z.enum([
   "House",
@@ -180,7 +180,7 @@ export const messageSchema = z.object({
 //
 export const externalInvestorSchema = z
   .object({
-    status:InvestmentBlockStatusSchema,
+    status: InvestmentBlockStatusSchema,
     id: z.string().default(""), // Prisma uuid
     name: z.string().min(2, "Name is required."),
     email: z.string().email("Valid email required."),
@@ -213,7 +213,7 @@ export const externalInvestorSchema = z
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
   })
- 
+
 
 export type InvestmentBlockStatusType = z.infer<typeof InvestmentBlockStatusSchema>;
 //
@@ -269,13 +269,13 @@ export const investmentBlockSchema = z
     const { initialInvestment, margin, externalInvestors } = data;
     console.log(externalInvestors);
     const totalContribution = externalInvestors.reduce(
-        (sum, investor) => sum + investor.contributionPercentage,
-        0
-      );
+      (sum, investor) => sum + investor.contributionPercentage,
+      0
+    );
 
-      
+
     if (externalInvestors.length > 0) {
-      
+
       if (totalContribution > 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -353,7 +353,7 @@ export const investmentBlockSchema = z
 // ─── PROPERTY ────────────────────────────────────────────────────────────────────
 //
 export const propertySchema = z
-.object({
+  .object({
     id: z.string().default(""),
     name: z
       .string()
@@ -380,7 +380,7 @@ export const propertySchema = z
       .number()
       .int()
       .gte(1800, "Year unrealistic.")
-      .lte(new Date().getFullYear()+5, "Year cannot be in the future."),
+      .lte(new Date().getFullYear() + 5, "Year cannot be in the future."),
     squareFootage: z
       .number()
       .int()
@@ -486,7 +486,7 @@ export const PropertyListingSchema = z.object({
 // ─── Chat ────────────────────────────
 
 export const ChatRoomMemberSchema = z.object({
-  id:z.string().default(""),
+  id: z.string().default(""),
   roomId: z.string().default(""),            // @relation(fields: [roomId], references: [id])
   userId: z.string().default(""),
   userName: z.string().default(""),
@@ -497,15 +497,15 @@ export const ChatRoomMemberSchema = z.object({
 })
 export const ChatImageSchema = z.object({
   id: z.string().default(""),
-  name :z.string(),
+  name: z.string(),
   url: z.string().url("Invalid image URL."),
-  size :z.number().int().nonnegative("Size must be ≥ 0."),       
-  type :z.string().min(1),        
-  lastModified: z.bigint().nonnegative(), 
-  supabaseID :z.string().default(""), 
-  ChatRoomID :z.string().default(""),
+  size: z.number().int().nonnegative("Size must be ≥ 0."),
+  type: z.string().min(1),
+  lastModified: z.bigint().nonnegative(),
+  supabaseID: z.string().default(""),
+  ChatRoomID: z.string().default(""),
   chatOwnerID: z.string().default(""),
-  messageId :z.string().default(""),
+  messageId: z.string().default(""),
 
 })
 export const MessageSchema = z.object({
@@ -882,3 +882,64 @@ export const amenitiesItems: { value: string; label: string }[] = [
   { value: "package_room", label: "Package Room" },
   { value: "cold_storage", label: "Cold Storage" }
 ];
+export type limitMeta = {
+  orgMembers: number;
+  ChatBoxs: number;
+  chatMessagesImage: number;
+  maxProjects: number;
+  maxProjectImages: number;
+  maxOrg: number;
+  PoolInvestor: number;
+
+}
+
+export type OrganizationMetadata = {
+  limits: limitMeta,
+  ownerId: string;
+  plan: string;
+  daysLeft: number
+
+}
+export type subMeta = {
+  limits: limitMeta | undefined;
+  priceId: string | undefined;
+  id: string;
+  plan: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  trialStart?: Date;
+  trialEnd?: Date;
+  referenceId: string;
+  status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
+  periodStart?: Date;
+  periodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
+  groupId?: string;
+  seats?: number;
+  daysLeft: number;
+}
+
+
+
+export const defaultFreePlan: subMeta = {
+  limits: {
+    orgMembers: 0,
+    ChatBoxs: 3,
+    chatMessagesImage: 5,
+    maxProjects: 2,
+    maxProjectImages: 5,
+    maxOrg: 0,
+    PoolInvestor: 0
+  },
+  priceId: "",
+  id: "",
+  plan: "free",
+  stripeCustomerId: "",
+  stripeSubscriptionId: "",
+  referenceId: "",
+  status: "active",
+  periodStart: new Date(),
+  periodEnd: new Date(),
+  cancelAtPeriodEnd: false,
+  daysLeft: 0
+}

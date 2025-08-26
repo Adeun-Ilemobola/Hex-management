@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { OrganizationMetadata } from "@/server/actions/subscriptionService";
+import { limitMeta, OrganizationMetadata, subMeta } from "@/lib/Zod";
 import { sendEmail } from "@/server/actions/sendEmail";
 import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 import { rateLimit } from '../middlewares/rateLimit';
@@ -11,9 +11,26 @@ import { seatPlan } from "@/lib/utils";
 
 export const organizationRouter = createTRPCRouter({
 
+
+    getActiveMember: protectedProcedure
+        .query(async ({ ctx }) => {
+            try {
+                const member = await auth.api.getActiveMember({
+                    // This endpoint requires session cookies.
+                    headers: ctx.headers,
+                });
+                console.log("member", member);
+                
+                return { success: true, value: member };
+            } catch (error) {
+                console.error("Error in getActiveMember:", error);
+                return { success: false, value: null };
+            }
+        }),
+
     onboardUserToOrg: protectedProcedure
-    .use(rateLimit())
-    .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
+        .use(rateLimit())
+        .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
             try {
                 let userId = ""
@@ -125,7 +142,7 @@ export const organizationRouter = createTRPCRouter({
 
 
     getOrganization: protectedProcedure
-     .use(rateLimit())
+        .use(rateLimit())
         .input(z.object({ id: z.string(), slug: z.string() }))
         .query(async ({ input, ctx }) => {
             try {
@@ -148,7 +165,7 @@ export const organizationRouter = createTRPCRouter({
                     }
                 }
                 const fullData: XOrganization = {
-                    metadata: JSON.parse(data?.metadata || "{}") as OrganizationMetadata,
+                    metadata: JSON.parse(data?.metadata || "{}") as subMeta,
                     id: data.id,
                     name: data.name,
                     slug: data.slug,
@@ -192,18 +209,19 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const userSub = ctx.plan
-                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
-                const metadata = {
-                    planType: userSub.planTier,
-                    seatLimit: seatPlan(userSub.planTier),
-                    isExpired: userSub.daysLeft ? userSub.daysLeft <= 0 : true
+                const userSub = ctx.subscription
+                if (!userSub) {
+                    return {
+                        message: " you are not subscribed to any plan",
+                        success: false,
+                        value: null
+                    }
                 }
-                console.log({
-                    userSub,
-                    metadata,
-                    slug
-                });
+                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
+                const metadata: subMeta = {
+                    ...userSub,
+                }
+              
 
                 const { status } = await auth.api.checkOrganizationSlug({
                     body: {
@@ -302,7 +320,7 @@ export const organizationRouter = createTRPCRouter({
                 }
             }
             else if (input.ActionType === "admin" || input.ActionType === "owner" || input.ActionType === "member") {
-               const dataRole = await auth.api.updateMemberRole({
+                const dataRole = await auth.api.updateMemberRole({
                     body: {
                         role: input.ActionType,
                         memberId: input.memberId,

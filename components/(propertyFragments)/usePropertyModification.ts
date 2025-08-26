@@ -27,12 +27,10 @@ export function usePropertyModification(id: string) {
     const [investmentBlock, setInvestmentBlock] = useState<InvestmentBlockInput>(defaultInvestmentBlockInput)
     const [externalInvestor, setExternalInvestor] = useState<ExternalInvestorInput[]>([])
     const getProperty = api.Propertie.getPropertie.useQuery({ pID: id },{
-        enabled: !!id,
-        refetchOnWindowFocus: false
-
     })
     const Session = authClient.useSession();
-    const { data: plan, isPending: planLoading } = api.user.getUserPlan.useQuery();
+    const { data: memberData , isPending: memberLoading } = api.organization.getActiveMember.useQuery();
+    const { data: subscription, isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
 
 
 
@@ -382,20 +380,22 @@ export function usePropertyModification(id: string) {
         }
 
         const user = Session?.data?.user;
-        const userPlan = plan?.value?.inOrganization;
+        const orgMember = memberData?.value
 
         if (user?.name && user?.email && id.length === 0) {
             setPropertyInfo((prev) => ({ ...prev, ownerName: user.name, contactInfo: user.email }));
         }
 
-        if (userPlan && userPlan.role !== "owner") {
+        if (orgMember && orgMember.role !=="owner" && orgMember.role !== "admin") {
             setPropertyInfo((prev) => ({
                 ...prev,
-                ownerId: userPlan.id,
+                ownerId: orgMember.organizationId,
                 ownerType: "ORGANIZATION",
             }));
         }
     }, [ getProperty.data]);
+
+    
 
     return {
         propertyInfo,
@@ -408,12 +408,13 @@ export function usePropertyModification(id: string) {
         financials,
         investorCalculations,
         Session,
-        sub: { planTier: plan?.value?.planTier || "Free", isActive: plan?.value?.isActive || false, daysLeft: plan?.value?.daysLeft || null, inOrganization: plan?.value?.inOrganization || null },
-        isLoading: planLoading || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending,
+        sub: subscription?.value ,
+        isLoading: subscriptionLoading || getProperty.isPending || Session.isPending || postProperty.isPending || updateProperty.isPending || memberLoading, 
         disableInput: postProperty.isPending || updateProperty.isPending,
         CreateProperty: postProperty.mutate,
         UpdateProperty: updateProperty.mutate,
         RemoveImage: delImage.mutate,
+        memberData: memberData?.value,
         reFresh: () => {
             getProperty.refetch();
         }

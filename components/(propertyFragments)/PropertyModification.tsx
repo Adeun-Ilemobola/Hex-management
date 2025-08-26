@@ -37,7 +37,7 @@ export default function PropertyModification() {
         UpdateProperty,
         disableInput,
         isLoading,
-        sub,
+        sub,memberData,
         reFresh
     } = usePropertyModification(id)
     const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
@@ -149,17 +149,7 @@ export default function PropertyModification() {
             }
         }
     }
-    function handleSSubscriptionRequirement() {
-        const tier = sub.planTier
-        if (tier === 'Free') {
-            return 5
-        } else if (tier === 'Deluxe') {
-            return 35
-        } else if (tier === 'Premium') {
-            return 100
-        }
-        return 5;
-    }
+  
 
     function orgListClean() {
         const cleaned = orgList?.value.map(org => ({
@@ -180,7 +170,7 @@ export default function PropertyModification() {
     }
 
 
-    const isSubscribed = sub.isActive && sub.planTier !== "free" || sub.planTier !== "Free"
+   
     return (
         <DropBack is={isLoading} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
@@ -199,15 +189,18 @@ export default function PropertyModification() {
                                         RemoveImage({ id, supabaseID });
 
                                     }}
-                                    handleSSubscriptionRequirement={handleSSubscriptionRequirement}
+                                    handleSSubscriptionRequirement={() => {
+                                        const v = sub?.limits?.maxProjectImages || 0
+                                        return v 
+                                    }}
                                     orgInfo={
                                         {
                                             data: orgListClean(),
                                             loading: organizationsQuery.isLoading,
                                             userId: Session.data?.user.id || "",
                                             refetch: organizationsQuery.refetch,
-                                            showOwnershipConfig: (sub.inOrganization && sub.inOrganization.role === "owner") || false,
-                                            disabled: (sub.inOrganization && sub.inOrganization.role !== "owner") || false
+                                            showOwnershipConfig: (memberData && memberData.role === "owner") || false,
+                                            disabled: (memberData && memberData.role === "owner") || false
 
                                         }
                                     }
@@ -230,7 +223,7 @@ export default function PropertyModification() {
                             />
 
                             {Session.data?.user && (
-                                <PayWall allowed={isSubscribed}>
+                                <PayWall allowed={(sub && sub.limits ) ? sub.limits.PoolInvestor === 0 ? false : true : false  }>
                                     <PoolInvestorsSection
                                         mebers={externalInvestor}
                                         setMebers={setExternalInvestor}

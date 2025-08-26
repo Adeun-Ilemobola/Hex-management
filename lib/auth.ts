@@ -4,7 +4,12 @@ import { prisma } from '@/lib/prisma';
 import { sendEmail } from "@/server/actions/sendEmail";
 import { organization } from "better-auth/plugins"
 import { createServerCaller } from "@/server/trpc/caller";
+import { stripe } from "@better-auth/stripe"
+import Stripe from "stripe"
 
+export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-07-30.basil",
+})
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.NEXTAUTH_URL,
@@ -14,6 +19,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+
   trustedOrigins: [
     "http://localhost:3000",
     "https://hex-management.vercel.app", // ✅ Production URL
@@ -48,6 +54,8 @@ export const auth = betterAuth({
 
         input: true
       },
+      stripeCustomerId: { type: "string", required: false, input: false },
+
       country: {
         type: "string",
         returned: false,
@@ -84,6 +92,87 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    stripe({
+      stripeClient,
+      stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+      createCustomerOnSignUp: true,
+      onCustomerCreate: async ({ stripeCustomer, user }) => {
+        // await prisma.subscription.create({
+
+        //   data: {
+        //     id: crypto.randomUUID(),
+        //     stripeCustomerId: stripeCustomer.id,
+        //     referenceId: user.id,
+        //     plan: "free",
+        //     status: "active"
+        //   },
+
+        // });
+
+      },
+
+      subscription: {
+        enabled: true,
+        plans: [
+          {
+            name: "Deluxe",
+            priceId: "price_1S03q92c20NQVeDjKSDVR7j8",
+            annualDiscountPriceId: "price_1S04Wb2c20NQVeDjlhnehbj3",
+            limits: {
+              orgMembers: 12,
+              ChatBoxs: 12,
+              chatMessagesImage: 15,
+              maxProjects: 10,
+              maxProjectImages: 15,
+              maxOrg: 4,
+              PoolInvestor: 1 // 1=true, 0=false
+
+            }
+
+          },
+          {
+            name: "Premium",
+            priceId: "price_1S03nJ2c20NQVeDj9SMnndNq",
+            annualDiscountPriceId: "price_1S04aA2c20NQVeDjTA0JD0aA",
+            limits: {
+              orgMembers: 100,
+              ChatBoxs: 100,
+              chatMessagesImage: 45,
+              maxProjects: 2000,
+              maxProjectImages: 45,
+              maxOrg: 10,
+              PoolInvestor: 1 // 1=true, 0=false
+            }
+          },
+          {
+            name: "free",
+            limits: {
+              orgMembers: 4,
+              ChatBoxs: 3,
+              chatMessagesImage: 5,
+              maxProjects: 2,
+              maxProjectImages: 5,
+              maxOrg: 1,
+              PoolInvestor: 0 // 1=true, 0=false
+            }
+          }
+
+        ],
+        authorizeReference: async ({ user, referenceId }) => {
+           if (!referenceId || referenceId === user.id) return true;
+          const member = await prisma.member.findFirst({
+            where: {
+              userId: user.id,
+              organizationId: referenceId
+            }
+
+          })
+          return member?.role === "owner" || member?.role === "admin";
+        }
+
+      }
+    }),
+
     organization({
       // async sendInvitationEmail(data) {
       //   const inviteLink = `https://app.com/accept-invite/${data.id}`;
@@ -94,19 +183,20 @@ export const auth = betterAuth({
       //   });
       // }
 
+
       allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
         const { value: plan } = await caller.user.getUserPlan();
         if (!plan) {
           return false;
         }
-        if (plan.planTier === "Free") {
+        if (plan.plan === "free") {
           return false
-        } else if (plan.planTier === "Deluxe" || plan.planTier === "Premium") {
+        } else if (plan.plan === "Deluxe" || plan.plan === "Premium") {
           return true
         }
         return false
-        
+
       }
     })
   ]

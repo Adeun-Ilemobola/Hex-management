@@ -26,6 +26,7 @@ enum SaleType {
   RENT
   LEASE
 }
+
 enum roomType {
   PRIVATE
   GROUP
@@ -45,61 +46,63 @@ model User {
   country       String?
   createdAt     DateTime
   updatedAt     DateTime
-  investments  String[]
+  investments   String[]
   sessions      Session[]
   accounts      Account[]
 
-  SubscriptionArchives SubscriptionArchives?
-  Subscription         Subscription?
+  // SubscriptionArchives SubscriptionArchives?
+  // Subscription         Subscription?
 
   members     Member[]
   invitations Invitation[]
+
+  stripeCustomerId String?
 
   @@unique([email])
   @@map("user")
 }
 
-model SubscriptionArchives {
-  id            String         @id @default(uuid())
-  Subscriptions Subscription[]
-  user          User           @relation(fields: [userId], references: [id])
-  userId        String         @unique
-}
+// model SubscriptionArchives {
+//   id            String         @id @default(uuid())
+//   Subscriptions Subscription[]
+//   user          User           @relation(fields: [userId], references: [id])
+//   userId        String         @unique
+// }
 
-model Subscription {
-  id String @id @default(uuid())
+// model Subscription {
+//   id String @id @default(uuid())
 
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  priceId              String? // Stripe Price ID
-  status               String  @default("active") // active | past_due | canceled | incomplete, etc.
-  isActive             Boolean @default(false)
+//   stripeCustomerId     String?
+//   stripeSubscriptionId String?
+//   priceId              String? // Stripe Price ID
+//   status               String  @default("active") // active | past_due | canceled | incomplete, etc.
+//   isActive             Boolean @default(false)
 
-  currentPeriodStart DateTime?
-  currentPeriodEnd   DateTime?
+//   currentPeriodStart DateTime?
+//   currentPeriodEnd   DateTime?
 
-  cancelAtPeriodEnd Boolean   @default(false)
-  canceledAt        DateTime? // optional, if user cancels
+//   cancelAtPeriodEnd Boolean   @default(false)
+//   canceledAt        DateTime? // optional, if user cancels
 
-  planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
+//   planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
 
-  nextStripeSubscriptionId String?
+//   nextStripeSubscriptionId String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
+//   user   User   @relation(fields: [userId], references: [id])
+//   userId String @unique
 
-  SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
-  subscriptionArchivesId String?
-}
+//   SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
+//   subscriptionArchivesId String?
+// }
 
 enum InvestmentBlockStatus {
   DRAFT
   FINALIZED // allocations sum to 100%, funding in progress/escrow
   LOCKED // funds cleared; cap table immutable
-  VERIFIED 
+  VERIFIED
 }
 
 model externalInvestor {
@@ -111,14 +114,14 @@ model externalInvestor {
   investorUserId String? // optional link to a User if they do exist
 
   // economics
-  contributionPercentage Decimal @db.Decimal(8, 4) // was Float
-  returnPercentage       Decimal @db.Decimal(8, 4) // was Float
-  dollarValueReturn      Decimal @db.Decimal(18, 2) // was Float
+  contributionPercentage Decimal   @db.Decimal(8, 4) // was Float
+  returnPercentage       Decimal   @db.Decimal(8, 4) // was Float
+  dollarValueReturn      Decimal   @db.Decimal(18, 2) // was Float
   // states/flags
-  isInternal    Boolean
-  accessRevoked Boolean   @default(false)
-  funded        Boolean   @default(false)
-  fundedAt      DateTime?
+  isInternal             Boolean
+  accessRevoked          Boolean   @default(false)
+  funded                 Boolean   @default(false)
+  fundedAt               DateTime?
 
   // parent
   investmentBlockId String
@@ -265,7 +268,7 @@ model Session {
 model ChatRoom {
   id           String           @id @default(uuid())
   title        String // this will be an arry of the two users name so you can switch depends on who is viewing it
-  type    roomType @default(PRIVATE)
+  type         roomType         @default(PRIVATE)
   participants ChatRoomMember[]
 
   chats Message[]
@@ -353,4 +356,19 @@ model Invitation {
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@map("invitation")
+}
+
+model Subscription {
+  id                   String    @id
+  plan                 String
+  referenceId          String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  status               String?
+  periodStart          DateTime?
+  periodEnd            DateTime?
+  cancelAtPeriodEnd    Boolean?
+  seats                Int?
+
+  @@map("subscription")
 }
