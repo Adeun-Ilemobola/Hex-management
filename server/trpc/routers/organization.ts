@@ -6,6 +6,8 @@ import { sendEmail } from "@/server/actions/sendEmail";
 import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 import { rateLimit } from '../middlewares/rateLimit';
 import { seatPlan } from "@/lib/utils";
+import { TRPCError } from "@trpc/server";
+import { role } from "better-auth/plugins";
 
 
 
@@ -19,8 +21,6 @@ export const organizationRouter = createTRPCRouter({
                     // This endpoint requires session cookies.
                     headers: ctx.headers,
                 });
-                console.log("member", member);
-                
                 return { success: true, value: member };
             } catch (error) {
                 console.error("Error in getActiveMember:", error);
@@ -103,42 +103,40 @@ export const organizationRouter = createTRPCRouter({
             }
         }),
 
-    getAllOrganization: protectedProcedure
+    getAllOrganization: protectedProcedure.query(async ({ ctx }) => {
+        try {
+            const data = await auth.api.listOrganizations({ headers: ctx.headers });
+            console.log(data);
 
-        .query(async ({ ctx }) => {
-            try {
-                const data = await auth.api.listOrganizations({ headers: ctx.headers });
-                console.log(data);
-
-                const organizations = await Promise.all(
-                    data.map(async (org) => {
-                        const members = await ctx.prisma.member.count({
-                            where: {
-                                organizationId: org.id
-                            }
-                        })
-                        return {
-                            ...org,
-                            memberCount: members,
-                            metadata: JSON.parse(org.metadata) as OrganizationMetadata
+            const organizations = await Promise.all(
+                data.map(async (org) => {
+                    const members = await ctx.prisma.member.count({
+                        where: {
+                            organizationId: org.id
                         }
                     })
-                )
+                    return {
+                        ...org,
+                        memberCount: members,
+                        metadata: JSON.parse(org.metadata) as subMeta
+                    }
+                })
+            )
 
-                return {
-                    message: "Successfully got user organizations",
-                    success: true,
-                    value: organizations
-                }
-            } catch (error) {
-                console.error("Error in getUserOrganizations:", error);
-                return {
-                    message: "Failed to get user organizations",
-                    success: false,
-                    value: []
-                }
+            return {
+                message: "Successfully got user organizations",
+                success: true,
+                value: organizations
             }
-        }),
+        } catch (error) {
+            console.error("Error in getUserOrganizations:", error);
+            return {
+                message: "Failed to get user organizations",
+                success: false,
+                value: []
+            }
+        }
+    }),
 
 
     getOrganization: protectedProcedure
@@ -221,7 +219,7 @@ export const organizationRouter = createTRPCRouter({
                 const metadata: subMeta = {
                     ...userSub,
                 }
-              
+
 
                 const { status } = await auth.api.checkOrganizationSlug({
                     body: {
@@ -360,7 +358,102 @@ export const organizationRouter = createTRPCRouter({
             }
 
         }
-    })
+    }),
+
+
+    getOwnerOrganizations: protectedProcedure.query(async ({ ctx }) => {
+        try {
+            const user = ctx.session?.user;
+            if (!user) {
+                throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+            }
+            const useOrg = await auth.api.listOrganizations({
+                headers: ctx.headers,
+                query: {
+                    role: "owner"
+                }
+
+            });
+
+
+            const fullOrgInfo = await Promise.all(
+                useOrg.map(async (org) => {
+                    const allMembers = await ctx.prisma.member.count({
+                        where: {
+                            organizationId: org.id
+                        }
+                    })
+                    const Meta = JSON.parse(org.metadata || "{}") as subMeta
+
+                    return {
+                        name: org.name,
+                        slug: org.slug,
+                        id: org.id,
+                        logo: org.logo,
+                        createdAt: org.createdAt,
+                        currentSeats: allMembers,
+                        maxSeats: Meta.limits?.orgMembers || 0
+                    }
+                })
+            )
+
+            return fullOrgInfo
+
+        } catch (error) {
+            console.error("Error in getOwnerOrganizations:", error);
+            return []
+
+        }
+
+    }),
+
+    getFullOrganizationInfo: protectedProcedure.input(z.object({
+        organizationId: z.string(),
+    })).query(async ({ input, ctx }) => {
+        try {
+            const data = await auth.api.getFullOrganization({
+                query: {
+                    organizationId: "org-id",
+                    organizationSlug: "org-slug",
+                    membersLimit: 100,
+                },
+                headers: ctx.headers,
+            });
+            if (!data) {
+                console.error("Failed to fetch organization info");
+                return {
+                    message: "Failed to fetch organization info",
+                    success: false,
+                    value: null
+                }
+            }
+            
+            return {
+                message: "Successfully fetched organization info",
+                success: true,
+                value: {
+                    ...data,
+                    metadata: JSON.parse(data.metadata || "{}") as subMeta
+
+                }
+            }
+
+
+
+            
+
+
+        } catch (error) {
+            console.error("Error in getFullOrganizationInfo:", error);
+            return {
+                message: "Failed to fetch organization info",
+                success: false,
+                value: null
+            }
+        }
+    }),
+
+
 
 });
 

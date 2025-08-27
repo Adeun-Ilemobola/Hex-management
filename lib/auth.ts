@@ -96,20 +96,7 @@ export const auth = betterAuth({
       stripeClient,
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       createCustomerOnSignUp: true,
-      onCustomerCreate: async ({ stripeCustomer, user }) => {
-        // await prisma.subscription.create({
-
-        //   data: {
-        //     id: crypto.randomUUID(),
-        //     stripeCustomerId: stripeCustomer.id,
-        //     referenceId: user.id,
-        //     plan: "free",
-        //     status: "active"
-        //   },
-
-        // });
-
-      },
+      
 
       subscription: {
         enabled: true,
@@ -167,7 +154,7 @@ export const auth = betterAuth({
             }
 
           })
-          return member?.role === "owner" || member?.role === "admin";
+           return !!member && ["owner", "admin"].includes(member.role);
         }
 
       }

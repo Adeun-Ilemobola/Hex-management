@@ -386,7 +386,7 @@ export function usePropertyModification(id: string) {
             setPropertyInfo((prev) => ({ ...prev, ownerName: user.name, contactInfo: user.email }));
         }
 
-        if (orgMember && orgMember.role !=="owner" && orgMember.role !== "admin") {
+        if (orgMember && orgMember.role !=="owner" ) {
             setPropertyInfo((prev) => ({
                 ...prev,
                 ownerId: orgMember.organizationId,

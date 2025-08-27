@@ -17,6 +17,8 @@ import {
   DrawerOverlay
   
 } from "@/components/ui/drawer"
+import { mockOrganization } from '@/lib/Zod';
+import OrganizationDashboard from '@/components/(organizationFragments)/OrganizationDashboard';
 
 // Fake data for all tiers
 
@@ -140,7 +142,11 @@ export default function Page() {
   return (
     <div className='relative flex flex-col gap-4 p-9  min-h-screen  overflow-hidden'>
 
-      <Drawer preventScrollRestoration direction='right'>
+      <OrganizationDashboard
+     
+      />
+
+      {/* <Drawer preventScrollRestoration direction='right'>
         <DrawerOverlay className=' bg-purple-500/15 backdrop-blur-sm' />
         <DrawerTrigger>Open</DrawerTrigger>
         <DrawerContent className=' min-w-[46rem] sm:min-w-[50rem]'>
@@ -155,16 +161,16 @@ export default function Page() {
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
-      </Drawer>
+      </Drawer> */}
 
-      <div className='flex flex-row  gap-6 items-center justify-center'>
+      {/* <div className='flex flex-row  gap-6 items-center justify-center'>
         <Button size={"lg"} onClick={() => VerifyEmail.mutate()}>Send Verify Email</Button>
         <Button size={"lg"} onClick={() => ResetPassword.mutate()}>Send Reset Password Email</Button>
         <Button size={"lg"} onClick={() => WelcomeEmail.mutate()}>Send Welcome Email</Button>
         <Button size={"lg"} onClick={() => VerifyExternalInvestor.mutate()}>Send Verify External Investor Email</Button>
         <Button size={"lg"} onClick={() => onboardingFinished.mutate()}>Send Onboarding Finished Email</Button>
 
-      </div>
+      </div> */}
 
 
       {/* <div className='flex flex-col gap-4 w-64'>

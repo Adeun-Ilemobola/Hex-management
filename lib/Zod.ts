@@ -943,3 +943,179 @@ export const defaultFreePlan: subMeta = {
   cancelAtPeriodEnd: false,
   daysLeft: 0
 }
+
+export type Role = "member" | "owner" | "admin";
+export type InvitationStatus =
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "canceled"
+  | "expired";
+
+
+
+export type OrganizationX = {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: Date | string;
+  logo?: string | null | undefined;
+  metadata?: {
+    limits?: {
+      orgMembers: number;
+      ChatBoxs: number;
+      chatMessagesImage: number;
+      maxProjects: number;
+      maxProjectImages: number;
+      maxOrg: number;
+      PoolInvestor: number;
+    };
+    priceId?: string;
+    id: string;
+    plan: string;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    trialStart?: Date | string;
+    trialEnd?: Date | string;
+    referenceId: string;
+    status:
+      | "active"
+      | "canceled"
+      | "incomplete"
+      | "incomplete_expired"
+      | "past_due"
+      | "paused"
+      | "trialing"
+      | "unpaid";
+    periodStart?: Date | string;
+    periodEnd?: Date | string;
+    cancelAtPeriodEnd?: boolean;
+    groupId?: string;
+    seats?: number;
+    daysLeft: number;
+  };
+  members: {
+    id: string;
+    organizationId: string;
+    role: Role;
+    createdAt: Date | string;
+    userId: string;
+    user: {
+      email: string;
+      name: string;
+      image?: string | undefined;
+    };
+  }[];
+  invitations: {
+    id: string;
+    organizationId: string;
+    email: string;
+    role: Role;
+    status: InvitationStatus;
+    inviterId: string;
+    expiresAt: Date | string;
+  }[];
+};
+
+
+// --- MOCK DATA ---
+
+export const mockOrganization: OrganizationX = {
+  id: "org_01J9ACME1234XYZ",
+  name: "Aurora Labs",
+  slug: "aurora-labs",
+  createdAt: "2024-11-18T10:15:00.000Z",
+  logo: null,
+  metadata: {
+    limits: {
+      orgMembers: 12,           // 11/12 -> near limit to exercise the UI
+      ChatBoxs: 5,
+      chatMessagesImage: 1000,
+      maxProjects: 10,
+      maxProjectImages: 500,
+      maxOrg: 3,
+      PoolInvestor: 50,
+    },
+    priceId: "price_PREMIUM_CA",
+    id: "sub_meta_01J9ACME",
+    plan: "Premium",
+    stripeCustomerId: "cus_9AbcXyZ123",
+    stripeSubscriptionId: "sub_A1B2C3D4",
+    referenceId: "ARL-REF-2025",
+    status: "active",
+    periodStart: "2025-08-01T00:00:00.000Z",
+    periodEnd: "2025-08-31T23:59:59.000Z",
+    cancelAtPeriodEnd: false,
+    seats: 12,
+    daysLeft: 5, // assuming today is 2025-08-26
+  },
+
+  members: [
+    // owner
+    m("mem_01", "owner", "2024-12-02T09:00:00.000Z", "jordan@aurora.dev", "Jordan Park", 11),
+    // admins
+    m("mem_02", "admin", "2025-01-20T15:30:00.000Z", "sasha@aurora.dev", "Sasha Kim", 3),
+    m("mem_03", "admin", "2025-02-08T11:10:00.000Z", "liam@aurora.dev", "Liam Patel", 7),
+    // members
+    m("mem_04", "member", "2025-03-01T08:45:00.000Z", "avery@aurora.dev", "Avery Chen", 15),
+    m("mem_05", "member", "2025-03-12T17:22:00.000Z", "noah@aurora.dev", "Noah García", 22),
+    m("mem_06", "member", "2025-04-03T13:05:00.000Z", "mia@aurora.dev", "Mia Rossi", 34),
+    m("mem_07", "member", "2025-04-28T19:12:00.000Z", "zoe@aurora.dev", "Zoe Singh", 28),
+    m("mem_08", "member", "2025-05-16T10:00:00.000Z", "ethan@aurora.dev", "Ethan Müller", 36),
+    m("mem_09", "member", "2025-06-05T14:42:00.000Z", "amelia@aurora.dev", "Amelia Dubois", 41),
+    m("mem_10", "member", "2025-07-09T09:33:00.000Z", "lucas@aurora.dev", "Lucas Novak", 52),
+    m("mem_11", "member", "2025-08-10T16:18:00.000Z", "harper@aurora.dev", "Harper Ito", 64),
+  ],
+
+  invitations: [
+    inv("inv_01", "pending", "2025-09-05T23:59:59.000Z", "nina@aurora.dev", "admin", "mem_02"),
+    inv("inv_02", "accepted", "2025-07-01T23:59:59.000Z", "owen@aurora.dev", "member", "mem_01"),
+    inv("inv_03", "rejected", "2025-06-15T23:59:59.000Z", "ruby@aurora.dev", "member", "mem_03"),
+    inv("inv_04", "canceled", "2025-05-20T23:59:59.000Z", "sam@aurora.dev", "member", "mem_01"),
+    inv("inv_05", "expired", "2025-08-15T23:59:59.000Z", "ivy@aurora.dev", "member", "mem_05"),
+  ],
+};
+
+// --- Helpers (purely for mock shaping) ---
+
+function m(
+  id: string,
+  role: Role,
+  createdAtISO: string,
+  email: string,
+  name: string,
+  imgSeed: number
+): OrganizationX["members"][number] {
+  return {
+    id,
+    organizationId: "org_01J9ACME1234XYZ",
+    role,
+    createdAt: createdAtISO,
+    userId: `user_${id}`,
+    user: {
+      email,
+      name,
+      // Public placeholder avatar; safe to remove if you don't want external images.
+      image: `https://i.pravatar.cc/100?img=${imgSeed}`,
+    },
+  };
+}
+
+function inv(
+  id: string,
+  status: InvitationStatus,
+  expiresAtISO: string,
+  email: string,
+  role: Role,
+  inviterMemberId: string
+): OrganizationX["invitations"][number] {
+  return {
+    id,
+    organizationId: "org_01J9ACME1234XYZ",
+    email,
+    role,
+    status,
+    inviterId: inviterMemberId,
+    expiresAt: expiresAtISO,
+  };
+}
