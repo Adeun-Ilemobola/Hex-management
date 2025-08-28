@@ -55,9 +55,12 @@ export const userCongiRouter = createTRPCRouter({
             const  memberInOrg = await ctx.prisma.member.findFirst({
                 where: {
                     userId: user.id,
-                    role: "member"
+                    role:{
+                        in: ["member", "admin"]
+                    }
                 },
                 select: {
+                    role: true,
                     organization:{
                         select: {
                             metadata: true
@@ -68,19 +71,18 @@ export const userCongiRouter = createTRPCRouter({
             })
             if(memberInOrg && memberInOrg.organization.metadata) {
                 const plan = (JSON.parse(memberInOrg.organization.metadata ) || defaultFreePlan )as subMeta
-                console.log("plan from org", plan);
+                console.log("------  == plan from org", { success: true, isEployee: true, role: memberInOrg.role , value: plan });
                 
-                return { success: true, value: plan };
+                return { success: true, isEployee: true, role: memberInOrg.role , value: plan };
             }
            
             const plan = ctx.subscription || defaultFreePlan
-            console.log("plan from sub", plan);
+            console.log("------  ==plan from sub", { success: true, isEployee: false, role: "owner", value: plan});
             
-            return { success: true, value: plan
-           };
+            return { success: true, isEployee: false, role: "owner", value: plan};
         } catch (error) {
             console.error("Error in getUserPlan:", error);
-            return { success: false  , value: null };
+            return { success: false, isEployee: false , role: ""  , value: null };
         }   
     }),
 

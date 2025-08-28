@@ -1,13 +1,14 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { limitMeta, OrganizationMetadata, subMeta } from "@/lib/Zod";
+import {  OrganizationX, subMeta } from "@/lib/Zod";
 import { sendEmail } from "@/server/actions/sendEmail";
-import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 import { rateLimit } from '../middlewares/rateLimit';
-import { seatPlan } from "@/lib/utils";
+import { DateToIOS, seatPlan } from "@/lib/utils";
 import { TRPCError } from "@trpc/server";
-import { role } from "better-auth/plugins";
+import { DateTime } from "luxon";
+import { nanoid } from "nanoid";
+import { fa } from "zod/v4/locales";
 
 
 
@@ -32,34 +33,48 @@ export const organizationRouter = createTRPCRouter({
         .use(rateLimit())
         .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
+            let newUserId: string | null = null
             try {
-                let userId = ""
+                let userExistsId = ""
                 const newUserbody = {
                     name: input.name,
                     email: input.email,
-                    password: `${input.name}${Math.floor(Math.random() * 1000)}`,
+                    password: `${input.name}${nanoid(8)}`,
                 }
+
                 const userExists = await ctx.prisma.user.findUnique({ where: { email: input.email } })
                 if (userExists) {
-                    userId = userExists.id
+                    userExistsId = userExists.id
                 } else {
+
+
                     const { response } = await auth.api.signUpEmail({
                         returnHeaders: true,
                         body: newUserbody,
                     })
                     const { user } = response;
-                    userId = user.id
+                    newUserId = user.id
                 }
+                console.log({
+                    input,
+                    userExistsId,
+                    newUserId
+                });
+
 
                 const res = await auth.api.addMember({
                     body: {
-                        userId: userId,
+                        userId: newUserId ?? userExistsId,
                         organizationId: input.organizationId,
                         role: input.role
-                    }
+                    },
+                    headers: ctx.headers
                 })
 
                 if (!res) {
+                    if (newUserId) {
+                        await ctx.prisma.user.delete({ where: { id: newUserId } })
+                    }
                     return {
                         message: "Failed to complete onboarding",
                         success: false,
@@ -75,7 +90,7 @@ export const organizationRouter = createTRPCRouter({
                         email: input.email,
                         tempPassword: newUserbody.password,
                         fallbackUrl: `${process.env.NEXTAUTH_URL}/login`,
-                        userExists: !!userExists
+                        userExists: newUserId ? false : true
                     }
                 })
                 if (!newEmailSend.success) {
@@ -94,6 +109,9 @@ export const organizationRouter = createTRPCRouter({
 
             } catch (error) {
                 console.error("Error in onboardUserToOrg:", error);
+                if (newUserId) {
+                    await ctx.prisma.user.delete({ where: { id: newUserId } })
+                }
                 return {
                     message: "Failed to complete onboarding",
                     success: false,
@@ -144,8 +162,6 @@ export const organizationRouter = createTRPCRouter({
         .input(z.object({ id: z.string(), slug: z.string() }))
         .query(async ({ input, ctx }) => {
             try {
-                console.log(input);
-
                 const data = await auth.api.getFullOrganization({
                     query: {
                         organizationId: input.id,
@@ -162,8 +178,15 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const fullData: XOrganization = {
-                    metadata: JSON.parse(data?.metadata || "{}") as subMeta,
+                const me = JSON.parse(data?.metadata || "{}") as subMeta
+                const trialEnd = DateTime.fromISO(DateToIOS(me.trialEnd) || DateTime.local().toISO()).diffNow("days").as("days")
+                const periodEnd = DateTime.fromISO(DateToIOS(me.periodEnd) || DateTime.local().toISO()).diffNow("days").as('days')
+                const daysLeft = me.status === "trialing" ? trialEnd : periodEnd
+                const fullData: OrganizationX = {
+                    metadata: {
+                        ...me,
+                        daysLeft: Math.max(0, Math.ceil(daysLeft))
+                    },
                     id: data.id,
                     name: data.name,
                     slug: data.slug,
@@ -173,6 +196,12 @@ export const organizationRouter = createTRPCRouter({
                     members: data.members,
 
                 }
+                console.log("DateTime ====", {
+                    trialEnd,
+                    periodEnd,
+                    daysLeft
+                });
+
                 console.log("fullData ====", fullData);
 
 
@@ -427,7 +456,7 @@ export const organizationRouter = createTRPCRouter({
                     value: null
                 }
             }
-            
+
             return {
                 message: "Successfully fetched organization info",
                 success: true,
@@ -440,7 +469,7 @@ export const organizationRouter = createTRPCRouter({
 
 
 
-            
+
 
 
         } catch (error) {

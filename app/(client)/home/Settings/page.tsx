@@ -307,7 +307,7 @@ export default function Page() {
               </div>
             </div>
 
-            {(plan && plan.value && plan.value.inOrganization?.role === "owner") && (<>
+            {(plan?.value && plan.value.status === "active" && plan.value.plan !== "free") && (<>
             <div className=' rounded-lg border border-gray-200 shadow-sm'>
               <div className='px-6 py-4 border-b border-gray-200'>
                 <h2 className='text-xl font-semibold '>Organization Information</h2>
@@ -333,7 +333,7 @@ export default function Page() {
                         {organizations.value.map((organization) => (
                           <TableRow key={organization.id}>
                             <TableCell className="font-medium">{organization.name}</TableCell>
-                            <TableCell>{organization.memberCount} / {organization.metadata.seatLimit}</TableCell>
+                            <TableCell>{organization.memberCount} / {organization.metadata.limits?.orgMembers||0}</TableCell>
                             <TableCell>{organization.slug}</TableCell>
                             <TableCell>
                               <Button

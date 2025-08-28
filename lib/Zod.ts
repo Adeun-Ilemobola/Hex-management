@@ -907,12 +907,12 @@ export type subMeta = {
   plan: string;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
-  trialStart?: Date;
-  trialEnd?: Date;
+  trialStart?: Date | string;
+  trialEnd?: Date | string;
   referenceId: string;
   status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
-  periodStart?: Date;
-  periodEnd?: Date;
+  periodStart?: Date | string;
+  periodEnd?: Date | string;
   cancelAtPeriodEnd?: boolean;
   groupId?: string;
   seats?: number;

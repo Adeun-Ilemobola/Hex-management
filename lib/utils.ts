@@ -94,6 +94,13 @@ export function isEqual<T>(a: T[], b: T[]): boolean {
   
 }
 
+export function DateToIOS(d: Date | string | undefined): string {
+  if(!d) return ""
+  const date = new Date(d);
+  return date.toISOString();
+  
+}
+
  export const countries = [
   // North America
   "Canada",

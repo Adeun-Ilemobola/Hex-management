@@ -173,16 +173,14 @@ export const auth = betterAuth({
 
       allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
-        const { value: plan } = await caller.user.getUserPlan();
-        if (!plan) {
-          return false;
-        }
-        if (plan.plan === "free") {
-          return false
-        } else if (plan.plan === "Deluxe" || plan.plan === "Premium") {
-          return true
-        }
+        const dataPlan = await caller.user.getUserPlan();
+        
+        if(!dataPlan.value) return false;
+        const {role, isEployee , value}= dataPlan
+        if(isEployee === false && role === "owner" && value.plan !== "free") return true;
         return false
+        
+       
 
       }
     })

@@ -178,6 +178,7 @@
   --shadow-xl: 0px 8px 24px -8px hsl(0 0% 0% / 0.10), 0px 8px 10px -9px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0px 8px 24px -8px hsl(0 0% 0% / 0.25);
 }
+
 @layer utilities {
   .bg-animated-stripe {
    background-size: 600% 100%;

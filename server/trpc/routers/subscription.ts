@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
-import { rateLimit, heavyRateLimit } from '../middlewares/rateLimit';
+import { rateLimit } from '../middlewares/rateLimit';
 import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
 import { TRPCError } from '@trpc/server';
 import { auth } from '@/lib/auth';

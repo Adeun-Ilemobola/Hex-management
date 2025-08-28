@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
-import { rateLimit, heavyRateLimit } from '../middlewares/rateLimit';
+import { rateLimit } from '../middlewares/rateLimit';
 import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
 import { TRPCError } from '@trpc/server';
+import { auth } from '@/lib/auth';
 
 // type userOrganizationContributor = {
 //     name: string;
@@ -43,21 +44,31 @@ export const PropertiesRouter = createTRPCRouter({
                     // you can either throw or return a shaped error
                     throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
                 }
-                
-                let itemList: CleanProperty[]
 
-
-                console.log("--------ctx.userOrgMembership-------------", ctx.userOrgMembership);
-                
-
-
-                const { data } = input;
                
+                const memberships = await prisma.member.findMany({
+                    where: { userId: user.id },
+                    select: { organizationId: true, role: true },
+                });
+                const isUserAEployeeOfOrg = memberships.some(m => m.role === "member");
+                const userOrgMembership = {
+                    ownerOrganizationIds: memberships
+                        .filter(m => m.role === "owner")
+                        .map(m => m.organizationId),
+                    isUserAEployeeOfOrg: {
+                        organizationId: isUserAEployeeOfOrg ? memberships[0].organizationId : "",
+                        isEployee: isUserAEployeeOfOrg
+                    }
+
+                };
+                let itemList: CleanProperty[]
+                const { data } = input;
+
                 const getOrgItems = await prisma.propertie.findMany(
                     {
                         where: {
                             ownerId: {
-                                in: [ctx.userOrgMembership.isUserAEployeeOfOrg.organizationId]
+                                in: [userOrgMembership.isUserAEployeeOfOrg.organizationId]
                             },
                             ownerType: "ORGANIZATION",
                             ...(data.status && { leavingstatus: data.status as string }),
@@ -93,11 +104,11 @@ export const PropertiesRouter = createTRPCRouter({
                 })
 
 
-                if (!ctx.userOrgMembership.isUserAEployeeOfOrg.isEployee) {
+                if (!userOrgMembership.isUserAEployeeOfOrg.isEployee) {
                     const getUserItems = await prisma.propertie.findMany({
                         where: {
                             ownerId: {
-                                in: [...ctx.userOrgMembership.ownerOrganizationIds , user.id]
+                                in: [...userOrgMembership.ownerOrganizationIds, user.id]
                             },
                             ownerType: "USER",
                             ...(data.status && { leavingstatus: data.status as string }),
@@ -131,10 +142,6 @@ export const PropertiesRouter = createTRPCRouter({
                     }))
 
                 }
-
-                console.log(itemList);
-
-
                 return {
                     data: itemList,
                 }
@@ -216,7 +223,7 @@ export const PropertiesRouter = createTRPCRouter({
         }),
 
     postPropertie: protectedProcedure
-        .use(heavyRateLimit())
+        .use(rateLimit("heavy"))
         .input(z.object({ property: propertySchema, investmentBlock: investmentBlockSchema }))
         .mutation(async ({ input, ctx }) => {
             let propertyIdGo: string | null = null;
@@ -905,11 +912,11 @@ export const PropertiesRouter = createTRPCRouter({
                         id: investorId,
                         email: user.email,
                         investmentBlockId: getPropertie.investBlock.id,
-                        code, accepted 
+                        code, accepted
 
                     });
 
-                    const data= await ctx.prisma.externalInvestor.updateMany({
+                    const data = await ctx.prisma.externalInvestor.updateMany({
                         where: {
                             id: investorId,
                             email: user.email,
@@ -919,7 +926,7 @@ export const PropertiesRouter = createTRPCRouter({
                             status: "VERIFIED",
                             isInternal: true,
                             investorUserId: user.id
-                            
+
                         }
 
                     })
@@ -947,7 +954,7 @@ export const PropertiesRouter = createTRPCRouter({
                         id: investorId,
                         email: user.email,
                         investmentBlockId: getPropertie.investBlock.id,
-                        code, accepted 
+                        code, accepted
 
                     });
 
@@ -965,7 +972,7 @@ export const PropertiesRouter = createTRPCRouter({
                         }
 
                     })
-                    if (count===0) {
+                    if (count === 0) {
                         throw new TRPCError({ code: 'NOT_FOUND', message: 'Investor not found or not owned by user.' });
 
 

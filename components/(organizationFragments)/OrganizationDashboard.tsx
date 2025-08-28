@@ -1,15 +1,4 @@
-// OrganizationDashboard.tsx
-// React + Tailwind + shadcn/ui + Lucide
-// Drop-in UI that renders a modern, responsive organization dashboard.
-// Focused on structure, styling, and accessibility; minimal client-side logic for filtering.
-//
-// Usage:
-// <OrganizationDashboard
-//   organization={organization}
-//   onOnboard={() => {/* open onboarding flow */}}
-//   onAddExistingUser={() => {/* open add-existing modal */}}
-// />
-
+"use client";
 import React, { useState, useEffect, useMemo } from "react";
 import {
     Dialog,
@@ -54,13 +43,9 @@ import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import z from "zod";
 import InputBox, { SelectorBox } from "../InputBox";
-import {
-    ContextMenu,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuTrigger,
-} from "@/components/ui/context-menu"
-import { set } from "better-auth";
+import { useSearchParams } from "next/navigation";
+import Loading from "../Loading";
+import { DateTime } from "luxon";
 
 interface Props {
     organization: OrganizationX | null;
@@ -75,19 +60,26 @@ type selectedCardType = {
     id: string
 }
 
- const getRoleIcon = (role: string) => {
-        switch (role) {
-            case 'owner': return <Crown className="w-4 h-4" />;
-            case 'admin': return <Shield className="w-4 h-4" />;
-            default: return <User className="w-4 h-4" />;
-        }
-    };
+const getRoleIcon = (role: string) => {
+    switch (role) {
+        case 'owner': return <Crown className="w-4 h-4" />;
+        case 'admin': return <Shield className="w-4 h-4" />;
+        default: return <User className="w-4 h-4" />;
+    }
+};
+
+
 
 
 
 export default function OrganizationDashboard() {
+    const searchParams = useSearchParams()
+    const OrgId = searchParams.get('id')
+    const slug = searchParams.get('slug')
+    const { data: getOrganization, isPending, refetch } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
+    const organization = getOrganization?.value
 
-    const [organization] = useState<OrganizationX | null>(mockOrganization);
+
     const [selectedCard, setSelectedCard] = useState<selectedCardType | null>(null);
     const [memberFilter, setMemberFilter] = useState('');
     const [invitationFilter, setInvitationFilter] = useState('');
@@ -110,6 +102,26 @@ export default function OrganizationDashboard() {
         );
     }, [organization, invitationFilter]);
 
+    // function daysLeft(org: OrganizationX | null | undefined) {
+    //     if (org && org.metadata) {
+    //         const activeSubscription = org.metadata
+    //         const trialEnd = DateTime.fromJSDate(new Date(activeSubscription.trialEnd || DateTime.local().toJSDate())).diff(DateTime.local()).days
+    //         const periodEnd = DateTime.fromJSDate(new Date(activeSubscription.periodEnd || DateTime.local().toJSDate())).diff(DateTime.local()).days
+    //         const daysLeft = activeSubscription.status === "trialing" ? trialEnd : periodEnd
+    //         console.log({
+    //             trialEnd,
+    //             periodEnd,
+    //             daysLeft,
+    //             activeSubscription
+    //         });
+            
+    //         return daysLeft
+    //     }
+    //     return 0
+
+
+    // }
+
 
 
 
@@ -122,10 +134,10 @@ export default function OrganizationDashboard() {
         }
     };
 
-    if (!organization) {
+    if (!organization || isPending) {
         return (
             <div className="flex-1 flex items-center justify-center">
-                <div className="text-gray-500 dark:text-slate-400">Loading organization data...</div>
+                <Loading full={false} />
             </div>
         );
     }
@@ -199,7 +211,7 @@ export default function OrganizationDashboard() {
                                         <Calendar className="w-4 h-4 text-amber-600" />
                                         <span className="text-sm text-gray-700 dark:text-slate-200">Billing Period</span>
                                     </div>
-                                    <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{organization.metadata.daysLeft} days left</span>
+                                    <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{organization.metadata?.daysLeft} days left</span>
                                 </div>
                             </div>
                         )}
@@ -324,8 +336,13 @@ export default function OrganizationDashboard() {
             </div>
             <AddMemberDialog
                 isOpen={showAddUser}
-                onClose={setShowAddUser}
-                organizationId={"sdasdasdd"}
+                onClose={(v) => {
+                    setShowAddUser(v)
+                    setSelectedCard(null)
+
+                }}
+                organizationId={organization.id}
+                maxMembersReached={(organization.members.length + 1) >= (organization.metadata?.limits?.orgMembers || 0)}
                 reLoadData={() => {
 
                 }}
@@ -335,12 +352,13 @@ export default function OrganizationDashboard() {
             {selectedCard && (
                 <UpdateMemberDialog
                     isOpen={showMemberUpdate}
-                    onClose={(v)=>{
+                    onClose={(v) => {
                         setShowMemberUpdate(v)
                         setSelectedCard(null)
                     }}
                     member={selectedCard}
                     organizationId={organization.id}
+                    organizationName={organization.name}
                 />
             )}
         </div>
@@ -425,7 +443,7 @@ type MemberCardViewType = {
 
 function MemberCardView(data: MemberCardViewType) {
     const { data: member, onclick } = data
-   
+
 
     return (
         <div
@@ -460,17 +478,21 @@ interface AddMemberDialogProps {
     onClose: (value: boolean) => void;
     organizationId: string;
     reLoadData: () => void;
+    maxMembersReached: boolean
 }
 
 interface UpdateMemberDialogProps {
     isOpen: boolean;
     onClose: (value: boolean) => void;
     organizationId: string;
-    member: selectedCardType
+    organizationName: string;
+    member: selectedCardType,
+
+
 }
 
 
-function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMemberDialogProps) {
+function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData , maxMembersReached }: AddMemberDialogProps) {
 
     const zNewMember = z.object({
         email: z.string().email(),
@@ -504,6 +526,10 @@ function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMem
 
 
     function handleAddMember() {
+        if (maxMembersReached) {
+            toast.error('Maximum number of members reached.', { id: 'add-member' });
+            return;
+        }
         const validation = zNewMember.safeParse(formData);
         if (!validation.success) {
             if (validation.error.errors) {
@@ -579,7 +605,25 @@ function AddMemberDialog({ isOpen, onClose, organizationId, reLoadData }: AddMem
 
 }
 
-function UpdateMemberDialog({ isOpen, onClose, organizationId, member }: UpdateMemberDialogProps) {
+function UpdateMemberDialog({ isOpen, onClose, organizationId, organizationName, member }: UpdateMemberDialogProps) {
+    const switchRole = api.organization.updateMemberRole.useMutation({
+        onMutate() {
+            toast.loading('Updating member...', { id: 'update-member' });
+        },
+        onSuccess(data) {
+            if (data && data.success) {
+                toast.success(data.message, { id: 'update-member' });
+                onClose(false);
+            } else {
+                toast.error(data.message, { id: 'update-member' });
+            }
+        },
+        onError(error) {
+            toast.error(error.message || 'Failed to update member.', { id: 'update-member' });
+            console.log(error);
+        }
+
+    })
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}  >
@@ -590,7 +634,7 @@ function UpdateMemberDialog({ isOpen, onClose, organizationId, member }: UpdateM
             >
                 <div className='flex flex-col  gap-6'>
                     <div
-                    className="group p-4   rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 "
+                        className="group p-4   rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 "
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -615,16 +659,27 @@ function UpdateMemberDialog({ isOpen, onClose, organizationId, member }: UpdateM
                             <h1 className='text-2xl font-semibold text-gray-800 dark:text-slate-100'>
                                 owner cannot be updated
                             </h1>
-                            
-                        ):(
+
+                        ) : (
                             <>
-                             <Button size={"lg"} >set as  admin</Button>
-                        <Button size={"lg"} >set as  member</Button>
-                        <Button size={"lg"} variant='destructive'>remove member</Button>
+                                <Button
+                                    disabled={switchRole.isPending}
+                                    onClick={() => switchRole.mutate({ organizationId: organizationId, memberId: member.id, ActionType: "admin", organizationName: organizationName, memberEmail: member.email, memberName: member.name })}
+                                    size={"lg"}
+                                >set as  admin</Button>
+                                <Button
+                                    disabled={switchRole.isPending}
+                                    onClick={() => switchRole.mutate({ organizationId: organizationId, memberId: member.id, ActionType: "member", organizationName: organizationName, memberEmail: member.email, memberName: member.name })}
+                                    size={"lg"} >set as  member</Button>
+                                <Button
+                                    disabled={switchRole.isPending}
+                                    onClick={() => switchRole.mutate({ organizationId: organizationId, memberId: member.id, ActionType: "remove", organizationName: organizationName, memberEmail: member.email, memberName: member.name })}
+
+                                    size={"lg"} variant='destructive'>remove member</Button>
 
                             </>
                         )}
-                       
+
                     </div>
 
 

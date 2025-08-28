@@ -21,13 +21,7 @@ type userOrgMembersPayload = {
 export const createTRPCContext = async () => {
   const webHeaders = await headers();
   let sub: subMeta | null = null
-  let userOrgMembership: userOrgMembersPayload = {
-    ownerOrganizationIds: [],
-    isUserAEployeeOfOrg: {
-      organizationId: "",
-      isEployee: false
-    }
-  }
+
   const ip = webHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     webHeaders.get('x-real-ip') ??
     'unknown';
@@ -46,31 +40,19 @@ export const createTRPCContext = async () => {
       sub => sub.status === "active" || sub.status === "trialing"
     );
     if (activeSubscription) {
-      const trialEnd = DateTime.fromJSDate(activeSubscription.trialEnd || DateTime.local().toJSDate()).diff(DateTime.local()).days
-      const periodEnd = DateTime.fromJSDate(activeSubscription.periodEnd || DateTime.local().toJSDate()).diff(DateTime.local()).days
+      const trialEnd = DateTime.fromISO(DateTime.fromJSDate(activeSubscription.trialEnd || new Date()  ).toISO() || DateTime.local().toISO()).diffNow("days").as("days")
+      const periodEnd = DateTime.fromISO(DateTime.fromJSDate(activeSubscription.periodEnd || new Date() ).toISO() || DateTime.local().toISO()).diffNow("days").as('days')
+      const daysLeft = activeSubscription.status === "trialing" ? trialEnd : periodEnd
 
       sub = {
         ...activeSubscription,
-        daysLeft: activeSubscription.status === "trialing" ? trialEnd : periodEnd,
+        daysLeft: Math.max(0, Math.ceil(daysLeft)),
         limits: activeSubscription.limits as limitMeta
+        
       }
 
     }
-    const memberships = await prisma.member.findMany({
-      where: { userId: session.user.id },
-      select: { organizationId: true, role: true },
-    });
-    const isUserAEployeeOfOrg = memberships.some(m => m.role === "member") ;
-    userOrgMembership = {
-      ownerOrganizationIds: memberships
-        .filter(m => m.role === "owner")
-        .map(m => m.organizationId),
-        isUserAEployeeOfOrg: {
-          organizationId: isUserAEployeeOfOrg ? memberships[0].organizationId : "",
-          isEployee: isUserAEployeeOfOrg
-        }
-      
-    };
+
   }
 
   return {
@@ -79,7 +61,6 @@ export const createTRPCContext = async () => {
     headers:
       webHeaders,
     subscription: sub,
-    userOrgMembership,
 
     ip,
     _rateMeta: {} as { limit?: number; remaining?: number; reset?: number },

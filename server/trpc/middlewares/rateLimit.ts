@@ -1,27 +1,19 @@
 import { TRPCError } from '@trpc/server';
-import { globalLimiter, heavyLimiter } from '@/lib/ratelimit';
+import {  heavy, light } from '@/lib/ratelimit';
 import { t, type Context } from '../init'; // <- use your t + Context from init
 
 // Reusable middleware factory
-export function rateLimit(limiter = globalLimiter) {
+export function rateLimit(limiterType: "light" | "heavy" = "light") {
   return t.middleware(async ({ ctx, path, next }) => {
     // Prefer user id; fall back to IP; include path for per-procedure limiting
     const id = ctx.session?.user?.id ?? ctx.ip ?? 'anon';
     const key = `${id}:${path}`;
+    let limiterCtx = light(ctx.session?.user?.id);
+    if (limiterType === "heavy") {
+      limiterCtx = heavy(ctx.session?.user?.id);
+    }
 
-    const { success, limit, remaining, reset ,...T } = await limiter.limit(key);
-    console.log({
-      success,
-      limit,
-      remaining,
-      reset,
-      T,
-      key,
-      id,
-      path
-    });
-    
-
+    const { success, limit, remaining, reset ,...T } = await limiterCtx.limit(key);
     // expose for adapter to emit headers
     ctx._rateMeta = { limit, remaining, reset };
 
@@ -36,4 +28,4 @@ export function rateLimit(limiter = globalLimiter) {
 }
 
 // Optional: export a stricter version for heavy endpoints
-export const heavyRateLimit = () => rateLimit(heavyLimiter);
+// export const heavyRateLimit = () => rateLimit(heavyLimiter);
