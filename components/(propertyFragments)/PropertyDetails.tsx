@@ -52,6 +52,8 @@ export default function PropertyDetails({
   RemoveImage,
   orgInfo
 }: PropertyGIFProps) {
+  
+  
   const handleField = (
     field: keyof PropertyInput,
     val: string | boolean | number,
@@ -319,6 +321,11 @@ interface OwnershipConfigProps {
 
 function OwnershipConfig({ data, loading, handleSelectOrg , disabled }: OwnershipConfigProps) {
   const [showConfidential, setShowConfidential] = useState(false);
+  console.log(disabled
+  );
+  
+ 
+  
 
 
   return (

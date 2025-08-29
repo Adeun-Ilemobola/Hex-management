@@ -37,7 +37,8 @@ export default function PropertyModification() {
         UpdateProperty,
         disableInput,
         isLoading,
-        sub,memberData,
+        sub,
+        memberData,
         reFresh
     } = usePropertyModification(id)
     const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
@@ -45,10 +46,10 @@ export default function PropertyModification() {
     const [section, Setsection] = useState(1)
 
     function validation() {
-        
+
         const blockForValidation = {
             ...investmentBlock,
-            externalInvestors: externalInvestor, 
+            externalInvestors: externalInvestor,
         };
 
 
@@ -149,7 +150,7 @@ export default function PropertyModification() {
             }
         }
     }
-  
+
 
     function orgListClean() {
         const cleaned = orgList?.value.map(org => ({
@@ -170,7 +171,8 @@ export default function PropertyModification() {
     }
 
 
-   
+
+
     return (
         <DropBack is={isLoading} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
@@ -191,16 +193,16 @@ export default function PropertyModification() {
                                     }}
                                     handleSSubscriptionRequirement={() => {
                                         const v = sub?.limits?.maxProjectImages || 0
-                                        return v 
+                                        return v
                                     }}
                                     orgInfo={
                                         {
                                             data: orgListClean(),
-                                            loading: organizationsQuery.isLoading,
+                                            loading: organizationsQuery.isPending,
                                             userId: Session.data?.user.id || "",
                                             refetch: organizationsQuery.refetch,
-                                            showOwnershipConfig: (memberData && memberData.role === "owner") || false,
-                                            disabled: (memberData && memberData.role === "owner") || false
+                                            showOwnershipConfig: (memberData && memberData.role !== "owner") || true,
+                                            disabled: (memberData && memberData.role !== "owner") || true
 
                                         }
                                     }
@@ -223,7 +225,7 @@ export default function PropertyModification() {
                             />
 
                             {Session.data?.user && (
-                                <PayWall allowed={(sub && sub.limits ) ? sub.limits.PoolInvestor === 0 ? false : true : false  }>
+                                <PayWall allowed={(sub && sub.limits) ? sub.limits.PoolInvestor === 0 ? false : true : false}>
                                     <PoolInvestorsSection
                                         mebers={externalInvestor}
                                         setMebers={setExternalInvestor}

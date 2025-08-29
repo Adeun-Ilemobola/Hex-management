@@ -221,120 +221,7 @@ export function usePropertyModification(id: string) {
     }, [financials, investorCalculations.updatedInvestors]);
 
 
-    // useEffect(() => {
-    //     if (getProperty.data?.success && getProperty.data?.value) {
-    //         const { externalInvestors, property, investmentBlock, images } = getProperty.data.value;
-
-
-    //         setPropertyInfo({
-    //             ...property,
-    //             images,
-    //             status: property.status as StatusEnumType,
-    //             propertyType: property.propertyType as PropertyTypeEnumType,
-    //             description: property.description || "",
-    //             ownerId: property.ownerId || "",
-    //             ownerType: property.ownerType as ownerTypeT
-    //         });
-
-    //         if (investmentBlock) {
-    //             const externalInvestorsCleaned = externalInvestors.map(inv => ({
-    //                 ...inv,
-    //                 contributionPercentage: Number(inv.contributionPercentage) || 0,
-    //                 returnPercentage: Number(inv.returnPercentage) || 0,
-    //                 dollarValueReturn: Number(inv.dollarValueReturn) || 0,
-    //                 updatedAt: inv.updatedAt ? new Date(inv.updatedAt) : undefined,
-    //                 createdAt: inv.createdAt ? new Date(inv.createdAt) : undefined,
-    //                 fundedAt: inv.fundedAt ? new Date(inv.fundedAt) : undefined,
-    //             }));
-    //             setExternalInvestor(externalInvestorsCleaned);
-    //             setInvestmentBlock({
-    //                 ...investmentBlock,
-    //                 typeOfInvestment: investmentBlock.typeOfInvestment as InvestmentTypeEnumType,
-    //                 typeOfSale: investmentBlock.typeOfSale as SaleTypeEnumType,
-    //                 externalInvestors: externalInvestorsCleaned,
-    //                 propertyId: property.id,
-    //                 saleDuration: investmentBlock.saleDuration,
-    //                 leaseCycle: investmentBlock.leaseCycle,
-    //                 depreciationYears: investmentBlock.depreciationYears
-
-    //             });
-    //         }
-    //     }
-
-    //     const user = Session?.data?.user;
-    //     const userPlan = plan?.value;
-    //     if (user?.name && user?.email && id.length === 0) {
-    //         setPropertyInfo(prev => ({
-    //             ...prev,
-    //             ownerName: user.name,
-    //             contactInfo: user.email,
-    //         }));
-    //     }
-
-    //     if (userPlan && userPlan.inOrganization && userPlan.inOrganization.role !== "owner") {
-    //         const oid = userPlan.inOrganization.id
-    //         setPropertyInfo(prev => ({
-    //             ...prev,
-    //             ownerId: oid,
-    //             ownerType: "ORGANIZATION"
-    //         }));
-    //     }
-
-
-
-    // }, [ id, getProperty.data,]);
-
-
-    // useEffect(() => {
-    //     const { result, duration } = financials;
-
-    //     setInvestmentBlock(prev => {
-    //         if (prev.saleDuration === duration && prev.finalResult === result) return prev;
-
-    //         return {
-    //             ...prev,
-    //             saleDuration: duration,
-    //             finalResult: result,
-    //         };
-    //     });
-    // }, [financials.result, financials.duration]);
-
-    // useEffect(() => {
-    //     setExternalInvestor(prev => {
-    //         const updated = investorCalculations.updatedInvestors;
-
-    //         // Merge calculated outputs into existing investors, preserve their contributionPercentage
-    //         const merged = updated.map(u => {
-    //             const existing = prev.find(p => p.email === u.email && p.name === u.name);
-    //             if (!existing) return {
-    //                 ...u,
-    //                 contributionPercentage: u.contributionPercentage ?? 0, // fallback if new
-    //             };
-    //             return {
-    //                 ...existing,
-    //                 returnPercentage: u.returnPercentage,
-    //                 dollarValueReturn: u.dollarValueReturn,
-    //             };
-    //         });
-
-    //         // If lengths differ or any key field differs, replace
-    //         const isSame =
-    //             prev.length === merged.length &&
-    //             merged.every(m => {
-    //                 const corresponding = prev.find(p => p.email === m.email && p.name === m.name);
-    //                 if (!corresponding) return false;
-    //                 return (
-    //                     corresponding.contributionPercentage === m.contributionPercentage &&
-    //                     corresponding.returnPercentage === m.returnPercentage &&
-    //                     corresponding.dollarValueReturn === m.dollarValueReturn
-    //                 );
-    //             });
-
-    //         if (isSame) return prev;
-    //         return merged;
-    //     });
-    // }, [investorCalculations.updatedInvestors]);
-
+   
     useEffect(() => {
         if (getProperty.data?.success && getProperty.data?.value) {
             const { externalInvestors, property, investmentBlock: ib, images: files } = getProperty.data.value;
@@ -378,22 +265,28 @@ export function usePropertyModification(id: string) {
                 });
             }
         }
+    }, [ getProperty.data ]);
 
-        const user = Session?.data?.user;
+    useEffect(() => {
+         const user = Session?.data?.user;
         const orgMember = memberData?.value
 
         if (user?.name && user?.email && id.length === 0) {
             setPropertyInfo((prev) => ({ ...prev, ownerName: user.name, contactInfo: user.email }));
         }
 
-        if (orgMember && orgMember.role !=="owner" ) {
+       
+
+        if (orgMember && (orgMember.role === "member" || orgMember.role === "admin")) {
+            console.log("Setting organization as owner");
             setPropertyInfo((prev) => ({
                 ...prev,
                 ownerId: orgMember.organizationId,
                 ownerType: "ORGANIZATION",
             }));
-        }
-    }, [ getProperty.data]);
+        }        
+    }, [memberData , Session.data]);
+
 
     
 

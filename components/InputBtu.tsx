@@ -19,6 +19,7 @@ export default function InputBtu({  onSubmit, className  , icon ,disabled }: Inp
     <div className={clsx("flex flex-row gap-1.5 items-center ", className)}>
         <InputBox
             value={value}
+            className='flex-1 w-full'
             onChange={setValue}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {

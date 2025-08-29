@@ -50,6 +50,12 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // privacy settings
+  directMessage Boolean @default(true)
+  profilePublic Boolean @default(true)
+
+
+
   // SubscriptionArchives SubscriptionArchives?
   // Subscription         Subscription?
 
@@ -61,6 +67,8 @@ model User {
   @@unique([email])
   @@map("user")
 }
+
+
 
 // model SubscriptionArchives {
 //   id            String         @id @default(uuid())

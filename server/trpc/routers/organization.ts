@@ -8,7 +8,6 @@ import { DateToIOS, seatPlan } from "@/lib/utils";
 import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
-import { fa } from "zod/v4/locales";
 
 
 
@@ -18,11 +17,39 @@ export const organizationRouter = createTRPCRouter({
     getActiveMember: protectedProcedure
         .query(async ({ ctx }) => {
             try {
-                const member = await auth.api.getActiveMember({
-                    // This endpoint requires session cookies.
-                    headers: ctx.headers,
+                console.log("-------- getActiveMember called---------");
+                
+               const memberOfOrg = await ctx.prisma.member.findFirst({
+                    where: {
+                        userId: ctx.session?.user.id,
+                        role: {
+                            in: ["member", "admin"]
+                        }
+                    },
+                    include: {
+                        organization: true,
+                        user: true
+                    }
                 });
+                if (!memberOfOrg) {
+                    console.log("No active member found for user:", ctx.session?.user.id);
+                    return { success: true, value: null };
+                }
+                if (!memberOfOrg.organization) {
+                    console.log("Member found but no organization associated:", memberOfOrg);
+                    return { success: true, value: null };
+                }
+                const member = {
+                    name: memberOfOrg.user.name,
+                    email: memberOfOrg.user.email,
+                    role: memberOfOrg.role,
+                    organizationId: memberOfOrg.organizationId,
+                    organizationSlug: memberOfOrg.organization.slug  
+                }
+                
                 return { success: true, value: member };
+                
+
             } catch (error) {
                 console.error("Error in getActiveMember:", error);
                 return { success: false, value: null };
@@ -124,7 +151,6 @@ export const organizationRouter = createTRPCRouter({
     getAllOrganization: protectedProcedure.query(async ({ ctx }) => {
         try {
             const data = await auth.api.listOrganizations({ headers: ctx.headers });
-            console.log(data);
 
             const organizations = await Promise.all(
                 data.map(async (org) => {

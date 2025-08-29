@@ -5,7 +5,6 @@ import { auth } from '@/lib/auth';
 
 import {  defaultFreePlan, OrganizationMetadata, subMeta } from '@/lib/Zod';
 import { TRPCError } from '@trpc/server';
-import { log } from 'console';
 
 
 
@@ -71,13 +70,11 @@ export const userCongiRouter = createTRPCRouter({
             })
             if(memberInOrg && memberInOrg.organization.metadata) {
                 const plan = (JSON.parse(memberInOrg.organization.metadata ) || defaultFreePlan )as subMeta
-                console.log("------  == plan from org", { success: true, isEployee: true, role: memberInOrg.role , value: plan });
                 
                 return { success: true, isEployee: true, role: memberInOrg.role , value: plan };
             }
            
             const plan = ctx.subscription || defaultFreePlan
-            console.log("------  ==plan from sub", { success: true, isEployee: false, role: "owner", value: plan});
             
             return { success: true, isEployee: false, role: "owner", value: plan};
         } catch (error) {
@@ -91,16 +88,17 @@ export const userCongiRouter = createTRPCRouter({
             try {
                 const users = await ctx.prisma.user.findMany({
                     where: {
-                        email: {
-                            contains: input.email
-                        }
+                        email: input.email,
+                        profilePublic: true
                         
                     },
                     select: {
                         id: true,
                         name: true,
                         email: true,
-                        image: true
+                        image: true,
+                        directMessage: true,
+
                     }
                 })
                 return { success: true, value: users };

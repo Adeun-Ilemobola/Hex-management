@@ -14,6 +14,8 @@ import { isEqual } from '@/lib/utils';
 import DropBack from '../DropBack';
 import { toast } from 'sonner';
 import ScrollBox from '../Scroll';
+import { Button } from '../ui/button';
+import CreateChatView from './CreateChatView';
 interface RoomData {
   id: string;
   title: string;
@@ -159,7 +161,7 @@ export default function ChartView() {
       placeholderData: {
         message: "",
         success: true,
-        value:  []
+        value: []
       },    // smooth room switches
     }
   );
@@ -233,33 +235,29 @@ export default function ChartView() {
       }
     },
   })
-  const list = chatMessages?.value|| [];       // avoid duplicating state
+  const clearNotifications = api.ChatRoom.userRoomNotification.useMutation({
+    onSuccess(data, variables, context) {
+      if (!data.success) {
+        toast.error(data.message);
+      } else {
+        utils.ChatRoom.getUserRooms.invalidate();
+      }
+    },
+  })
+  const list = chatMessages?.value || [];       // avoid duplicating state
   const lastKey = list.at(-1)?.id ?? "__none__";
   const scrollToBottom = () => {
-  setTimeout(() => {
-    if (!ScrollBoxRef.current) return;
-    ScrollBoxRef.current.scrollTop = ScrollBoxRef.current.scrollHeight;
-  }, 90);
-};
+    setTimeout(() => {
+      if (!ScrollBoxRef.current) return;
+      ScrollBoxRef.current.scrollTop = ScrollBoxRef.current.scrollHeight;
+    }, 90);
+  };
   useLayoutEffect(() => {
     // wait for render + layout (and images) to settle, then snap to bottom
     scrollToBottom();
-   
-  }, [ lastKey]);
-  // useEffect(() => {
-  //   const Same = isEqual(messages, getChats.data?.value || []);
-  //   if (!Same) {
-  //     const info = (getChats.data?.value || []).map((item) => {
-  //       return {
-  //         ...item,
-  //         text: item.text || "",
-  //       }
-  //     })
-  //     setMessages(info);
-  //   }
 
-  // }, [list]);
-  
+  }, [lastKey]);
+
 
 
 
@@ -267,8 +265,7 @@ export default function ChartView() {
     <DropBack is={sessionPending}>
       <>
         <Nav session={session} SignOut={authClient.signOut} />
-
-
+        <CreateChatView/>
 
         <section
           className={`
@@ -410,7 +407,7 @@ export default function ChartView() {
                               name: m.name,
                               isAdmin: m.isAdmin,
                             }))}
-                            select={() =>
+                            select={() => {
                               setRoom({
                                 id: r.roomId,
                                 title: r.title,
@@ -421,6 +418,9 @@ export default function ChartView() {
                                   joinedAt: m.joinedAt,
                                 })),
                               })
+                              clearNotifications.mutate({ roomId: r.roomId });
+                            }
+
                             }
                           />
                         ))}

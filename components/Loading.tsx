@@ -44,14 +44,14 @@ export default function Loading({
       {/* Center stack */}
       <div className="relative flex flex-col items-center">
         {/* Soft gradient glow */}
-        <div
+        {/* <div
           className={`pointer-events-none absolute -inset-10 blur-2xl opacity-60 ${
             variant === "brand"
               ? "bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"
               : "bg-gradient-to-r from-zinc-300 via-zinc-200 to-zinc-300 dark:from-zinc-700 dark:via-zinc-800 dark:to-zinc-700"
           } rounded-full`}
           aria-hidden
-        />
+        /> */}
 
         {/* Icon */}
         <div className="relative flex h-24 w-24 items-center justify-center">

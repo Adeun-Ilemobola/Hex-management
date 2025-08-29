@@ -61,6 +61,17 @@ export const PropertiesRouter = createTRPCRouter({
                     }
 
                 };
+
+
+                console.log({
+                    memberships , 
+                    userOrgMembership ,
+                    isUserAEployeeOfOrg,
+                    userId: user.id ,
+
+
+                });
+                
                 let itemList: CleanProperty[]
                 const { data } = input;
 
@@ -203,7 +214,6 @@ export const PropertiesRouter = createTRPCRouter({
                     }),
                     externalInvestors: getExternalInvestors || []
                 }
-                console.log(cleanData);
 
                 return {
                     message: "successfully created property listing",
