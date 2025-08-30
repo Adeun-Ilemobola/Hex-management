@@ -34,7 +34,7 @@ import {
     Hourglass,
     AlertCircle,
 } from "lucide-react";
-import { InvitationStatus, OrganizationX, Role } from "@/lib/Zod";
+import { InvitationStatus, Role } from "@/lib/Zod";
 import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import z from "zod";

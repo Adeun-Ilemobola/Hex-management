@@ -157,7 +157,7 @@ const PropertyInvestmentLanding = () => {
               >
                 {/* Gradient Border on Hover */}
                 <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}></div>
-                
+
                 <div className="relative z-10">
                   <div className={`mb-6 p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} w-fit group-hover:scale-110 transition-transform duration-300`}>
                     <div className="text-white">
@@ -187,6 +187,7 @@ const PropertyInvestmentLanding = () => {
                 Investment Style
               </span>
             </h2>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
               Whether you're going solo or joining forces, we have the perfect investment solution for your goals.
             </p>

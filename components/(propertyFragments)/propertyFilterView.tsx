@@ -26,7 +26,7 @@ export interface CleanProperty {
 }
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
-    const { data: subscription, isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
+    const {  isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
 
     const router = useRouter();
 

@@ -3,25 +3,25 @@
 // import { sendEmail } from '@/server/actions/sendEmail';
 // import { useMutation } from '@tanstack/react-query'
 
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 // import { toast } from 'sonner';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerOverlay
+// import {
+//   Drawer,
+//   DrawerContent,
+//   DrawerTrigger,
+//   DrawerOverlay
 
-} from "@/components/ui/drawer"
+// } from "@/components/ui/drawer"
 // import { mockOrganization } from '@/lib/Zod';
 // import OrganizationDashboard from '@/components/(organizationFragments)/OrganizationDashboard';
 // import { api } from '@/lib/trpc';
-import InputBtu from '@/components/InputBtu';
-import { Search } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Loading from '@/components/Loading';
+// import InputBtu from '@/components/InputBtu';
+// import { Search } from 'lucide-react';
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import Loading from '@/components/Loading';
 // Fake data for all tiers
 
-const email = "adeun2020@gmail.com"
+// const email = "adeun2020@gmail.com"
 
 export default function Page() {
   // const VerifyEmail = useMutation({
