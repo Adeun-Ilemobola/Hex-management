@@ -175,7 +175,8 @@ export function NumberBox({
       step={step}
       onChange={setValue}
       isDisabled={disabled}
-      aria-label={label}
+      aria-label={""}
+      
     >
       {/* Responsive outer wrapper */}
       <div className={clsx('flex flex-col space-y-2  min-w-20', className)}>
