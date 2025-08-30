@@ -6,7 +6,7 @@ import SubscriptionCard from '@/components/SubscriptionCard'
 import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 const subscriptionPlans = [
   {
     tier: 'free' as const,
