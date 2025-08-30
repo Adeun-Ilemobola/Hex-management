@@ -189,7 +189,7 @@ const PropertyInvestmentLanding = () => {
             </h2>
             {/* eslint-disable-next-line react/no-unescaped-entities */}
             <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-              Whether you're going solo or joining forces, we have the perfect investment solution for your goals.
+              Whether you&apos;re going solo or joining forces, we have the perfect investment solution for your goals.
             </p>
           </div>
 

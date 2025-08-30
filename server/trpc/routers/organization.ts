@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import {  OrganizationX, subMeta } from "@/lib/Zod";
+import {  MetadataT, OrganizationX, subMeta } from "@/lib/Zod";
 import { sendEmail } from "@/server/actions/sendEmail";
 import { rateLimit } from '../middlewares/rateLimit';
 import { DateToIOS, seatPlan } from "@/lib/utils";
@@ -204,7 +204,7 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const me = JSON.parse(data?.metadata || "{}") as subMeta
+                const me = JSON.parse(data?.metadata || "{}") as MetadataT
                 const trialEnd = DateTime.fromISO(DateToIOS(me.trialEnd) || DateTime.local().toISO()).diffNow("days").as("days")
                 const periodEnd = DateTime.fromISO(DateToIOS(me.periodEnd) || DateTime.local().toISO()).diffNow("days").as('days')
                 const daysLeft = me.status === "trialing" ? trialEnd : periodEnd
@@ -271,7 +271,7 @@ export const organizationRouter = createTRPCRouter({
                     }
                 }
                 const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
-                const metadata: subMeta = {
+                const metadata: MetadataT = {
                     ...userSub,
                 }
 

@@ -47,7 +47,7 @@ const subscriptionPlans = [
 ];
 
 export default function Page() {
-  const router = useRouter();
+  // const router = useRouter();
   const { isPending: sessionLoading } = authClient.useSession();
   const {data:getUserPlan , isPending:getUserPlanLoading} = api.user.getUserPlan.useQuery()
   const subscriptionMutation = api.subscription.UpgradeSubscription.useMutation({

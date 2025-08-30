@@ -5,7 +5,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 import superjson from "superjson";
 import { DateTime } from 'luxon';
-import { limitMeta, Metadata, subMeta } from '@/lib/Zod';
+import { limitMeta, Metadata, MetadataT, subMeta } from '@/lib/Zod';
 
 
 
@@ -20,7 +20,7 @@ type userOrgMembersPayload = {
 
 export const createTRPCContext = async () => {
   const webHeaders = await headers();
-  let sub: subMeta | null = null
+  let sub: MetadataT | null = null
 
   const ip = webHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     webHeaders.get('x-real-ip') ??

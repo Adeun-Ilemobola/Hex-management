@@ -882,7 +882,7 @@ export const amenitiesItems: { value: string; label: string }[] = [
   { value: "package_room", label: "Package Room" },
   { value: "cold_storage", label: "Cold Storage" }
 ];
-export type limitMeta = z.infer<typeof Metadata.shape.limits>
+export type limitMeta = z.infer<typeof MetadataBase.shape.limits>
 
 export type OrganizationMetadata = {
   limits: limitMeta,
@@ -943,71 +943,67 @@ export type InvitationStatus =
   | "canceled"
   | "expired";
 
-export const Metadata = z.object({
-  limits: z.object({
-    orgMembers: z.number().int().nonnegative().default(0),
-    ChatBoxs: z.number().int().nonnegative().default(3),
-    chatMessagesImage: z.number().int().nonnegative().default(5),
-    maxProjects: z.number().int().nonnegative().default(2),
-    maxProjectImages: z.number().int().nonnegative().default(5),
-    maxOrg: z.number().int().nonnegative().default(0),
-    PoolInvestor: z.preprocess(
-      (val) => {
-        if (val === 1) return true;
-        if (val === 0) return false;
-        return val;
-      },
-      z.boolean().default(false)
-    )
-  }),
+  const DEFAULT_LIMITS = {
+  orgMembers: 0,
+  ChatBoxs: 3,
+  chatMessagesImage: 5,
+  maxProjects: 2,
+  maxProjectImages: 5,
+  maxOrg: 0,
+  PoolInvestor: false,
+} as const;
+
+
+const asDateOpt = z.preprocess(
+  (val) => (typeof val === "string" || val instanceof Date ? new Date(val) : val),
+  z.date().optional()
+);
+const BoolFrom01 = z.union([z.literal(0), z.literal(1), z.boolean()])
+  .transform((v) => v === 1 || v === true);
+
+const LimitsSchemaBase = z.object({
+  orgMembers: z.number().int().nonnegative().default(DEFAULT_LIMITS.orgMembers),
+  ChatBoxs: z.number().int().nonnegative().default(DEFAULT_LIMITS.ChatBoxs),
+  chatMessagesImage: z.number().int().nonnegative().default(DEFAULT_LIMITS.chatMessagesImage),
+  maxProjects: z.number().int().nonnegative().default(DEFAULT_LIMITS.maxProjects),
+  maxProjectImages: z.number().int().nonnegative().default(DEFAULT_LIMITS.maxProjectImages),
+  maxOrg: z.number().int().nonnegative().default(DEFAULT_LIMITS.maxOrg),
+  PoolInvestor: BoolFrom01.default(DEFAULT_LIMITS.PoolInvestor),
+});
+
+const LimitsSchema = z
+  .any()
+  .transform((val) => {
+    if (val == null) return DEFAULT_LIMITS; // null or undefined
+    return LimitsSchemaBase.parse(val);
+  });
+
+
+ const MetadataBase = z.object({
+  limits: LimitsSchema,
   priceId: z.string().default(""),
   id: z.string().default(""),
   plan: z.string().default("free"),
-  stripeCustomerId: z.string(),
-  stripeSubscriptionId: z.string().optional(),
-  trialStart: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date().optional()
-  ),
-  trialEnd: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date().optional()
-  ),
+  stripeCustomerId: z.string().nullable().default(null),
+  stripeSubscriptionId: z.string().nullable().default(null),
+  trialStart: asDateOpt,
+  trialEnd: asDateOpt,
   referenceId: z.string().default(""),
   status: z.enum(["active", "canceled", "incomplete", "incomplete_expired", "past_due", "paused", "trialing", "unpaid"]).default("active"),
-  periodStart: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date().optional()
-  ),
-  periodEnd: z.preprocess(
-    (val) => {
-      if (typeof val === "string" || val instanceof Date) {
-        return new Date(val);
-      }
-      return val;
-    },
-    z.date().optional()
-  ),
-  cancelAtPeriodEnd: z.boolean().nullable(),
+  periodStart: asDateOpt,
+  periodEnd: asDateOpt,
+  cancelAtPeriodEnd: z.boolean().nullable().default(null),
   groupId: z.string().optional(),
   seats: z.number().int().nonnegative().default(0),
   daysLeft: z.number().int().nonnegative().default(0)
 })
+export const Metadata = z.preprocess(
+  v => (v == null ? {} : v),
+  MetadataBase
+);
+
+export type MetadataT = z.infer<typeof Metadata>;
+export type LimitsT = typeof DEFAULT_LIMITS;
 
 
 export type OrganizationX = {
@@ -1016,40 +1012,7 @@ export type OrganizationX = {
   slug: string;
   createdAt: Date | string;
   logo?: string | null | undefined;
-  metadata?: {
-    limits?: {
-      orgMembers: number;
-      ChatBoxs: number;
-      chatMessagesImage: number;
-      maxProjects: number;
-      maxProjectImages: number;
-      maxOrg: number;
-      PoolInvestor: number;
-    };
-    priceId?: string;
-    id: string;
-    plan: string;
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    trialStart?: Date | string;
-    trialEnd?: Date | string;
-    referenceId: string;
-    status:
-    | "active"
-    | "canceled"
-    | "incomplete"
-    | "incomplete_expired"
-    | "past_due"
-    | "paused"
-    | "trialing"
-    | "unpaid";
-    periodStart?: Date | string;
-    periodEnd?: Date | string;
-    cancelAtPeriodEnd?: boolean;
-    groupId?: string;
-    seats?: number;
-    daysLeft: number;
-  };
+  metadata:MetadataT
   members: {
     id: string;
     organizationId: string;
@@ -1090,7 +1053,7 @@ export const mockOrganization: OrganizationX = {
       maxProjects: 10,
       maxProjectImages: 500,
       maxOrg: 3,
-      PoolInvestor: 50,
+      PoolInvestor: true,
     },
     priceId: "price_PREMIUM_CA",
     id: "sub_meta_01J9ACME",
@@ -1099,8 +1062,8 @@ export const mockOrganization: OrganizationX = {
     stripeSubscriptionId: "sub_A1B2C3D4",
     referenceId: "ARL-REF-2025",
     status: "active",
-    periodStart: "2025-08-01T00:00:00.000Z",
-    periodEnd: "2025-08-31T23:59:59.000Z",
+    periodStart:new Date ("2025-08-01T00:00:00.000Z"),
+    periodEnd: new Date ("2025-09-01T00:00:00.000Z"),
     cancelAtPeriodEnd: false,
     seats: 12,
     daysLeft: 5, // assuming today is 2025-08-26
