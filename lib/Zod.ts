@@ -882,16 +882,7 @@ export const amenitiesItems: { value: string; label: string }[] = [
   { value: "package_room", label: "Package Room" },
   { value: "cold_storage", label: "Cold Storage" }
 ];
-export type limitMeta = {
-  orgMembers: number;
-  ChatBoxs: number;
-  chatMessagesImage: number;
-  maxProjects: number;
-  maxProjectImages: number;
-  maxOrg: number;
-  PoolInvestor: number;
-
-}
+export type limitMeta = z.infer<typeof Metadata.shape.limits>
 
 export type OrganizationMetadata = {
   limits: limitMeta,
@@ -913,7 +904,7 @@ export type subMeta = {
   status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
   periodStart?: Date | string;
   periodEnd?: Date | string;
-  cancelAtPeriodEnd?: boolean;
+  cancelAtPeriodEnd: boolean | null;
   groupId?: string;
   seats?: number;
   daysLeft: number;
@@ -929,7 +920,7 @@ export const defaultFreePlan: subMeta = {
     maxProjects: 2,
     maxProjectImages: 5,
     maxOrg: 0,
-    PoolInvestor: 0
+    PoolInvestor: false
   },
   priceId: "",
   id: "",
@@ -952,6 +943,71 @@ export type InvitationStatus =
   | "canceled"
   | "expired";
 
+export const Metadata = z.object({
+  limits: z.object({
+    orgMembers: z.number().int().nonnegative().default(0),
+    ChatBoxs: z.number().int().nonnegative().default(3),
+    chatMessagesImage: z.number().int().nonnegative().default(5),
+    maxProjects: z.number().int().nonnegative().default(2),
+    maxProjectImages: z.number().int().nonnegative().default(5),
+    maxOrg: z.number().int().nonnegative().default(0),
+    PoolInvestor: z.preprocess(
+      (val) => {
+        if (val === 1) return true;
+        if (val === 0) return false;
+        return val;
+      },
+      z.boolean().default(false)
+    )
+  }),
+  priceId: z.string().default(""),
+  id: z.string().default(""),
+  plan: z.string().default("free"),
+  stripeCustomerId: z.string(),
+  stripeSubscriptionId: z.string().optional(),
+  trialStart: z.preprocess(
+    (val) => {
+      if (typeof val === "string" || val instanceof Date) {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional()
+  ),
+  trialEnd: z.preprocess(
+    (val) => {
+      if (typeof val === "string" || val instanceof Date) {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional()
+  ),
+  referenceId: z.string().default(""),
+  status: z.enum(["active", "canceled", "incomplete", "incomplete_expired", "past_due", "paused", "trialing", "unpaid"]).default("active"),
+  periodStart: z.preprocess(
+    (val) => {
+      if (typeof val === "string" || val instanceof Date) {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional()
+  ),
+  periodEnd: z.preprocess(
+    (val) => {
+      if (typeof val === "string" || val instanceof Date) {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional()
+  ),
+  cancelAtPeriodEnd: z.boolean().nullable(),
+  groupId: z.string().optional(),
+  seats: z.number().int().nonnegative().default(0),
+  daysLeft: z.number().int().nonnegative().default(0)
+})
 
 
 export type OrganizationX = {
@@ -979,14 +1035,14 @@ export type OrganizationX = {
     trialEnd?: Date | string;
     referenceId: string;
     status:
-      | "active"
-      | "canceled"
-      | "incomplete"
-      | "incomplete_expired"
-      | "past_due"
-      | "paused"
-      | "trialing"
-      | "unpaid";
+    | "active"
+    | "canceled"
+    | "incomplete"
+    | "incomplete_expired"
+    | "past_due"
+    | "paused"
+    | "trialing"
+    | "unpaid";
     periodStart?: Date | string;
     periodEnd?: Date | string;
     cancelAtPeriodEnd?: boolean;

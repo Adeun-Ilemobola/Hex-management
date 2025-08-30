@@ -225,7 +225,7 @@ export default function PropertyModification() {
                             />
 
                             {Session.data?.user && (
-                                <PayWall allowed={(sub && sub.limits) ? sub.limits.PoolInvestor === 0 ? false : true : false}>
+                                <PayWall allowed={(sub  ) ? sub.limits.PoolInvestor :false} >
                                     <PoolInvestorsSection
                                         mebers={externalInvestor}
                                         setMebers={setExternalInvestor}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
     Dialog,
     DialogContent,
@@ -13,19 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import {
-    Rocket,
     UserPlus,
     Users,
     Shield,
     Mail,
-    Filter,
     Crown,
     Clock,
-    Info,
-    ShieldCheck,
+   
     User,
-    PlusCircle,
-    MailPlus,
+   
     Search,
     Calendar,
     Sparkles,
@@ -38,20 +34,15 @@ import {
     Hourglass,
     AlertCircle,
 } from "lucide-react";
-import { InvitationStatus, mockOrganization, OrganizationX, Role } from "@/lib/Zod";
+import { InvitationStatus, OrganizationX, Role } from "@/lib/Zod";
 import { toast } from "sonner";
 import { api } from "@/lib/trpc";
 import z from "zod";
 import InputBox, { SelectorBox } from "../InputBox";
 import { useSearchParams } from "next/navigation";
 import Loading from "../Loading";
-import { DateTime } from "luxon";
 
-interface Props {
-    organization: OrganizationX | null;
-    onOnboard?: () => void;
-    onAddExistingUser?: () => void;
-}
+
 
 type selectedCardType = {
     name: string;
@@ -76,7 +67,7 @@ export default function OrganizationDashboard() {
     const searchParams = useSearchParams()
     const OrgId = searchParams.get('id')
     const slug = searchParams.get('slug')
-    const { data: getOrganization, isPending, refetch } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
+    const { data: getOrganization, isPending } = api.organization.getOrganization.useQuery({ id: OrgId || '', slug: slug || '' })
     const organization = getOrganization?.value
 
 

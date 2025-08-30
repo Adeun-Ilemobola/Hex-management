@@ -5,7 +5,7 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 import superjson from "superjson";
 import { DateTime } from 'luxon';
-import { limitMeta, subMeta } from '@/lib/Zod';
+import { limitMeta, Metadata, subMeta } from '@/lib/Zod';
 
 
 
@@ -44,11 +44,16 @@ export const createTRPCContext = async () => {
       const periodEnd = DateTime.fromISO(DateTime.fromJSDate(activeSubscription.periodEnd || new Date() ).toISO() || DateTime.local().toISO()).diffNow("days").as('days')
       const daysLeft = activeSubscription.status === "trialing" ? trialEnd : periodEnd
 
-      sub = {
+      const vSub = Metadata.parse({
         ...activeSubscription,
-        daysLeft: Math.max(0, Math.ceil(daysLeft)),
-        limits: activeSubscription.limits as limitMeta
-        
+         daysLeft: Math.max(0, Math.ceil(daysLeft)),
+         limits: activeSubscription.limits 
+         
+      
+      })
+
+      sub = {
+        ...vSub,
       }
 
     }

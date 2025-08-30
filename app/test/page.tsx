@@ -1,10 +1,10 @@
 "use client"
 
-import { sendEmail } from '@/server/actions/sendEmail';
-import { useMutation } from '@tanstack/react-query'
+// import { sendEmail } from '@/server/actions/sendEmail';
+// import { useMutation } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 import {
   Drawer,
   DrawerContent,
@@ -12,9 +12,9 @@ import {
   DrawerOverlay
 
 } from "@/components/ui/drawer"
-import { mockOrganization } from '@/lib/Zod';
-import OrganizationDashboard from '@/components/(organizationFragments)/OrganizationDashboard';
-import { api } from '@/lib/trpc';
+// import { mockOrganization } from '@/lib/Zod';
+// import OrganizationDashboard from '@/components/(organizationFragments)/OrganizationDashboard';
+// import { api } from '@/lib/trpc';
 import InputBtu from '@/components/InputBtu';
 import { Search } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,113 +24,113 @@ import Loading from '@/components/Loading';
 const email = "adeun2020@gmail.com"
 
 export default function Page() {
-  const VerifyEmail = useMutation({
-    mutationFn: async () => await sendEmail({
-      templateText: "VerifyEmail",
-      to: email,
-      params: {
-        verifyUrl: "https://google.com"
-      }
-    }),
-    onSuccess: (data) => {
-      console.log("Email sent successfully:", data);
-      toast.success("Email sent successfully!", { id: "email-VerifyEmail" });
-    },
-    onError: (error) => {
-      console.error("Error sending email:", error);
-      toast.error("Failed to send email", { id: "email-VerifyEmail" });
-    }
+  // const VerifyEmail = useMutation({
+  //   mutationFn: async () => await sendEmail({
+  //     templateText: "VerifyEmail",
+  //     to: email,
+  //     params: {
+  //       verifyUrl: "https://google.com"
+  //     }
+  //   }),
+  //   onSuccess: (data) => {
+  //     console.log("Email sent successfully:", data);
+  //     toast.success("Email sent successfully!", { id: "email-VerifyEmail" });
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error sending email:", error);
+  //     toast.error("Failed to send email", { id: "email-VerifyEmail" });
+  //   }
 
-  });
+  // });
 
-  const ResetPassword = useMutation({
-    mutationFn: async () => await sendEmail({
-      templateText: "ResetPassword",
-      to: email,
-      params: {
-        resetUrl: "https://google.com"
-      }
-    }),
-    onSuccess: (data) => {
-      console.log("Email sent successfully:", data);
-      toast.success("Email sent successfully!", { id: "email-ResetPassword" });
-    },
-    onError: (error) => {
-      console.error("Error sending email:", error);
-      toast.error("Failed to send email", { id: "email-ResetPassword" });
-    }
-  });
+  // const ResetPassword = useMutation({
+  //   mutationFn: async () => await sendEmail({
+  //     templateText: "ResetPassword",
+  //     to: email,
+  //     params: {
+  //       resetUrl: "https://google.com"
+  //     }
+  //   }),
+  //   onSuccess: (data) => {
+  //     console.log("Email sent successfully:", data);
+  //     toast.success("Email sent successfully!", { id: "email-ResetPassword" });
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error sending email:", error);
+  //     toast.error("Failed to send email", { id: "email-ResetPassword" });
+  //   }
+  // });
 
-  const WelcomeEmail = useMutation({
-    mutationFn: async () => await sendEmail({
-      templateText: "Welcome",
-      to: email,
-      params: {
-        userName: "Adekunle",
-      }
-    }),
-    onSuccess: (data) => {
-      console.log("Email sent successfully:", data);
-      toast.success("Email sent successfully!", { id: "email-WelcomeEmail" });
-    },
-    onError: (error) => {
-      console.error("Error sending email:", error);
-      toast.error("Failed to send email", { id: "email-WelcomeEmail" });
-    }
-  });
-
-
-  const VerifyExternalInvestor = useMutation({
-    mutationFn: async () => await sendEmail({
-      templateText: "VerifyExternalInvestor",
-      to: email,
-      params: {
-        name: "Adekunle",
-        organizationName: "Adekunle's Org",
-        propertyName: "Adekunle's Property",
-        propertyLink: "https://google.com",
-        email: "adeun2020@gmail.com",
-        DollarValueReturn: 1000,
-        verificationLink: `${process.env.NEXTAUTH_URL}/home/verifyExternalInvestor?investorId=${"533431bc-2e1d-462e-99c3-aec440c75530"}&propertieid=${"d93abec1-d97b-43b1-9e75-5f0591807e86"}`,
-        contributionPercent: 10,
-        accessCode: "P7qG6Pb1qTZW"
-      }
-    }),
-    onSuccess: (data) => {
-      console.log("Email sent successfully:", data);
-      toast.success("Email sent successfully!", { id: "email-VerifyExternalInvestor" });
-    },
-    onError: (error) => {
-      console.error("Error sending email:", error);
-      toast.error("Failed to send email", { id: "email-VerifyExternalInvestor" });
-    }
-  });
+  // const WelcomeEmail = useMutation({
+  //   mutationFn: async () => await sendEmail({
+  //     templateText: "Welcome",
+  //     to: email,
+  //     params: {
+  //       userName: "Adekunle",
+  //     }
+  //   }),
+  //   onSuccess: (data) => {
+  //     console.log("Email sent successfully:", data);
+  //     toast.success("Email sent successfully!", { id: "email-WelcomeEmail" });
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error sending email:", error);
+  //     toast.error("Failed to send email", { id: "email-WelcomeEmail" });
+  //   }
+  // });
 
 
-  const onboardingFinished = useMutation({
-    mutationFn: async () => await sendEmail({
-      templateText: "onboardingFinished",
-      to: email,
-      params: {
-        name: "Adekunle",
-        organizationName: "Adekunle's Org",
-        email: "adeun2020@gmail.com",
-        fallbackUrl: "https://google.com",
-        tempPassword: "password",
-        userExists: false
-      }
-    }),
-    onSuccess: (data) => {
-      console.log("Email sent successfully:", data);
-      toast.success("Email sent successfully!", { id: "email-onboardingFinished" });
-    },
-    onError: (error) => {
-      console.error("Error sending email:", error);
-      toast.error("Failed to send email", { id: "email-onboardingFinished" });
-    }
-  });
+  // const VerifyExternalInvestor = useMutation({
+  //   mutationFn: async () => await sendEmail({
+  //     templateText: "VerifyExternalInvestor",
+  //     to: email,
+  //     params: {
+  //       name: "Adekunle",
+  //       organizationName: "Adekunle's Org",
+  //       propertyName: "Adekunle's Property",
+  //       propertyLink: "https://google.com",
+  //       email: "adeun2020@gmail.com",
+  //       DollarValueReturn: 1000,
+  //       verificationLink: `${process.env.NEXTAUTH_URL}/home/verifyExternalInvestor?investorId=${"533431bc-2e1d-462e-99c3-aec440c75530"}&propertieid=${"d93abec1-d97b-43b1-9e75-5f0591807e86"}`,
+  //       contributionPercent: 10,
+  //       accessCode: "P7qG6Pb1qTZW"
+  //     }
+  //   }),
+  //   onSuccess: (data) => {
+  //     console.log("Email sent successfully:", data);
+  //     toast.success("Email sent successfully!", { id: "email-VerifyExternalInvestor" });
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error sending email:", error);
+  //     toast.error("Failed to send email", { id: "email-VerifyExternalInvestor" });
+  //   }
+  // });
 
-  const searchUsers = api.user.SearchUserByEmail.useMutation();
+
+  // const onboardingFinished = useMutation({
+  //   mutationFn: async () => await sendEmail({
+  //     templateText: "onboardingFinished",
+  //     to: email,
+  //     params: {
+  //       name: "Adekunle",
+  //       organizationName: "Adekunle's Org",
+  //       email: "adeun2020@gmail.com",
+  //       fallbackUrl: "https://google.com",
+  //       tempPassword: "password",
+  //       userExists: false
+  //     }
+  //   }),
+  //   onSuccess: (data) => {
+  //     console.log("Email sent successfully:", data);
+  //     toast.success("Email sent successfully!", { id: "email-onboardingFinished" });
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error sending email:", error);
+  //     toast.error("Failed to send email", { id: "email-onboardingFinished" });
+  //   }
+  // });
+
+  // const searchUsers = api.user.SearchUserByEmail.useMutation();
 
 
 
@@ -147,7 +147,7 @@ export default function Page() {
      
       /> */}
 
-      <Drawer preventScrollRestoration direction='right'>
+      {/* <Drawer preventScrollRestoration direction='right'>
         <DrawerOverlay className=' bg-purple-500/15 backdrop-blur-sm' />
         <DrawerTrigger>
           <Button
@@ -223,7 +223,7 @@ export default function Page() {
 
           </div>
         </DrawerContent>
-      </Drawer>
+      </Drawer> */}
 
       {/* <div className='flex flex-row  gap-6 items-center justify-center'>
         <Button size={"lg"} onClick={() => VerifyEmail.mutate()}>Send Verify Email</Button>

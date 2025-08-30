@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '../init';
 import { authClient } from '@/lib/auth-client';
 import { auth } from '@/lib/auth';
 
-import {  defaultFreePlan, OrganizationMetadata, subMeta } from '@/lib/Zod';
+import { Metadata } from '@/lib/Zod';
 import { TRPCError } from '@trpc/server';
 
 
@@ -69,12 +69,23 @@ export const userCongiRouter = createTRPCRouter({
                 
             })
             if(memberInOrg && memberInOrg.organization.metadata) {
-                const plan = (JSON.parse(memberInOrg.organization.metadata ) || defaultFreePlan )as subMeta
+                console.log(JSON.parse(memberInOrg.organization.metadata));
                 
-                return { success: true, isEployee: true, role: memberInOrg.role , value: plan };
+                const plan = Metadata.parse(JSON.parse(memberInOrg.organization.metadata))  
+                return { 
+                    success: true, 
+                    isEployee: true, 
+                    role: memberInOrg.role , 
+                    value: {
+                        ...plan,
+                        limits:{
+                            ...plan.limits,
+                        }
+                    }
+                 };
             }
            
-            const plan = ctx.subscription || defaultFreePlan
+            const plan = Metadata.parse(ctx.subscription) 
             
             return { success: true, isEployee: false, role: "owner", value: plan};
         } catch (error) {

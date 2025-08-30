@@ -2,7 +2,7 @@
 import { authClient } from '@/lib/auth-client';
 import { api } from '@/lib/trpc';
 import { Message } from '@/lib/Zod';
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import React, { useState, useRef, useLayoutEffect } from 'react'
 import Chatheader from './Chatheader';
 import Loading from '../Loading';
 import ChatBox from './ChatBox';
@@ -10,11 +10,10 @@ import ChatSend from './ChatSend';
 import ChatRoomCard from './ChatRoomCard';
 import { Nav } from '../Nav';
 import { Inbox } from "lucide-react";
-import { isEqual } from '@/lib/utils';
 import DropBack from '../DropBack';
 import { toast } from 'sonner';
 import ScrollBox from '../Scroll';
-import { Button } from '../ui/button';
+// import { Button } from '../ui/button';
 import CreateChatView from './CreateChatView';
 interface RoomData {
   id: string;
@@ -149,7 +148,7 @@ export default function ChartView() {
   const roomId = room?.id ?? null;
   const utils = api.useUtils(); // tRPC v10 helpers
   // const [messages, setMessages] = useState<Message[]>([]);
-  const { data: chatMessages, isPending: chatPending } = api.ChatRoom.getUserChats.useQuery(
+  const { data: chatMessages,  } = api.ChatRoom.getUserChats.useQuery(
     { roomId: roomId! },
     {
       enabled: !!roomId,                      // only run when a room is selected
@@ -236,7 +235,7 @@ export default function ChartView() {
     },
   })
   const clearNotifications = api.ChatRoom.userRoomNotification.useMutation({
-    onSuccess(data, variables, context) {
+    onSuccess(data) {
       if (!data.success) {
         toast.error(data.message);
       } else {

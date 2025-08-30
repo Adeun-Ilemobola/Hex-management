@@ -25,7 +25,7 @@ export default function Loading({
   text,
   full,
   progress,
-  variant = "brand",
+  // variant = "brand",
 }: LoadingProps) {
   const phrase =
     typeof text === "undefined"
