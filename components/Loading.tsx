@@ -19,17 +19,20 @@ type LoadingProps = {
   progress?: number;
   /** Subtle vs brandy glow */
   variant?: "brand" | "muted";
+
+  PHRASESx?: string[];
 };
 
 export default function Loading({
   text,
   full,
   progress,
+  PHRASESx = PHRASES,
   // variant = "brand",
 }: LoadingProps) {
   const phrase =
     typeof text === "undefined"
-      ? PHRASES[Math.floor(Math.random() * PHRASES.length)]
+      ? PHRASESx[Math.floor(Math.random() * PHRASESx.length)]
       : null;
 
   const size = full ? "min-h-screen min-w-full" : "min-h-[12rem] w-full";

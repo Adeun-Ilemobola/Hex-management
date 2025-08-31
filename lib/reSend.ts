@@ -495,7 +495,6 @@ function onboardingFinish(
   name: string,
   email: string,
   organizationName: string,
-  tempPassword: string,
   fallbackUrl: string,
   userExists: boolean
 ): { subject: string; html: string } {
@@ -635,7 +634,6 @@ function onboardingFinish(
                       ${userExists ? (`
                         <tr>
                         <td style="padding: 16px 0;">
-                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted"> PASSWORD</div>
                           <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">
                               Sign in with the method you used to create the account.
                           </div>
@@ -647,8 +645,9 @@ function onboardingFinish(
                         `) : (`
                           <tr>
                         <td style="padding: 16px 0;">
-                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted">TEMPORARY PASSWORD</div>
-                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">${tempPassword}</div>
+                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">
+
+                          </div>
                         </td>
                       </tr>
                           
@@ -916,8 +915,398 @@ function memberRoleChangedEmail(
   };
 }
 
+function generateMagicLinkEmail({ email, url }: { email: string; url: string }): { subject: string, html: string } {
+  const subject = "Verify your email address";
 
-export type TemplateType = | 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished' | 'memberRemovedEmail' | 'memberRoleChangedEmail'
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .dark-mode-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; }
+      .dark-mode-text { color: #f8fafc !important; }
+      .dark-mode-subtext { color: #cbd5e1 !important; }
+      .dark-mode-glass { 
+        background: rgba(15, 23, 42, 0.2) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 50%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 50%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        
+        <!-- Main Container -->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden;" class="dark-mode-glass">
+          
+          <!-- Header with Aurora Gradient -->
+          <tr>
+            <td style="background: linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(14, 165, 233, 0.2) 100%); padding: 0; height: 4px;"></td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 48px 40px 40px 40px;">
+              
+              <!-- Logo/Icon Area -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4);">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                      </svg>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Main Heading -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 16px;">
+                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2;" class="dark-mode-text">
+                      Verify Your Email
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Description -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <p style="margin: 0; font-size: 16px; color: #64748b; line-height: 1.6; max-width: 400px;" class="dark-mode-subtext">
+                      We received a request to verify your email address. Click the button below to complete your verification.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Email Display -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 20px; display: inline-block;" class="dark-mode-glass">
+                      <span style="font-size: 14px; color: #475569; font-weight: 500;" class="dark-mode-subtext">${email}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); color: white; text-decoration: none; font-weight: 600; font-size: 16px; padding: 16px 32px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); transition: all 0.2s ease;">
+                      Verify Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Alternative Link -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.5;" class="dark-mode-subtext">
+                      If the button doesn't work, copy and paste this link into your browser:
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <div style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px 16px; word-break: break-all;" class="dark-mode-glass">
+                      <a href="${url}" style="color: #a855f7; text-decoration: none; font-size: 14px; font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;">${url}</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 40px; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05);" class="dark-mode-glass">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.4;" class="dark-mode-subtext">
+                      This verification link will expire in 24 hours.<br>
+                      If you didn't request this verification, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+        </table>
+        
+        <!-- Bottom Spacer -->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="height: 40px;"></td>
+          </tr>
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+
+  return { subject, html };
+}
+function generateOrganizationInviteEmail({
+  organizationName,
+  userEmail,
+  inviteLink,
+  role
+}: TemplateParamMap['generateOrganizationInviteEmail']): { subject: string; html: string } {
+  const subject = `You've been invited to join ${organizationName}`;
+
+  // Role configuration
+  const roleConfig = {
+    member: {
+      title: "Member",
+      description: "You'll have access to collaborate and contribute to projects.",
+      color: "#0ea5e9", // sky-500
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="m22 21-3-3m0 0-3-3m3 3 3 3m-3-3V8"/>
+      </svg>`
+    },
+    admin: {
+      title: "Administrator",
+      description: "You'll have administrative privileges to manage the organization.",
+      color: "#a855f7", // purple-500
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="m2 17 10 5 10-5"/>
+        <path d="m2 12 10 5 10-5"/>
+      </svg>`
+    },
+    owner: {
+      title: "Owner",
+      description: "You'll have full control and ownership of the organization.",
+      color: "#ec4899", // pink-500
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12l2 2 4-4"/>
+        <path d="M21 12c.552 0 1-.449 1-1V8c0-.551-.448-1-1-1-.551 0-1-.449-1-1V3c0-.551-.448-1-1-1H4c-.552 0-1 .449-1 1v3c0 .551-.449 1-1 1-.552 0-1 .449-1 1v3c0 .551.448 1 1 1 .551 0 1 .449 1 1v3c0 .551.448 1 1 1h15c.552 0 1-.449 1-1v-3c0-.551.449-1 1-1z"/>
+      </svg>`
+    }
+  };
+
+  const currentRole = roleConfig[role];
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organization Invitation</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .dark-mode-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important; }
+      .dark-mode-text { color: #f8fafc !important; }
+      .dark-mode-subtext { color: #cbd5e1 !important; }
+      .dark-mode-glass { 
+        background: rgba(15, 23, 42, 0.2) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+      }
+      .dark-mode-role-bg { 
+        background: rgba(15, 23, 42, 0.3) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+      }
+    }
+    
+    @media only screen and (max-width: 600px) {
+      .mobile-padding { padding: 24px 20px !important; }
+      .mobile-text { font-size: 24px !important; }
+      .mobile-button { padding: 14px 24px !important; font-size: 15px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 30%, #ede9fe 60%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 30%, #ede9fe 60%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        
+        <!-- Main Container -->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 640px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden;" class="dark-mode-glass">
+          
+          <!-- Aurora Header -->
+          <tr>
+            <td style="background: linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(14, 165, 233, 0.2) 100%); padding: 0; height: 4px;"></td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 48px 40px 40px 40px;" class="mobile-padding">
+              
+              <!-- Organization Icon -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <div style="width: 72px; height: 72px; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 20px 25px -5px rgba(168, 85, 247, 0.4); position: relative;">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="m22 21-3-3m0 0-3-3m3 3 3 3m-3-3V8"/>
+                      </svg>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Main Heading -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 16px;">
+                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; text-align: center;" class="dark-mode-text mobile-text">
+                      You're invited to join<br>
+                      <span style="background: linear-gradient(135deg, #ec4899, #a855f7, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${organizationName}</span>
+                    </h1>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Invitation Description -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <p style="margin: 0; font-size: 16px; color: #64748b; line-height: 1.6; max-width: 480px; text-align: center;" class="dark-mode-subtext">
+                      You've been invited to collaborate and contribute as a team member. Accept your invitation to get started.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Role Badge -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 20px 24px; display: inline-block; max-width: 320px;" class="dark-mode-role-bg">
+                      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" style="padding-bottom: 12px;">
+                            <div style="color: ${currentRole.color}; display: inline-flex; align-items: center; justify-content: center;">
+                              ${currentRole.icon}
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="padding-bottom: 8px;">
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;" class="dark-mode-text">
+                              ${currentRole.title}
+                            </h3>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center">
+                            <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.4; text-align: center;" class="dark-mode-subtext">
+                              ${currentRole.description}
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Email Display -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;" class="dark-mode-subtext">
+                      Invitation sent to
+                    </p>
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 20px; display: inline-block;" class="dark-mode-glass">
+                      <span style="font-size: 15px; color: #475569; font-weight: 500; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;" class="dark-mode-subtext">${userEmail}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 32px;">
+                    <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); color: white; text-decoration: none; font-weight: 600; font-size: 16px; padding: 16px 40px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); transition: all 0.2s ease; border: none;" class="mobile-button">
+                      Accept Invitation
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Alternative Link Section -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 20px;">
+                    <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; text-align: center;" class="dark-mode-subtext">
+                      If the button doesn't work, copy and paste this link:
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <div style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px 16px; word-break: break-all; max-width: 100%;" class="dark-mode-glass">
+                      <a href="${inviteLink}" style="color: #a855f7; text-decoration: none; font-size: 13px; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; word-break: break-all;">${inviteLink}</a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 40px; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05);" class="dark-mode-glass mobile-padding">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;" class="dark-mode-subtext">
+                      This invitation will expire in 7 days.<br>
+                      If you didn't expect this invitation, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+        </table>
+        
+        <!-- Bottom Spacer -->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="height: 40px;"></td>
+          </tr>
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+
+  return { subject, html };
+}
+
+
+export type TemplateType = 'generateOrganizationInviteEmail'| 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished' | 'memberRemovedEmail' | 'memberRoleChangedEmail' | 'generateMagicLinkEmail'
 export interface TemplateParamMap {
   VerifyEmail: { verifyUrl: string }
   ResetPassword: { resetUrl: string }
@@ -936,7 +1325,7 @@ export interface TemplateParamMap {
     name: string
     email: string
     organizationName: string
-    tempPassword: string
+
     fallbackUrl: string,
     userExists: boolean
   }
@@ -949,6 +1338,13 @@ export interface TemplateParamMap {
     organizationName: string
     member: string
     memberRole: string
+  },
+  generateMagicLinkEmail: { email: string; url: string },
+  generateOrganizationInviteEmail: {
+    organizationName: string;
+    userEmail: string;
+    inviteLink: string;
+    role: "member" | "owner" | "admin";
   }
 
 
@@ -975,12 +1371,14 @@ const templates: { [K in TemplateType]: (params: TemplateParamMap[K]) => Templat
       p.name,
       p.email,
       p.organizationName,
-      p.tempPassword,
       p.fallbackUrl,
       p.userExists
     ),
   memberRemovedEmail: (p) => memberRemovedEmail(p.member, p.organizationName),
   memberRoleChangedEmail: (p) => memberRoleChangedEmail(p.member, p.organizationName, p.memberRole),
+  generateMagicLinkEmail: (p) => generateMagicLinkEmail(p),
+  generateOrganizationInviteEmail: (p) => generateOrganizationInviteEmail(p),
+
 }
 export function generateTemplate<T extends TemplateType>(
   template: T,

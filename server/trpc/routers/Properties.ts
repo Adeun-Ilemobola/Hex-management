@@ -1,15 +1,14 @@
 //UserRouter
 
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure, t } from '../init';
+import { createTRPCRouter, protectedProcedure, } from '../init';
 import { prisma } from '@/lib/prisma';
 import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
 import { DeleteImages } from '@/lib/supabase';
 import { sendEmail } from '@/server/actions/sendEmail';
 import { rateLimit } from '../middlewares/rateLimit';
-import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
+import { CreateGroupChat, getOwnerPropertieCount } from '@/server/actions/CreateGroupChat';
 import { TRPCError } from '@trpc/server';
-import { auth } from '@/lib/auth';
 
 // type userOrganizationContributor = {
 //     name: string;
@@ -45,7 +44,7 @@ export const PropertiesRouter = createTRPCRouter({
                     throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
                 }
 
-               
+
                 const memberships = await prisma.member.findMany({
                     where: { userId: user.id },
                     select: { organizationId: true, role: true },
@@ -64,14 +63,14 @@ export const PropertiesRouter = createTRPCRouter({
 
 
                 console.log({
-                    memberships , 
-                    userOrgMembership ,
+                    memberships,
+                    userOrgMembership,
                     isUserAEployeeOfOrg,
-                    userId: user.id ,
+                    userId: user.id,
 
 
                 });
-                
+
                 let itemList: CleanProperty[]
                 const { data } = input;
 
@@ -239,6 +238,16 @@ export const PropertiesRouter = createTRPCRouter({
             let propertyIdGo: string | null = null;
             let supabaseIDList: string[] = [];
             try {
+                const plan = ctx.subscription
+                const cont = await getOwnerPropertieCount({ ownerType: input.property.ownerType, ownerId: input.property.ownerId });
+                if (plan && cont !== null && cont >= plan.limits.maxProjects) {
+                    return{
+                        message: input.property.ownerType === "USER" ? "You have reached the maximum number of properties for your plan. Please upgrade your plan to add more properties." : "Your organization has reached the maximum number of properties for your plan. Please contact user oganization owner or admin to upgrade the plan.",
+                        success: false,
+                    }
+
+                }
+
                 let ownerShip = {
                     name: ctx.user.name,
                     email: ctx.user.email

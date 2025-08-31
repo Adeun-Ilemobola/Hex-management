@@ -20,19 +20,6 @@ export const appRouter = createTRPCRouter({
   ChatRoom: ChatRoomRouter,
   subscription: SubscriptionRouter,
 
-  // Add other routers here as needed
-
-    test: protectedProcedure.query(async ({ ctx }) => {
-      const user = ctx.session?.user;
-      if (!user) {
-        console.warn("[test] not signed in");
-        // you can either throw or return a shaped error
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
-      }
-       const trpc = await createServerCaller();
-       await trpc.user.getUserPlan()
-      return { ok: true };
-    }),
 
 
 });

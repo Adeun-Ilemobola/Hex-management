@@ -66,3 +66,30 @@ export async function CreateGroupChat({  PropertyName, members , currentAdminId 
 
     }
 }
+
+
+export async function getOwnerPropertieCount({ ownerType, ownerId }: { ownerType: "USER" | "ORGANIZATION"; ownerId: string }) {
+    try {
+        if (ownerType === "USER") {
+            const total = await prisma.propertie.count({
+                where: {
+                    ownerType: "USER",
+                    ownerId: ownerId
+                }
+            })
+            return total
+        } else {
+            const total = await prisma.propertie.count({
+                where: {
+                    ownerType: "ORGANIZATION",
+                    ownerId: ownerId
+                }
+            })
+            return total
+        }
+         
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}

@@ -2,10 +2,12 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from "@/server/actions/sendEmail";
-import { organization } from "better-auth/plugins"
+import { organization, role } from "better-auth/plugins"
 import { createServerCaller } from "@/server/trpc/caller";
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
+import { magicLink } from "better-auth/plugins";
+import { use } from "react";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-07-30.basil",
@@ -96,7 +98,7 @@ export const auth = betterAuth({
       stripeClient,
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       createCustomerOnSignUp: true,
-      
+
 
       subscription: {
         enabled: true,
@@ -146,7 +148,7 @@ export const auth = betterAuth({
 
         ],
         authorizeReference: async ({ user, referenceId }) => {
-           if (!referenceId || referenceId === user.id) return true;
+          if (!referenceId || referenceId === user.id) return true;
           const member = await prisma.member.findFirst({
             where: {
               userId: user.id,
@@ -154,33 +156,51 @@ export const auth = betterAuth({
             }
 
           })
-           return !!member && ["owner", "admin"].includes(member.role);
+          return !!member && ["owner", "admin"].includes(member.role);
         }
 
       }
     }),
 
+
+    magicLink({
+      sendMagicLink: async ({ email, token, url }, request) => {
+        const newUrl = `${process.env.NEXTAUTH_URL}/magic-link?token=${token}`;
+        const res = await sendEmail({
+          templateText: "generateMagicLinkEmail",
+          to: email,
+          params: {
+            email,
+            url: url
+          }
+        })
+      }
+    }),
+
     organization({
-      // async sendInvitationEmail(data) {
-      //   const inviteLink = `https://app.com/accept-invite/${data.id}`;
-      //   await sendEmail({
-      //     to: data.email,
-      //     subject: `Join ${data.organization.name}`,
-      //     html: `<a href="${inviteLink}">Accept invite</a>`
-      //   });
-      // }
+      requireEmailVerificationOnInvitation: true, 
+      async sendInvitationEmail(data) {
+        const inviteLink = `${process.env.NEXTAUTH_URL}/accept-invite?id=${data.id}`;
+        const sendPayload = {
+          organizationName: data.organization.name,
+          userEmail: data.email,
+          inviteLink,
+          role: data.role as "member" | "owner" | "admin"
+        }
+       
+      },
 
 
       allowUserToCreateOrganization: async () => {
         const caller = await createServerCaller();
         const dataPlan = await caller.user.getUserPlan();
-        
-        if(!dataPlan.value) return false;
-        const {role, isEployee , value}= dataPlan
-        if(isEployee === false && role === "owner" && value.plan !== "free") return true;
+
+        if (!dataPlan.value) return false;
+        const { role, isEployee, value } = dataPlan
+        if (isEployee === false && role === "owner" && value.plan !== "free") return true;
         return false
-        
-       
+
+
 
       }
     })

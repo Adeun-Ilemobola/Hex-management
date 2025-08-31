@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useRouter } from 'next/navigation';
+import { secondsToMilliseconds } from '@/lib/utils';
 
 
 const passworDefault = {
@@ -56,16 +57,23 @@ const vPass = z.object({
 
 export default function Page() {
   const router = useRouter();
+const utils = api.useUtils(); 
   const [user, setUser] = useState<UserInput>(defaultUserInput);
   const [password, setPassword] = useState(passworDefault);
   const { isPending, data } = authClient.useSession();
   const [mounted, setMounted] = useState(false);
   const { data: plan, isLoading: isLoadingPlan } = api.user.getUserPlan.useQuery();
 
-  const { data: organizations, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
+  const { data: organizations, } = api.organization.getAllOrganization.useQuery(undefined, {
+    staleTime: secondsToMilliseconds(100)
+  });
 
   // const { mutateAsync: updateUser } = api.User.updateUser.useMutation();
-  const fetchedUser = api.Propertie.getUserProfle.useQuery();
+  const fetchedUser = api.Propertie.getUserProfle.useQuery( undefined ,{
+    enabled: !!data?.user?.id,
+    staleTime: secondsToMilliseconds(66)
+
+  });
   const createOrganization = api.organization.createOrganization.useMutation({
     onMutate() {
       toast.loading("Creating organization...", { id: "create" });
@@ -73,7 +81,7 @@ export default function Page() {
     onSuccess(data) {
       if (data && data.success) {
         toast.success(data.message, { id: "create" });
-        organizationsQuery.refetch();
+        utils.organization.getAllOrganization.invalidate()
       } else {
         toast.error(data.message, { id: "create" });
       }
@@ -307,7 +315,7 @@ export default function Page() {
               </div>
             </div>
 
-            {(plan?.value && plan.value.status === "active" && plan.value.plan !== "free") && (<>
+            {(plan?.value && plan.role === "owner" && plan.value.status === "active" && plan.value.plan !== "free") && (<>
             <div className=' rounded-lg border border-gray-200 shadow-sm'>
               <div className='px-6 py-4 border-b border-gray-200'>
                 <h2 className='text-xl font-semibold '>Organization Information</h2>
@@ -317,6 +325,16 @@ export default function Page() {
               <div className='p-6'>
                 {organizations && organizations.value.length > 0 ? (
                   <>
+                  <div className='flex p-1.5 justify-end items-center'>
+                     <InputBtu
+                        onSubmit={(value) => {
+                          createOrganization.mutate({ name: value })
+
+                        }}
+                        icon={"new organization"}
+                        disabled={createOrganization.isPending}
+                      />
+                  </div>
                     <Table>
                       <TableCaption>
                         A list of your user organizations
@@ -357,7 +375,7 @@ export default function Page() {
                           createOrganization.mutate({ name: value })
 
                         }}
-                        icon={" new organization"}
+                        icon={"new organization"}
                         disabled={createOrganization.isPending}
                       />
 

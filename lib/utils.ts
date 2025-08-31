@@ -94,6 +94,12 @@ export function isEqual<T>(a: T[], b: T[]): boolean {
   
 }
 
+export function secondsToMilliseconds(params:number | undefined):number{
+  if(!params) return 1000 * 62
+  return params * 1000
+  
+}
+
 export function DateToIOS(d: Date | string | undefined): string {
   if(!d) return ""
   const date = new Date(d);

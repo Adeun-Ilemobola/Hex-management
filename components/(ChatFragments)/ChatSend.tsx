@@ -9,6 +9,7 @@ import { Send, X, File, FileText, FileImage, FileVideo, FileAudio } from 'lucide
 import {  defaultMessage, Message, MessageSchema } from '@/lib/Zod';
 import { toast } from 'sonner';
 import { DeleteImages, UploadImageList } from '@/lib/supabase';
+import { DateTime } from 'luxon';
 
 interface ChatSendProps {
     sendMessage: (data: Message) => void
@@ -19,9 +20,9 @@ interface ChatSendProps {
 export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps) {
     const [file, setFile] = useState<fullFile[]>([]);
     const[text,setText] = useState("");
-
     const [isUploading, setUploading] = useState(false);
     const [isMounted, setMounted] = useState(false);
+    const [lasstMessageTime, setLastMessageTime] = useState<DateTime | null>(null);
 
     useEffect(() => {
         if (!isMounted) {
@@ -34,6 +35,17 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
 
    
    async function send() {
+    if (!lasstMessageTime){
+        setLastMessageTime(DateTime.now())
+    }else{
+        const now = DateTime.now()
+        const diff = now.diff(lasstMessageTime, 'seconds').seconds
+        if (diff < 4){
+            toast.error("You are sending messages too quickly. Please wait a moment before sending another message.");
+            return;
+        }
+        setLastMessageTime(now)
+    }
     
         const vMessage = MessageSchema.safeParse({
             ...defaultMessage,

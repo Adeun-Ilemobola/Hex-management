@@ -255,8 +255,18 @@ export const ChatRoomRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             try {
                 const user = ctx.session?.user;
-                if (!user) {
+                const plan = ctx.subscription
+                if (!user || !plan) {
                     return { success: false, message: "User not authenticated" };
+                }
+                const currentRoomCount = await ctx.prisma.chatRoomMember.count({
+                    where: {
+                        userId: user.id
+                    }
+                })
+
+                if ( currentRoomCount >= plan.limits.ChatBoxs) {
+                    return { success: false, message: "You have reached the maximum number of chat rooms for your plan. Please upgrade your plan to create more chat rooms." };
                 }
                 const getReceiver = await ctx.prisma.user.findUnique({
                     where: {
