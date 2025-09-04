@@ -27,14 +27,20 @@ export interface CleanProperty {
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
     const {  isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
+    const { data: getProperties, isPending: getPropertiesPending } = api.Propertie.getUserProperties.useQuery({ data: data } ,{
+        enabled: !!data,
+        refetchOnWindowFocus: true ,
+        refetchOnReconnect: true,
+        retry: 2
+    })
+
 
     const router = useRouter();
 
     const { data: session, isPending } = authClient.useSession();
-    const { data: plan, isPending: planLoading } = api.user.getUserPlan.useQuery();
-    console.log(plan?.value);
+    const { isPending: planLoading } = api.user.getUserPlan.useQuery();
+    console.log(getProperties?.data);
 
-    const { data: getProperties, isPending: getPropertiesPending } = api.Propertie.getUserProperties.useQuery({ data: data })
     const [isEdit, setIsEdit] = useState(false)
 
     function NavSearch(urlData: { status: string | null, searchText: string | null }) {

@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import ScrollBox from '../Scroll';
 // import { Button } from '../ui/button';
 import CreateChatView from './CreateChatView';
+import ChartRoomList from './ChartRoomList';
+import MessageView from './MessageView';
 interface RoomData {
   id: string;
   title: string;
@@ -148,7 +150,7 @@ export default function ChartView() {
   const roomId = room?.id ?? null;
   const utils = api.useUtils(); // tRPC v10 helpers
   // const [messages, setMessages] = useState<Message[]>([]);
-  const { data: chatMessages,  } = api.ChatRoom.getUserChats.useQuery(
+  const { data: chatMessages,isPending: chatMessagesPending } = api.ChatRoom.getUserChats.useQuery(
     { roomId: roomId! },
     {
       enabled: !!roomId,                      // only run when a room is selected
@@ -264,177 +266,42 @@ export default function ChartView() {
     <DropBack is={sessionPending}>
       <>
         <Nav session={session} SignOut={authClient.signOut} />
-        <CreateChatView/>
+        <CreateChatView />
 
-        <section
-          className={`
-        relative mx-auto flex w-full flex-1 flex-col
-        px-3 py-2 sm:px-4 md:px-6 md:py-4
-        max-w-6xl
-       
-      `}
+        <section className={`relative flex w-full flex-1 flex-row overflow-hidden  `}
           aria-label="Chat workspace"
         >
-          {/* Decorative gradient + glass frame */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-primary/10 via-transparent to-transparent"
+          <ChartRoomList
+            loading={isPending}
+            data={rooms?.value || []}
+            onSelect={(roomId) => {
+              const room = rooms?.value.find((room) => room.roomId === roomId);
+              if (!room) return;
+              setRoom({
+                id: room.roomId,
+                title: room.title,
+                notificationCount: room.notificationCount,
+                participants: room.member,
+
+              });
+              clearNotifications.mutate({ roomId });
+            }}
+
           />
-          <div
-            className="
-          relative flex min-h-[92vh] max-h-[calc(90vh-80px)] flex-1 flex-col overflow-hidden
-          rounded-3xl border border-border/50
-          bg-background/60 backdrop-blur-xl
-          shadow-[0_10px_30px_-10px_rgba(0,0,0,0.25)]
-          supports-[backdrop-filter]:bg-background/50
-        "
-          >
-            {/* Header (sticky when room selected) */}
-            {room && (
-              <div className="sticky top-0 z-20">
-                <Chatheader
-                  Back={() => setRoom(null)}
-                  mebers={room.participants.map((p) => p.name) || []}
-                  title={room.title}
-                />
-                <div aria-hidden className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-              </div>
-            )}
 
-            {/* Chat room selected */}
-            {room && (
-              <>
-                {/* Messages */}
-                <ScrollBox
-                  className='flex-1'
-                  ref={ScrollBoxRef}
+          <MessageView
+            sendMessage={(data) => {
+              messageSend.mutate(data);
+            }}
+            roomId={roomId || ""}
+            userId={session?.user.id || ""}
+            chats={chatMessages?.value || []}
+            ScrollBoxRef={ScrollBoxRef}
+            loading={chatMessagesPending}
+
+          />
 
 
-                >
-                  <div
-                    className="
-                  relative  flex w-full flex-col gap-4
-                  px-2 py-4 sm:px-2 md:px-3 md:py-3
-                "
-                  >
-                    {/* Background accents */}
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 -z-10 opacity-60 [mask-image:radial-gradient(60%_40%_at_50%_20%,black,transparent)]"
-                      style={{
-                        background:
-                          "radial-gradient(1200px 350px at 50% -10%, rgba(99,102,241,0.15), transparent 60%), radial-gradient(800px 300px at 80% 0%, rgba(236,72,153,0.08), transparent 60%)",
-                      }}
-                    />
-                    {list.map((message) => (
-                      <ChatBox
-                        key={message.id}
-                        id={message.id}
-                        text={message.text || ""}
-                        img={message.images || []}
-                        authorId={message.authorId}
-                        roomId={room.id}
-                        isUser={message.authorId === session?.user?.id}
-                      />
-                    ))}
-                  </div>
-                </ScrollBox>
-
-                {/* Composer */}
-                <div
-                  className="
-                sticky bottom-0 z-20 w-full border-t border-border/60
-                bg-background/80 backdrop-blur-xl
-              "
-                >
-                  <div className="mx-auto max-w-3xl px-3 py-2 sm:px-4 md:px-6 md:py-3">
-                    <ChatSend
-                      roomId={room.id}
-                      sendMessage={(data) => {
-                        console.log(data);
-
-
-                        messageSend.mutate(data);
-                      }}
-                      userId={session?.user?.id || ""}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Room list when no room selected */}
-            {!room && (
-              <>
-                {isPending ? (<>
-                  <div className="flex flex-1">
-                    <Loading full={false} />
-                  </div>
-
-
-                </>) : (<>
-                  {rooms?.value.length === 0 ? (
-                    <div className="flex flex-1 items-center justify-center p-8 text-center">
-                      <div className="flex max-w-md flex-col items-center gap-3">
-                        <div className="relative">
-                          <div className="absolute inset-0 -z-10 animate-pulse rounded-full bg-primary/20 blur-2xl" />
-                          <Inbox className="h-10 w-10 text-muted-foreground" aria-hidden />
-                        </div>
-                        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-                          No rooms available
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                          Create or join a room to start a conversation.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <ScrollBox className="flex-1 px-1"  >
-                      <div
-                        className="
-                    mx-auto grid w-full gap-1 px-1 py-2 sm:gap-2 sm:px-4 md:max-w-5xl md:grid-cols-2 md:gap-3 md:px-4
-                  "
-                      >
-                        {rooms?.value.map((r) => (
-                          <ChatRoomCard
-                            key={r.chatRoomMemberId}
-                            type={r.type}
-
-                            title={r.title}
-                            notificationCount={r.notificationCount}
-                            participants={r.member.map((m) => ({
-                              name: m.name,
-                              isAdmin: m.isAdmin,
-                            }))}
-                            select={() => {
-                              setRoom({
-                                id: r.roomId,
-                                title: r.title,
-                                notificationCount: r.notificationCount,
-                                participants: r.member.map((m) => ({
-                                  name: m.name,
-                                  isAdmin: m.isAdmin,
-                                  joinedAt: m.joinedAt,
-                                })),
-                              })
-                              clearNotifications.mutate({ roomId: r.roomId });
-                            }
-
-                            }
-                          />
-                        ))}
-                      </div>
-                    </ScrollBox>
-                  )}
-
-                </>)}
-              </>
-            )}
-
-
-            {/* Header (sticky when room selected) */}
-
-          </div>
         </section>
 
       </>

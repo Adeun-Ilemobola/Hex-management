@@ -134,7 +134,7 @@ export default function ChatSend({ sendMessage , userId ,roomId }: ChatSendProps
     }
 
     return (
-        <div className='flex flex-col w-full gap-1'>
+        <div className='flex flex-col w-full gap-1 border-t border-border '>
             {/* File Preview Section - Horizontal Scroll */}
             {isMounted && file && file.length > 0 && (
                 <div className='flex overflow-x-auto gap-2 px-2 pb-1'>

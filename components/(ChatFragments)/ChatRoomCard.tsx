@@ -31,11 +31,11 @@ export default function ChatRoomCard({
                        bg-gradient-to-br from-white/95 to-gray-50/90 
                        dark:from-gray-800/95 dark:to-gray-900/90
                        backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50
-                       rounded-2xl shadow-lg hover:shadow-2xl 
+                       rounded-sm shadow-lg hover:shadow-2xl 
                        transition-all duration-300 ease-out cursor-pointer
-                       hover:scale-[1.02] hover:bg-gradient-to-br hover:from-white hover:to-gray-100/95
+                        hover:bg-gradient-to-br hover:from-white hover:to-gray-100/95
                        dark:hover:from-gray-800 dark:hover:to-gray-850/95
-                       before:absolute before:inset-0 before:rounded-2xl 
+                       before:absolute before:inset-0 before:rounded-sm 
                        before:bg-gradient-to-r before:from-blue-500/10 before:via-purple-500/10 before:to-pink-500/10
                        before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
                        before:-z-10 overflow-hidden min-w-[32rem] max-w-[36rem]'
@@ -114,7 +114,7 @@ export default function ChatRoomCard({
             </div>
 
             {/* Gradient overlay on hover */}
-            <div className='absolute inset-0 rounded-2xl bg-gradient-to-tr 
+            <div className='absolute inset-0 rounded-sm bg-gradient-to-tr 
                             from-blue-500/0 via-purple-500/0 to-pink-500/0
                             group-hover:from-blue-500/5 group-hover:via-purple-500/5 
                             group-hover:to-pink-500/5 transition-all duration-500 

@@ -25,94 +25,60 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
     switch (status) {
       case 'active':
         return {
-          bg: 'bg-green-50 dark:bg-green-900/20',
-          text: 'text-green-700 dark:text-green-400',
-          border: 'border-green-200 dark:border-green-700/30',
-          dot: 'bg-green-500',
+          bg: 'bg-emerald-500/20 backdrop-blur-[2px]',
+          text: 'text-emerald-700 dark:text-emerald-300',
+          border: 'border-emerald-300/30 dark:border-emerald-400/20',
+          dot: 'bg-emerald-500',
           label: 'Active'
         };
       case 'pending':
         return {
-          bg: 'bg-amber-50 dark:bg-amber-900/20',
-          text: 'text-amber-700 dark:text-amber-400',
-          border: 'border-amber-200 dark:border-amber-700/30',
+          bg: 'bg-amber-500/20 backdrop-blur-[2px]',
+          text: 'text-amber-700 dark:text-amber-300',
+          border: 'border-amber-300/30 dark:border-amber-400/20',
           dot: 'bg-amber-500',
           label: 'Pending'
         };
       case 'sold':
         return {
-          bg: 'bg-gray-50 dark:bg-gray-900/20',
-          text: 'text-gray-700 dark:text-gray-400',
-          border: 'border-gray-200 dark:border-gray-700/30',
-          dot: 'bg-gray-500',
+          bg: 'bg-slate-500/20 backdrop-blur-[2px]',
+          text: 'text-slate-700 dark:text-slate-300',
+          border: 'border-slate-300/30 dark:border-slate-400/20',
+          dot: 'bg-slate-500',
           label: 'Sold'
         };
       default:
         return {
-          bg: 'bg-gray-50 dark:bg-gray-900/20',
-          text: 'text-gray-700 dark:text-gray-400',
-          border: 'border-gray-200 dark:border-gray-700/30',
-          dot: 'bg-gray-500',
+          bg: 'bg-slate-500/20 backdrop-blur-[2px]',
+          text: 'text-slate-700 dark:text-slate-300',
+          border: 'border-slate-300/30 dark:border-slate-400/20',
+          dot: 'bg-slate-500',
           label: status
         };
     }
   };
 
-  // Sale type styling
-  // const getSaleTypeStyles = (saleStatus: string) => {
-  //   switch (saleStatus) {
-  //     case 'SELL':
-  //       return {
-  //         bg: 'bg-blue-50 dark:bg-blue-900/20',
-  //         text: 'text-blue-700 dark:text-blue-400',
-  //         border: 'border-blue-200 dark:border-blue-700/30',
-  //         label: 'For Sale'
-  //       };
-  //     case 'RENT':
-  //       return {
-  //         bg: 'bg-purple-50 dark:bg-purple-900/20',
-  //         text: 'text-purple-700 dark:text-purple-400',
-  //         border: 'border-purple-200 dark:border-purple-700/30',
-  //         label: 'For Rent'
-  //       };
-  //     case 'LEASE':
-  //       return {
-  //         bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-  //         text: 'text-emerald-700 dark:text-emerald-400',
-  //         border: 'border-emerald-200 dark:border-emerald-700/30',
-  //         label: 'For Lease'
-  //       };
-  //     default:
-  //       return {
-  //         bg: 'bg-gray-50 dark:bg-gray-900/20',
-  //         text: 'text-gray-700 dark:text-gray-400',
-  //         border: 'border-gray-200 dark:border-gray-700/30',
-  //         label: saleStatus
-  //       };
-  //   }
-  // };
-
   const statusStyles = getStatusStyles(status);
-  // const saleTypeStyles = getSaleTypeStyles(saleStatus);//ffff
 
   return (
     <Linker id={id} mode={mode === undefined ? true : mode}>
       <div
         className={`
           group relative flex flex-col w-72 h-[26rem]
-          rounded-2xl bg-white dark:bg-gray-900
-          border border-gray-200/60 dark:border-gray-700/60
-          shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.15)]
-          hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]
-          hover:border-gray-300/80 dark:hover:border-gray-600/80
+          bg-white/20 dark:bg-slate-900/20 backdrop-blur-[2px]
+          rounded-xl shadow-xl border border-white/15 dark:border-white/5
+          hover:shadow-2xl hover:scale-[1.01] 
           transition-all duration-500 ease-out
           overflow-hidden cursor-pointer
-          hover:-translate-y-1
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500/40 dark:focus-visible:ring-fuchsia-400/40
           shrink-0
         `}
       >
+        {/* Aurora gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-sky-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
         {/* Image Container */}
-        <div className="relative w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
+        <div className="relative w-full h-48 bg-gradient-to-br from-slate-100/50 to-slate-200/50 dark:from-slate-800/50 dark:to-slate-900/50 overflow-hidden backdrop-blur-[2px]">
           {img ? (
             <Image
               alt={name}
@@ -124,59 +90,52 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                <Eye className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+              <div className="w-16 h-16 rounded-full bg-white/20 dark:bg-slate-900/20 backdrop-blur-[2px] border border-white/15 dark:border-white/5 flex items-center justify-center">
+                <Eye className="w-6 h-6 text-slate-600 dark:text-slate-300" />
               </div>
             </div>
           )}
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Gradient overlay on image */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Top badges */}
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
             <Badge
               variant="outline"
-              className={`${statusStyles.bg} ${statusStyles.text} ${statusStyles.border} backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium shadow-sm`}
+              className={`${statusStyles.bg} ${statusStyles.text} ${statusStyles.border} rounded-full px-3 py-1 text-xs font-semibold shadow-lg`}
             >
+              <div className={`w-1.5 h-1.5 rounded-full ${statusStyles.dot} mr-1.5 animate-pulse`} />
               {statusStyles.label}
             </Badge>
-            {/* {!mode && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="p-2 bg-white/90 dark:bg-gray-900/90 rounded-full shadow-sm hover:bg-white dark:hover:bg-gray-800 transition-colors">
-                  <Heart className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </button>
-              </div>
-            )} */}
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex flex-col p-5 flex-1 bg-white dark:bg-gray-900">
+        <div className="flex flex-col p-5 flex-1 relative">
           {/* Property name */}
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate leading-tight">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-3 truncate leading-tight">
             {name}
           </h1>
 
           {/* Address */}
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-            <h2 className="text-sm text-gray-600 dark:text-gray-400 truncate">
+            <MapPin className="w-4 h-4 text-slate-500 dark:text-slate-400 flex-shrink-0" />
+            <h2 className="text-sm text-slate-600 dark:text-slate-300 truncate">
               {address}
             </h2>
           </div>
 
           {/* Developer Mode Buttons */}
           {mode && (
-
             <div className="flex gap-2 mb-4">
               <Link href={`/home/propertie-mp?id=${id}`}>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 h-8 text-xs"
+                  className="flex-1 h-9 text-xs bg-white/20 dark:bg-slate-900/20 backdrop-blur-[2px] border-white/15 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-white/30 dark:hover:bg-slate-900/30 hover:brightness-110 transition-all duration-300"
                 >
-                  <Edit className="w-3 h-3 mr-1" />
+                  <Edit className="w-3 h-3 mr-1.5" />
                   Update
                 </Button>
               </Link>
@@ -184,35 +143,37 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/20"
+                className="flex-1 h-9 text-xs bg-white/20 dark:bg-slate-900/20 backdrop-blur-[2px] border-white/15 dark:border-white/5 text-red-600 dark:text-red-400 hover:bg-red-500/20 hover:border-red-400/30 hover:brightness-110 transition-all duration-300"
                 onClick={() => {
-
                   console.log('Delete property:', id);
                 }}
               >
-                <Trash2 className="w-3 h-3 mr-1" />
+                <Trash2 className="w-3 h-3 mr-1.5" />
                 Delete
               </Button>
             </div>
           )}
 
           {/* Bottom section */}
-          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10 dark:border-white/5">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Available</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm"></div>
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Available</span>
             </div>
             <Badge
               variant="secondary"
-              className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700/30 px-3 py-1 rounded-full text-xs font-semibold"
+              className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-sky-500 text-white shadow-lg hover:brightness-110 active:brightness-95 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300"
             >
               {saleStatus}
             </Badge>
           </div>
         </div>
 
-        {/* Subtle hover effect line */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+        {/* Enhanced hover effect line with aurora gradient */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left shadow-lg"></div>
+
+        {/* Subtle glow effect on hover */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       </div>
     </Linker>
   );

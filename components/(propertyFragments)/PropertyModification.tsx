@@ -202,7 +202,7 @@ export default function PropertyModification() {
                                             userId: Session.data?.user.id || "",
                                             refetch: organizationsQuery.refetch,
                                             showOwnershipConfig: (memberData && memberData.role !== "owner") || true,
-                                            disabled: (memberData && memberData.role !== "owner") || true
+                                            disabled: memberData ? (memberData.role !== "owner") : false
 
                                         }
                                     }

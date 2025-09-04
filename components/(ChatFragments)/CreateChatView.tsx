@@ -18,6 +18,7 @@ import React from 'react'
 
 export default function CreateChatView() {
       const searchUsers = api.user.SearchUserByEmail.useMutation();
+      const createNewPrivateChat = api.ChatRoom.createRoom.useMutation();
     
   return (
    <Drawer preventScrollRestoration direction='right'>
@@ -78,7 +79,12 @@ export default function CreateChatView() {
                            </div>
                            <div className='ml-auto flex items-center'>
                              {user.directMessage ? (
-                               <Button size={"sm"} >Message</Button>
+                               <Button 
+                               onClick={() => {
+                                createNewPrivateChat.mutate({toId:user.id })
+                                 
+                               }}
+                               size={"sm"} >Message</Button>
                              ) : (
                                <Button disabled size={"sm"}> unavailable</Button>
                              )}

@@ -43,13 +43,11 @@ export const PropertiesRouter = createTRPCRouter({
                     // you can either throw or return a shaped error
                     throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
                 }
-
-
                 const memberships = await prisma.member.findMany({
                     where: { userId: user.id },
                     select: { organizationId: true, role: true },
                 });
-                const isUserAEployeeOfOrg = memberships.some(m => m.role === "member");
+                const isUserAEployeeOfOrg = memberships.some(m => m.role === "member" || m.role === "admin");
                 const userOrgMembership = {
                     ownerOrganizationIds: memberships
                         .filter(m => m.role === "owner")
@@ -60,8 +58,6 @@ export const PropertiesRouter = createTRPCRouter({
                     }
 
                 };
-
-
                 console.log({
                     memberships,
                     userOrgMembership,
@@ -70,9 +66,51 @@ export const PropertiesRouter = createTRPCRouter({
 
 
                 });
-
-                let itemList: CleanProperty[]
                 const { data } = input;
+                if (!isUserAEployeeOfOrg) {
+                    console.log("----- user is not an employee of any organization, fetching owned properties ------- ");
+                    
+                    const getUserItems = await prisma.propertie.findMany({
+                        where: {
+                            ownerId: {
+                                in: [...userOrgMembership.ownerOrganizationIds, user.id]
+                            },
+                            ...(data.status && { leavingstatus: data.status as string }),
+                            ...(data.searchText && {
+                                name: {
+                                    contains: data.searchText as string,
+                                    mode: "insensitive"
+                                }
+                            })
+                        },
+                        select: {
+                            id: true,
+                            name: true,
+                            address: true,
+                            status: true,
+                            images: { select: { url: true } },
+                            investBlock: { select: { typeOfSale: true } }
+                        }
+                    })
+                    const userItems: CleanProperty[] = getUserItems.map(item => {
+                        const { investBlock } = item
+                        return {
+                            id: item.id,
+                            img: item.images.length === 0 ? undefined : item.images[0].url,
+                            name: item.name,
+                            address: item.address,
+                            status: item.status as string,
+                            saleStatus: investBlock?.typeOfSale as string
+                        }
+                    })
+                    console.log("----- cleaned user owned properties ------- ", userItems);
+                    
+                    return {
+                        data: userItems,
+                    }
+
+                }
+
 
                 const getOrgItems = await prisma.propertie.findMany(
                     {
@@ -100,7 +138,7 @@ export const PropertiesRouter = createTRPCRouter({
                     }
                 )
 
-                itemList = getOrgItems.map(item => {
+                const itemList: CleanProperty[] = getOrgItems.map(item => {
 
                     const { investBlock } = item
                     return {
@@ -113,45 +151,6 @@ export const PropertiesRouter = createTRPCRouter({
                     }
                 })
 
-
-                if (!userOrgMembership.isUserAEployeeOfOrg.isEployee) {
-                    const getUserItems = await prisma.propertie.findMany({
-                        where: {
-                            ownerId: {
-                                in: [...userOrgMembership.ownerOrganizationIds, user.id]
-                            },
-                            ownerType: "USER",
-                            ...(data.status && { leavingstatus: data.status as string }),
-                            ...(data.searchText && {
-                                name: {
-                                    contains: data.searchText as string,
-                                    mode: "insensitive"
-                                }
-                            })
-                        },
-                        select: {
-                            id: true,
-                            name: true,
-                            address: true,
-                            status: true,
-                            images: { select: { url: true } },
-                            investBlock: { select: { typeOfSale: true } }
-                        }
-                    })
-                    itemList = itemList.concat(getUserItems.map(item => {
-
-                        const { investBlock } = item
-                        return {
-                            id: item.id,
-                            img: item.images.length === 0 ? undefined : item.images[0].url,
-                            name: item.name,
-                            address: item.address,
-                            status: item.status as string,
-                            saleStatus: investBlock?.typeOfSale as string
-                        }
-                    }))
-
-                }
                 return {
                     data: itemList,
                 }
@@ -241,7 +240,7 @@ export const PropertiesRouter = createTRPCRouter({
                 const plan = ctx.subscription
                 const cont = await getOwnerPropertieCount({ ownerType: input.property.ownerType, ownerId: input.property.ownerId });
                 if (plan && cont !== null && cont >= plan.limits.maxProjects) {
-                    return{
+                    return {
                         message: input.property.ownerType === "USER" ? "You have reached the maximum number of properties for your plan. Please upgrade your plan to add more properties." : "Your organization has reached the maximum number of properties for your plan. Please contact user oganization owner or admin to upgrade the plan.",
                         success: false,
                     }

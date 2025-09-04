@@ -248,7 +248,7 @@ export const ChatRoomRouter = createTRPCRouter({
         }),
 
 
-    createRome: protectedProcedure
+    createRoom: protectedProcedure
         .input(z.object({
             toId: z.string(),
         }))
@@ -276,6 +276,32 @@ export const ChatRoomRouter = createTRPCRouter({
                 if (!getReceiver) {
                     return { success: false, message: "Receiver not found" };
                 }
+                const existingRoom = await ctx.prisma.chatRoom.findFirst({
+                    where: {
+                        AND: [
+                            {
+                                participants: {
+                                    some: {
+                                        userId: user.id
+                                    }
+                                }
+                            },
+                            {
+                                participants: {
+                                    some: {
+                                        userId: getReceiver.id
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                })
+                if (existingRoom) {
+                    return { success: false, message: "Room already exists" };
+                }
+
+
+
                 const newRoom = await ctx.prisma.chatRoom.create({
                     data: {
                         title: `${user.name} and ${getReceiver.name}`,
