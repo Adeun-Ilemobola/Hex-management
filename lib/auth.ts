@@ -2,12 +2,11 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from "@/server/actions/sendEmail";
-import { organization, role } from "better-auth/plugins"
+import { organization } from "better-auth/plugins"
 import { createServerCaller } from "@/server/trpc/caller";
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
 import { magicLink } from "better-auth/plugins";
-import { use } from "react";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-07-30.basil",
@@ -164,9 +163,10 @@ export const auth = betterAuth({
 
 
     magicLink({
-      sendMagicLink: async ({ email, token, url }, request) => {
-        const newUrl = `${process.env.NEXTAUTH_URL}/magic-link?token=${token}`;
-        const res = await sendEmail({
+      sendMagicLink: async ({ email, token, url }) => {
+        console.log(token);
+        
+        await sendEmail({
           templateText: "generateMagicLinkEmail",
           to: email,
           params: {
@@ -187,6 +187,12 @@ export const auth = betterAuth({
           inviteLink,
           role: data.role as "member" | "owner" | "admin"
         }
+
+        await sendEmail({
+          templateText: "generateOrganizationInviteEmail",
+          to: data.email,
+          params: sendPayload
+        })
        
       },
 

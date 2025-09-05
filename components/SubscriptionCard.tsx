@@ -102,7 +102,7 @@ export default function SubscriptionCard({
         <CardContent className="relative z-10 space-y-5 px-6">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-4">
-              What's included
+              What&apos;s included
             </h3>
           </div>
           
