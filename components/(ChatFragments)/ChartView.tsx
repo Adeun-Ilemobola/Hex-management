@@ -3,20 +3,15 @@ import { authClient } from '@/lib/auth-client';
 import { api } from '@/lib/trpc';
 import { Message } from '@/lib/Zod';
 import React, { useState, useRef, useLayoutEffect } from 'react'
-import Chatheader from './Chatheader';
-import Loading from '../Loading';
-import ChatBox from './ChatBox';
-import ChatSend from './ChatSend';
-import ChatRoomCard from './ChatRoomCard';
+
 import { Nav } from '../Nav';
-import { Inbox } from "lucide-react";
 import DropBack from '../DropBack';
 import { toast } from 'sonner';
-import ScrollBox from '../Scroll';
 // import { Button } from '../ui/button';
 import CreateChatView from './CreateChatView';
 import ChartRoomList from './ChartRoomList';
 import MessageView from './MessageView';
+import { secondsToMilliseconds } from '@/lib/utils';
 interface RoomData {
   id: string;
   title: string;
@@ -150,7 +145,7 @@ export default function ChartView() {
   const roomId = room?.id ?? null;
   const utils = api.useUtils(); // tRPC v10 helpers
   // const [messages, setMessages] = useState<Message[]>([]);
-  const { data: chatMessages,isPending: chatMessagesPending } = api.ChatRoom.getUserChats.useQuery(
+  const { data: chatMessages, isPending: chatMessagesPending } = api.ChatRoom.getUserChats.useQuery(
     { roomId: roomId! },
     {
       enabled: !!roomId,                      // only run when a room is selected
@@ -158,12 +153,13 @@ export default function ChartView() {
       refetchOnMount: true,
       refetchOnReconnect: true,
       refetchOnWindowFocus: true,
-      refetchInterval: roomId ? 4000 : false, // polling (pull) while a room is open
+      refetchInterval: roomId ? secondsToMilliseconds(3.3) : false, // polling (pull) while a room is open
       placeholderData: {
         message: "",
         success: true,
         value: []
       },    // smooth room switches
+
     }
   );
   const { data: rooms, isPending } = api.ChatRoom.getUserRooms.useQuery()
@@ -267,8 +263,7 @@ export default function ChartView() {
       <>
         <Nav session={session} SignOut={authClient.signOut} />
         <CreateChatView />
-
-        <section className={`relative flex w-full flex-1 flex-row overflow-hidden  `}
+        <section className={`relative flex w-full flex-1 flex-row overflow-hidden min-h-0  `}
           aria-label="Chat workspace"
         >
           <ChartRoomList
@@ -286,24 +281,18 @@ export default function ChartView() {
               });
               clearNotifications.mutate({ roomId });
             }}
-
           />
-
-          <MessageView
-            sendMessage={(data) => {
-              messageSend.mutate(data);
-            }}
-            roomId={roomId || ""}
-            userId={session?.user.id || ""}
-            chats={chatMessages?.value || []}
-            ScrollBoxRef={ScrollBoxRef}
-            loading={chatMessagesPending}
-
-          />
-
-
+          <div className="flex flex-1 basis-0 min-w-0 min-h-0">
+            <MessageView
+              sendMessage={(data) => messageSend.mutate(data)}
+              roomId={roomId || ""}
+              userId={session?.user.id || ""}
+              chats={chatMessages?.value || []}
+              ScrollBoxRef={ScrollBoxRef}
+              loading={chatMessagesPending}
+            />
+          </div>
         </section>
-
       </>
     </DropBack>
   )

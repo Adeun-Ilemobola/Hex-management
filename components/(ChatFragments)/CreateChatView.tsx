@@ -9,7 +9,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
-  DrawerOverlay
+  DrawerOverlay,
 
 } from "@/components/ui/drawer"
 
@@ -19,9 +19,10 @@ import React from 'react'
 export default function CreateChatView() {
       const searchUsers = api.user.SearchUserByEmail.useMutation();
       const createNewPrivateChat = api.ChatRoom.createRoom.useMutation();
+      const [open, setOpen] = React.useState(false);
     
   return (
-   <Drawer preventScrollRestoration direction='right'>
+   <Drawer open={open} onOpenChange={setOpen} preventScrollRestoration direction='right'>
            <DrawerOverlay className=' bg-purple-500/18 backdrop-blur-sm' />
            <DrawerTrigger>
              <Button
@@ -30,6 +31,7 @@ export default function CreateChatView() {
              size={"lg"}
              className="absolute z-30 top-[12%] right-3 backdrop-blur-lg  opacity-82 hover:opacity-99 "
              onClick={() => {
+               setOpen(true)
    
              }}
              >
@@ -43,7 +45,6 @@ export default function CreateChatView() {
                  <InputBtu
                  className='w-full'
                    onSubmit={(text) => {
-                     console.log(text)
                      searchUsers.mutate({ email: text })
                    }}
                    icon={<>
@@ -82,6 +83,7 @@ export default function CreateChatView() {
                                <Button 
                                onClick={() => {
                                 createNewPrivateChat.mutate({toId:user.id })
+                                setOpen(false)
                                  
                                }}
                                size={"sm"} >Message</Button>

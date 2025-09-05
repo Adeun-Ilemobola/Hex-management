@@ -5,7 +5,12 @@ export default function ScrollBox({children , className , ref}:{children:React.R
   return (
     <div
     ref={ref}
-    className={clsx("flex flex-col gap-2 h-full overflow-y-scroll overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ", className)}
+    className={clsx(
+          "flex-1 basis-0 min-h-0 min-w-0",  
+          "overflow-y-auto overflow-x-hidden overscroll-contain",
+          "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+          "flex flex-col gap-0.5",
+      className)}
     >
          {children}
     </div>

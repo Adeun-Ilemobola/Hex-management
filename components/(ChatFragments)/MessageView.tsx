@@ -35,7 +35,7 @@ interface MessageViewProps {
 
 }
 
-export default function MessageView({ sendMessage, roomId, userId, chats, ScrollBoxRef , loading }: MessageViewProps) {
+export default function MessageView({ sendMessage, roomId, userId, chats, ScrollBoxRef, loading }: MessageViewProps) {
     if (loading) {
         return (
             <div className='flex flex-col flex-1 overflow-hidden'>
@@ -51,45 +51,23 @@ export default function MessageView({ sendMessage, roomId, userId, chats, Scroll
         )
     }
     return (
-        <div className='flex flex-col flex-1 overflow-hidden'>
-
+        <div className='flex flex-col flex-1 basis-0 min-h-0 overflow-hidden"'>
             <ScrollBox
-                className='flex-1'
+                className=''
                 ref={ScrollBoxRef}
-
-
             >
-                <div
-                    className="
-                        relative  flex w-full flex-col gap-4
-                        px-2 py-4 sm:px-2 md:px-3 md:py-3
-                      "
-                >
-                    {/* Background accents */}
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 -z-10 opacity-60 [mask-image:radial-gradient(60%_40%_at_50%_20%,black,transparent)]"
-                        style={{
-                            background:
-                                "radial-gradient(1200px 350px at 50% -10%, rgba(99,102,241,0.15), transparent 60%), radial-gradient(800px 300px at 80% 0%, rgba(236,72,153,0.08), transparent 60%)",
-                        }}
+                {chats.map((message) => (
+                    <ChatBox
+                        key={message.id}
+                        id={message.id}
+                        text={message.text || ""}
+                        img={message.images || []}
+                        authorId={message.authorId}
+                        roomId={roomId}
+                        isUser={message.authorId === userId}
                     />
-                    {chats.map((message) => (
-                        <ChatBox
-                            key={message.id}
-                            id={message.id}
-                            text={message.text || ""}
-                            img={message.images || []}
-                            authorId={message.authorId}
-                            roomId={roomId}
-                            isUser={message.authorId === userId}
-                        />
-                    ))}
-                </div>
+                ))}
             </ScrollBox>
-
-
-
             <ChatSend
                 sendMessage={sendMessage}
                 roomId={roomId}
