@@ -24,7 +24,7 @@ const zPassword = z.object({
     message: "Passwords do not match",
     path: ["confirmPassword"],
 });
-export default function page() {
+export default function Page() {
     const searchParams = useSearchParams();
     const orgId = searchParams.get('orgId');
     const role = searchParams.get('role') || "member";

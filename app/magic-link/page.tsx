@@ -10,7 +10,7 @@ import {
 
 } from "@/components/ui/card"
 
-export default function page() {
+export default function Page() {
     const sp = useSearchParams();
 
     useEffect(() => {
