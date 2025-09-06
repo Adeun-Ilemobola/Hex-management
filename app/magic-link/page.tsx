@@ -10,8 +10,9 @@ import {
 
 } from "@/components/ui/card"
 
-export default function Page() {
-    const sp = useSearchParams();
+
+function VerifyMagicLink() {
+     const sp = useSearchParams();
 
     useEffect(() => {
         const token = sp.get("token");
@@ -33,7 +34,6 @@ export default function Page() {
     }, [sp]);
 
     return (
-        <Suspense fallback={<Loading full={true} />}>
             <div className="flex flex-col min-h-screen items-center justify-center ">
                 <Card>
 
@@ -51,6 +51,15 @@ export default function Page() {
 
 
             </div>
+       
+    )
+    
+}
+export default function Page() {
+    
+    return (
+        <Suspense fallback={<Loading full={true} />}>
+            <VerifyMagicLink />
         </Suspense>
     )
 }
