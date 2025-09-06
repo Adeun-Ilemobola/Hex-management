@@ -31,7 +31,7 @@ interface PropertyGIFProps {
   propertyInfo: PropertyInput;
   setPropertyInfo: React.Dispatch<React.SetStateAction<PropertyInput>>;
   disable: boolean;
-  handleSSubscriptionRequirement: () => 5 | 35 | 100;
+  handleSSubscriptionRequirement: () => number;
   RemoveImage: (id: string, supabaseID: string) => void;
   orgInfo: {
     data: org[],
@@ -52,6 +52,8 @@ export default function PropertyDetails({
   RemoveImage,
   orgInfo
 }: PropertyGIFProps) {
+  
+  
   const handleField = (
     field: keyof PropertyInput,
     val: string | boolean | number,
@@ -319,6 +321,11 @@ interface OwnershipConfigProps {
 
 function OwnershipConfig({ data, loading, handleSelectOrg , disabled }: OwnershipConfigProps) {
   const [showConfidential, setShowConfidential] = useState(false);
+  console.log(disabled
+  );
+  
+ 
+  
 
 
   return (

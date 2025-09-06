@@ -27,8 +27,13 @@ enum SaleType {
   LEASE
 }
 
+enum roomType {
+  PRIVATE
+  GROUP
+}
+
 model User {
-  id            String      @id
+  id            String    @id
   name          String
   email         String
   emailVerified Boolean
@@ -41,94 +46,100 @@ model User {
   country       String?
   createdAt     DateTime
   updatedAt     DateTime
+  investments   String[]
   sessions      Session[]
   accounts      Account[]
 
- 
+  // privacy settings
+  directMessage Boolean @default(true)
+  profilePublic Boolean @default(true)
 
-  SubscriptionArchives SubscriptionArchives?
-  Subscription         Subscription?
+
+
+  // SubscriptionArchives SubscriptionArchives?
+  // Subscription         Subscription?
 
   members     Member[]
   invitations Invitation[]
+
+  stripeCustomerId String?
 
   @@unique([email])
   @@map("user")
 }
 
-model SubscriptionArchives {
-  id            String         @id @default(uuid())
-  Subscriptions Subscription[]
-  user          User           @relation(fields: [userId], references: [id])
-  userId        String         @unique
+
+
+// model SubscriptionArchives {
+//   id            String         @id @default(uuid())
+//   Subscriptions Subscription[]
+//   user          User           @relation(fields: [userId], references: [id])
+//   userId        String         @unique
+// }
+
+// model Subscription {
+//   id String @id @default(uuid())
+
+//   stripeCustomerId     String?
+//   stripeSubscriptionId String?
+//   priceId              String? // Stripe Price ID
+//   status               String  @default("active") // active | past_due | canceled | incomplete, etc.
+//   isActive             Boolean @default(false)
+
+//   currentPeriodStart DateTime?
+//   currentPeriodEnd   DateTime?
+
+//   cancelAtPeriodEnd Boolean   @default(false)
+//   canceledAt        DateTime? // optional, if user cancels
+
+//   planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
+
+//   nextStripeSubscriptionId String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   user   User   @relation(fields: [userId], references: [id])
+//   userId String @unique
+
+//   SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
+//   subscriptionArchivesId String?
+// }
+
+enum InvestmentBlockStatus {
+  DRAFT
+  FINALIZED // allocations sum to 100%, funding in progress/escrow
+  LOCKED // funds cleared; cap table immutable
+  VERIFIED
 }
 
-model Subscription {
-  id String @id @default(uuid())
+model externalInvestor {
+  id     String                @id @default(uuid())
+  name   String
+  email  String
+  status InvestmentBlockStatus @default(DRAFT)
 
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  priceId              String? // Stripe Price ID
-  status               String  @default("active") // active | past_due | canceled | incomplete, etc.
-  isActive             Boolean @default(false)
+  investorUserId String? // optional link to a User if they do exist
 
-  currentPeriodStart DateTime?
-  currentPeriodEnd   DateTime?
+  // economics
+  contributionPercentage Decimal   @db.Decimal(8, 4) // was Float
+  returnPercentage       Decimal   @db.Decimal(8, 4) // was Float
+  dollarValueReturn      Decimal   @db.Decimal(18, 2) // was Float
+  // states/flags
+  isInternal             Boolean
+  accessRevoked          Boolean   @default(false)
+  funded                 Boolean   @default(false)
+  fundedAt               DateTime?
 
-  cancelAtPeriodEnd Boolean   @default(false)
-  canceledAt        DateTime? // optional, if user cancels
-
-  planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
-
-  nextStripeSubscriptionId String?
+  // parent
+  investmentBlockId String
+  investmentBlock   investmentBlock @relation(fields: [investmentBlockId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
-
-  SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
-  subscriptionArchivesId String?
+  @@unique([investmentBlockId, email])
 }
-
-enum InvestmentBlockStatus {
-  DRAFT
-  FINALIZED   // allocations sum to 100%, funding in progress/escrow
-  LOCKED      // funds cleared; cap table immutable
-}
-
-model externalInvestor {
-  id                     String  @id @default(uuid())
-  name                   String
-  email                  String
-    status       InvestmentBlockStatus @default(DRAFT)
-
-  investorUserId         String? // optional link to a User if they do exist
-  // relation if you have a User model:
-  // user                   User?   @relation(fields: [investorUserId], references: [id])
-
-  // economics
-  contributionPercentage Decimal @db.Decimal(8, 4)   // was Float
-  returnPercentage       Decimal @db.Decimal(8, 4)   // was Float
-  dollarValueReturn      Decimal @db.Decimal(18, 2)  // was Float
-
-  // states/flags
-  isInternal             Boolean
-  accessRevoked          Boolean @default(false)
-  funded                 Boolean @default(false)
-  fundedAt               DateTime?
-
-  // parent
-  investmentBlockId      String
-  investmentBlock        investmentBlock @relation(fields: [investmentBlockId], references: [id] , onDelete: Cascade )
-
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-
-  @@unique([investmentBlockId, email]) 
-}
-
 
 model investmentBlock {
   id               String         @id @default(uuid())
@@ -141,7 +152,7 @@ model investmentBlock {
   margin            Float // Profit percentage Based off the initial investment
   typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
   saleDuration      Int      @default(0) // duration for how long to get my money back from the investment
-  depreciationYears Int @default(1) //
+  depreciationYears Int      @default(1) //
 
   // ------------------ Lease -------------------------
   leaseCycle Float  @default(0.0)
@@ -152,7 +163,7 @@ model investmentBlock {
   discountPercentage Float @default(0) // Discount percentage for the property, if applicable
 
   propertieid       String             @unique
-  propertie         propertie          @relation(fields: [propertieid], references: [id] ,onDelete: Cascade)
+  propertie         propertie          @relation(fields: [propertieid], references: [id], onDelete: Cascade)
   externalInvestors externalInvestor[]
 
   @@unique([id])
@@ -209,10 +220,9 @@ model propertie {
   accessCode String @db.VarChar(12) // this code is generated by the user that created the property I need to be used for other external users to access the property
 
   // Relationships
-  ownerId      String
-  ownerType    String @default("ORGANIZATION") // "user" or "organization"
+  ownerId   String
+  ownerType String @default("ORGANIZATION") // "user" or "organization"
 
-  
   investBlock investmentBlock?
 }
 
@@ -266,6 +276,7 @@ model Session {
 model ChatRoom {
   id           String           @id @default(uuid())
   title        String // this will be an arry of the two users name so you can switch depends on who is viewing it
+  type         roomType         @default(PRIVATE)
   participants ChatRoomMember[]
 
   chats Message[]
@@ -285,14 +296,14 @@ model Message {
 }
 
 model ChatRoomMember {
-  id       String   @id @default(uuid())
-  room     ChatRoom @relation(fields: [roomId], references: [id])
-  roomId   String
-  userId   String
-  userName String
-  isAdmin  Boolean  @default(false) // Whether the user is an admin of the chat room
+  id                String   @id @default(uuid())
+  room              ChatRoom @relation(fields: [roomId], references: [id])
+  roomId            String
+  userId            String
+  userName          String
+  isAdmin           Boolean  @default(false) // Whether the user is an admin of the chat room
   notificationCount Int      @default(0) // Number of unread messages or notifications for this user in the room
-  joinedAt DateTime @default(now())
+  joinedAt          DateTime @default(now())
 
   @@unique([roomId, userId])
 }
@@ -313,8 +324,6 @@ model ChatImage {
 
   message   Message @relation(fields: [messageId], references: [id])
   messageId String
-  
-  
 }
 
 model Organization {
@@ -329,7 +338,6 @@ model Organization {
 
   @@unique([slug])
   @@map("organization")
-  
 }
 
 model Member {
@@ -356,4 +364,19 @@ model Invitation {
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@map("invitation")
+}
+
+model Subscription {
+  id                   String    @id
+  plan                 String
+  referenceId          String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  status               String?
+  periodStart          DateTime?
+  periodEnd            DateTime?
+  cancelAtPeriodEnd    Boolean?
+  seats                Int?
+
+  @@map("subscription")
 }

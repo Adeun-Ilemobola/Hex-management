@@ -1,5 +1,5 @@
 "use client"
-import React, { Suspense , useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import DropBack from '../DropBack'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
@@ -29,6 +29,7 @@ export default function PropertyModification() {
         setPropertyInfo,
         setInvestmentBlock,
         setExternalInvestor,
+        removeInvestor,
         Session,
         financials,
         RemoveImage,
@@ -37,6 +38,7 @@ export default function PropertyModification() {
         disableInput,
         isLoading,
         sub,
+        memberData,
         reFresh
     } = usePropertyModification(id)
     const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
@@ -44,12 +46,18 @@ export default function PropertyModification() {
     const [section, Setsection] = useState(1)
 
     function validation() {
-        const vInvestmentBlock = investmentBlockSchema.safeParse(investmentBlock)
+
+        const blockForValidation = {
+            ...investmentBlock,
+            externalInvestors: externalInvestor,
+        };
+
+
+        const vInvestmentBlock = investmentBlockSchema.safeParse(blockForValidation);
+
         const validatedProperty = propertySchema.safeParse({
             ...propertyInfo,
-            ...(section === 3 && {
-                investmentBlock: vInvestmentBlock.data
-            })
+            ...(section === 3 && { investmentBlock: blockForValidation }),
         });
         if (!validatedProperty.success) {
             validatedProperty.error.errors.forEach(err => {
@@ -58,7 +66,7 @@ export default function PropertyModification() {
             );
             return null
         }
-        if (section === 3 && !vInvestmentBlock.success) {
+        if (section === 2 && !vInvestmentBlock.success) {
             vInvestmentBlock.error.errors.forEach(err => {
                 toast.error(`Error in ${err.path.join(".")}: ${err.message}`);
             }
@@ -72,7 +80,7 @@ export default function PropertyModification() {
 
         let uploadedImages: FileUploadResult[] = [];
         try {
-              const data = validation()
+            const data = validation()
             if (!data) {
                 return
             }
@@ -80,19 +88,19 @@ export default function PropertyModification() {
                 toast.error("User session not found. Please log in.");
                 return;
             }
-          
+
 
 
             // Prevent duplications uploads
             const uploadedImagesDB = data.images.filter(img => img.id && img.id !== "")
             const imagesToUpload = propertyInfo.images.filter(img => !img.supabaseID || img.supabaseID === "");
-            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id , "notChat")
+            uploadedImages = await UploadImageList(imagesToUpload, Session.data?.user?.id, "notChat")
             // const uploadedImageToCL = propertyInfo.images.filter(img => img.supabaseID && img.supabaseID !== "")
             if (id.length <= 0) {
                 const imagesClean = uploadedImages.map(img => {
                     return {
                         ...img,
-                       
+
                     }
                 })
                 CreateProperty({
@@ -111,7 +119,7 @@ export default function PropertyModification() {
                 const imagesClean = [...uploadedImages, ...uploadedImagesDB].map(img => {
                     return {
                         ...img,
-                        
+
                     }
                 })
                 UpdateProperty({
@@ -142,17 +150,7 @@ export default function PropertyModification() {
             }
         }
     }
-    function handleSSubscriptionRequirement() {
-        const tier = sub.planTier
-        if (tier === 'Free') {
-            return 5
-        } else if (tier === 'Deluxe') {
-            return 35
-        } else if (tier === 'Premium') {
-            return 100
-        }
-        return 5;
-    }
+
 
     function orgListClean() {
         const cleaned = orgList?.value.map(org => ({
@@ -173,7 +171,8 @@ export default function PropertyModification() {
     }
 
 
-    const isSubscribed = sub.isActive && sub.planTier !== "free" || sub.planTier !== "Free"
+
+
     return (
         <DropBack is={isLoading} >
             <Nav SignOut={authClient.signOut} session={Session.data} />
@@ -192,15 +191,18 @@ export default function PropertyModification() {
                                         RemoveImage({ id, supabaseID });
 
                                     }}
-                                    handleSSubscriptionRequirement={handleSSubscriptionRequirement}
+                                    handleSSubscriptionRequirement={() => {
+                                        const v = sub?.limits?.maxProjectImages || 0
+                                        return v
+                                    }}
                                     orgInfo={
                                         {
                                             data: orgListClean(),
-                                            loading: organizationsQuery.isLoading,
+                                            loading: organizationsQuery.isPending,
                                             userId: Session.data?.user.id || "",
                                             refetch: organizationsQuery.refetch,
-                                            showOwnershipConfig: (sub.inOrganization && sub.inOrganization.role === "owner") || false,
-                                            disabled: (sub.inOrganization && sub.inOrganization.role !== "owner") || false
+                                            showOwnershipConfig: (memberData && memberData.role !== "owner") || true,
+                                            disabled: memberData ? (memberData.role !== "owner") : false
 
                                         }
                                     }
@@ -212,11 +214,29 @@ export default function PropertyModification() {
 
                     {section === 2 && (
                         <div className='flex flex-1 flex-col gap-4 p-2 justify-center items-center'>
-                            <InvestmentBlockSection setInvestmentBlock={setInvestmentBlock} disable={false} investmentBlock={investmentBlock} />
+                            <InvestmentBlockSection
+                                setInvestmentBlock={setInvestmentBlock}
+                                disable={false}
+                                investmentBlock={investmentBlock}
+                                Locked={() => {
+                                    const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
+                                    return isLocked
+                                }}
+                            />
 
                             {Session.data?.user && (
-                                <PayWall allowed={isSubscribed}>
-                                    <PoolInvestorsSection mebers={externalInvestor} setMebers={setExternalInvestor} reLoad={reFresh} />
+                                <PayWall allowed={(sub  ) ? sub.limits.PoolInvestor :false} >
+                                    <PoolInvestorsSection
+                                        mebers={externalInvestor}
+                                        setMebers={setExternalInvestor}
+                                        reLoad={reFresh}
+                                        Locked={() => {
+                                            const isLocked = externalInvestor.some(inv => inv.status !== "DRAFT")
+                                            return isLocked
+                                        }}
+                                        removeInvestor={removeInvestor}
+
+                                    />
                                 </PayWall>
                             )}
 
@@ -262,10 +282,8 @@ export default function PropertyModification() {
                         size={"lg"}
                         onClick={() => {
                             if (section !== 3) {
-                                if (section === 1) {
-                                    const data = validation()
-                                    if (!data) { return; }
-                                }
+                                const data = validation()
+                                if (!data) { return; }
                                 Setsection(pre => ++pre)
                             } else {
                                 handleSubmit()

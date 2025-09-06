@@ -1,136 +1,313 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
-import { OrganizationMetadata } from "@/server/actions/subscriptionService";
+import { MetadataT, OrganizationX, subMeta } from "@/lib/Zod";
 import { sendEmail } from "@/server/actions/sendEmail";
-import { XOrganization } from "@/components/(organizationFragments)/organizationDashbord";
 import { rateLimit } from '../middlewares/rateLimit';
-import { seatPlan } from "@/lib/utils";
+import { DateToIOS, seatPlan } from "@/lib/utils";
+import { TRPCError } from "@trpc/server";
+import { DateTime } from "luxon";
+
 
 
 
 export const organizationRouter = createTRPCRouter({
 
+
+    getActiveMember: protectedProcedure
+        .query(async ({ ctx }) => {
+            try {
+                console.log("-------- getActiveMember called---------");
+
+                const memberOfOrg = await ctx.prisma.member.findFirst({
+                    where: {
+                        userId: ctx.session?.user.id,
+                        role: {
+                            in: ["member", "admin"]
+                        }
+                    },
+                    include: {
+                        organization: true,
+                        user: true
+                    }
+                });
+                if (!memberOfOrg) {
+                    console.log("No active member found for user:", ctx.session?.user.id);
+                    return { success: true, value: null };
+                }
+                if (!memberOfOrg.organization) {
+                    console.log("Member found but no organization associated:", memberOfOrg);
+                    return { success: true, value: null };
+                }
+                const member = {
+                    name: memberOfOrg.user.name,
+                    email: memberOfOrg.user.email,
+                    role: memberOfOrg.role,
+                    organizationId: memberOfOrg.organizationId,
+                    organizationSlug: memberOfOrg.organization.slug
+                }
+
+                return { success: true, value: member };
+
+
+            } catch (error) {
+                console.error("Error in getActiveMember:", error);
+                return { success: false, value: null };
+            }
+        }),
+
     onboardUserToOrg: protectedProcedure
-    .use(rateLimit())
-    .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
+        .use(rateLimit())
+        .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
             try {
-                let userId = ""
-                const newUserbody = {
-                    name: input.name,
-                    email: input.email,
-                    password: `${input.name}${Math.floor(Math.random() * 1000)}`,
+                const userExists = await ctx.prisma.user.findUnique({
+                    where: {
+                        email: input.email
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                });
+                const org = await ctx.prisma.organization.findUnique({
+                    where: {
+                        id: input.organizationId
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true
+                    }
+                });
+                if (!org) {
+                    return { success: false, message: "Organization not found" };
                 }
-                const userExists = await ctx.prisma.user.findUnique({ where: { email: input.email } })
+
                 if (userExists) {
-                    userId = userExists.id
-                } else {
-                    const { response } = await auth.api.signUpEmail({
-                        returnHeaders: true,
-                        body: newUserbody,
-                    })
-                    const { user } = response;
-                    userId = user.id
-                }
+                    console.log("-------------------- user exists, adding to organization --------------------");
 
-                const res = await auth.api.addMember({
+                    const data = await auth.api.createInvitation({
+                        body: {
+                            email: input.email,
+                            role: input.role,
+                            organizationId: org.id,
+                            resend: true,
+                           
+                        },
+                        headers: ctx.headers,
+                    });
+
+                    if (!data) {
+                        return { success: false, message: `Failed to add user: ${input.email} to organization ${org.name}` };
+                    }
+                    // const mail = await sendEmail({
+                    //     templateText: "onboardingFinished",
+                    //     to: input.email,
+                    //     params: {
+                    //         name: userExists.name,
+                    //         organizationName: org.name,
+                    //         fallbackUrl: `${process.env.NEXTAUTH_URL}`,
+                    //         email: input.email,
+                    //         userExists: true
+
+                    //     }
+                    // })
+                    // if (!mail) {
+                    //     return { success: false, message: `Failed to send email to user: ${input.email}` };
+                    // }
+                    return { success: true, message: `Successfully invited user: ${input.email} to organization ${org.name}`   };
+                }
+                console.log(" -------------------- user does not exist, sending invite -------------------- ");
+                // user does not exist, send invite make it 
+                const data = await auth.api.signInMagicLink({
                     body: {
-                        userId: userId,
-                        organizationId: input.organizationId,
-                        role: input.role
-                    }
-                })
-
-                if (!res) {
-                    return {
-                        message: "Failed to complete onboarding",
-                        success: false,
-                        value: null
-                    }
-                }
-                const newEmailSend = await sendEmail({
-                    templateText: "onboardingFinished",
-                    to: input.email,
-                    params: {
+                        email: input.email, // required
                         name: input.name,
-                        organizationName: input.name,
-                        email: input.email,
-                        tempPassword: newUserbody.password,
-                        fallbackUrl: `${process.env.NEXTAUTH_URL}/login`,
-                        userExists: !!userExists
-                    }
-                })
-                if (!newEmailSend.success) {
-                    console.error("Failed to send onboarding email:", newEmailSend.error);
-                    return {
-                        message: "Failed to send onboarding email",
-                        success: false,
-                        value: null
-                    }
+                        callbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${org.id}&role=${input.role}`,
+                        newUserCallbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${org.id}&role=${input.role}`,
+                        errorCallbackURL: `${process.env.NEXTAUTH_URL}/error?error=magic_link_failed`,
+                    },
+                    headers: ctx.headers,
+                });
+                if (!data) {
+                    return { success: false, message: `Failed to create magic link for  user: ${input.email} please try again` };
                 }
-                return {
-                    message: "Successfully onboarded user",
-                    success: true,
-                    value: res
-                }
+                // const getNewUser = await ctx.prisma.user.findUnique({
+                //     where: {
+                //         email: input.email
+                //     },
+                //     select: {
+                //         id: true,
+                //         name: true,
+                //     }
+                // });
+                // if (!getNewUser) {
+                //     return { success: false, message: `Failed to find newly created user: ${input.email} please try again` };
+                // }
+                // const dataNew = await auth.api.addMember({
+                //         body: {
+                //             role: input.role,
+                //             userId: getNewUser.id,
+                //             organizationId: input.organizationId,
+
+                //         },
+                //         headers: ctx.headers
+                //     })
+
+                //     if (!dataNew) {
+                //         return { success: false, message: `Failed to add user: ${input.email} to organization ${org.name}` };
+                //     }
+                //     const mail = await sendEmail({
+                //         templateText: "onboardingFinished",
+                //         to: input.email,
+                //         params: {
+                //             name: getNewUser.name,
+                //             organizationName: org.name,
+                //             fallbackUrl: `${process.env.NEXTAUTH_URL}`,
+                //             email: input.email,
+                //             userExists: true
+
+                //         }
+                //     })
+                //     if (!mail) {
+                //         return { success: false, message: `Failed to send email to user: ${input.email}` };
+                //     }
+                //     return { success: true, message: `Successfully added user: ${input.email} to organization ${org.name}` };
+
+                return { success: true, message: `Successfully sent invite to user: ${input.email} to join organization ${org.name}` };
+
 
             } catch (error) {
                 console.error("Error in onboardUserToOrg:", error);
-                return {
-                    message: "Failed to complete onboarding",
-                    success: false,
-                    value: null
-                }
-
+                return { success: false, message: "Failed to onboard user to organization" };
             }
         }),
 
-    getAllOrganization: protectedProcedure
-
-        .query(async ({ ctx }) => {
+    finishOnboarding: protectedProcedure
+        .input(z.object({ organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
+        .query(async ({ input, ctx }) => {
             try {
-                const data = await auth.api.listOrganizations({ headers: ctx.headers });
-                console.log(data);
+                if (input.organizationId.trim() === "") {
+                    return { success: false, message: "Invalid data" };
+                }
+                const user = ctx.session?.user;
+                if (!user) {
+                    throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+                }
+                const org = await ctx.prisma.organization.findUnique({
+                    where: {
+                        id: input.organizationId
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true
+                    }
+                });
+                if (!org) {
+                    return { success: false, message: "Organization not found" };
+                }
+                 const userExists = await ctx.prisma.member.findFirst({
+                    where: {
+                        userId: user.id,
+                        organizationId: input.organizationId
 
-                const organizations = await Promise.all(
-                    data.map(async (org) => {
-                        const members = await ctx.prisma.member.count({
-                            where: {
-                                organizationId: org.id
-                            }
-                        })
-                        return {
-                            ...org,
-                            memberCount: members,
-                            metadata: JSON.parse(org.metadata) as OrganizationMetadata
+                    }
+                    
+                })
+                if (userExists) {
+                    return { success: true, userExists: true, message: `You are already a member of organization ${org.name}` };
+                }
+
+                const dataNew = await auth.api.addMember({
+                    body: {
+                        role: input.role,
+                        userId: user.id,
+                        organizationId: input.organizationId,
+
+                    },
+                    headers: ctx.headers
+                })
+
+                if (!dataNew) {
+                    return { success: false, message: `Failed to add user: ${user.email} to organization ${org.name}` };
+                }
+                const mail = await sendEmail({
+                    templateText: "onboardingFinished",
+                    to: user.email,
+                    params: {
+                        name: user.name,
+                        organizationName: org.name,
+                        fallbackUrl: `${process.env.NEXTAUTH_URL}`,
+                        email: user.email,
+                        userExists: true
+
+                    }
+                })
+                if (!mail) {
+                    return { success: false, message: `Failed to send email to user: ${user.email}` };
+                }
+                return { success: true, message: `Successfully added user: ${user.email} to organization ${org.name}` };
+
+
+
+            } catch (error) {
+                console.error("Error in finishOnboarding:", error);
+                return { success: false, message: "Failed to finish onboarding" };
+
+            }
+
+
+
+        }),
+
+    getAllOrganization: protectedProcedure.query(async ({ ctx }) => {
+        try {
+            const data = await auth.api.listOrganizations({ 
+                query:{
+                    role:"owner"
+                },
+                headers: ctx.headers 
+            });
+
+            const organizations = await Promise.all(
+                data.map(async (org) => {
+                    const members = await ctx.prisma.member.count({
+                        where: {
+                            organizationId: org.id
+                            
                         }
                     })
-                )
+                    return {
+                        ...org,
+                        memberCount: members,
+                        metadata: JSON.parse(org.metadata) as subMeta
+                    }
+                })
+            )
 
-                return {
-                    message: "Successfully got user organizations",
-                    success: true,
-                    value: organizations
-                }
-            } catch (error) {
-                console.error("Error in getUserOrganizations:", error);
-                return {
-                    message: "Failed to get user organizations",
-                    success: false,
-                    value: []
-                }
+            return {
+                message: "Successfully got user organizations",
+                success: true,
+                value: organizations
             }
-        }),
+        } catch (error) {
+            console.error("Error in getUserOrganizations:", error);
+            return {
+                message: "Failed to get user organizations",
+                success: false,
+                value: []
+            }
+        }
+    }),
 
 
     getOrganization: protectedProcedure
-     .use(rateLimit())
+        .use(rateLimit())
         .input(z.object({ id: z.string(), slug: z.string() }))
         .query(async ({ input, ctx }) => {
             try {
-                console.log(input);
-
                 const data = await auth.api.getFullOrganization({
                     query: {
                         organizationId: input.id,
@@ -147,8 +324,15 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const fullData: XOrganization = {
-                    metadata: JSON.parse(data?.metadata || "{}") as OrganizationMetadata,
+                const me = JSON.parse(data?.metadata || "{}") as MetadataT
+                const trialEnd = DateTime.fromISO(DateToIOS(me.trialEnd) || DateTime.local().toISO()).diffNow("days").as("days")
+                const periodEnd = DateTime.fromISO(DateToIOS(me.periodEnd) || DateTime.local().toISO()).diffNow("days").as('days')
+                const daysLeft = me.status === "trialing" ? trialEnd : periodEnd
+                const fullData: OrganizationX = {
+                    metadata: {
+                        ...me,
+                        daysLeft: Math.max(0, Math.ceil(daysLeft))
+                    },
                     id: data.id,
                     name: data.name,
                     slug: data.slug,
@@ -158,6 +342,12 @@ export const organizationRouter = createTRPCRouter({
                     members: data.members,
 
                 }
+                console.log("DateTime ====", {
+                    trialEnd,
+                    periodEnd,
+                    daysLeft
+                });
+
                 console.log("fullData ====", fullData);
 
 
@@ -192,22 +382,39 @@ export const organizationRouter = createTRPCRouter({
                         value: null
                     }
                 }
-                const userSub = ctx.plan
-                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
-                const metadata = {
-                    planType: userSub.planTier,
-                    seatLimit: seatPlan(userSub.planTier),
-                    isExpired: userSub.daysLeft ? userSub.daysLeft <= 0 : true
+                const userSub = ctx.subscription
+                if (!userSub) {
+                    return {
+                        message: " you are not subscribed to any plan",
+                        success: false,
+                        value: null
+                    }
                 }
-                console.log({
-                    userSub,
-                    metadata,
-                    slug
+                const orgList = await auth.api.listOrganizations({
+                    headers: ctx.headers,
+                    query: {
+                        role: "owner"
+                    }
+
                 });
+                if (userSub.limits.maxOrg <= orgList.length) {
+                    return {
+                        message: `You have reached the maximum number of organizations for your plan (${userSub.limits.maxOrg}). Please contact support to upgrade your plan.`,
+                        success: false,
+                        value: null
+                    }
+                }
+
+
+
+                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
+                const metadata: MetadataT = {
+                    ...userSub,
+                }
 
                 const { status } = await auth.api.checkOrganizationSlug({
                     body: {
-                        slug: slug, // required
+                        slug: slug,
                     },
                 });
 
@@ -302,7 +509,7 @@ export const organizationRouter = createTRPCRouter({
                 }
             }
             else if (input.ActionType === "admin" || input.ActionType === "owner" || input.ActionType === "member") {
-               const dataRole = await auth.api.updateMemberRole({
+                const dataRole = await auth.api.updateMemberRole({
                     body: {
                         role: input.ActionType,
                         memberId: input.memberId,
@@ -342,7 +549,102 @@ export const organizationRouter = createTRPCRouter({
             }
 
         }
-    })
+    }),
+
+
+    getOwnerOrganizations: protectedProcedure.query(async ({ ctx }) => {
+        try {
+            const user = ctx.session?.user;
+            if (!user) {
+                throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+            }
+            const useOrg = await auth.api.listOrganizations({
+                headers: ctx.headers,
+                query: {
+                    role: "owner"
+                }
+
+            });
+
+
+            const fullOrgInfo = await Promise.all(
+                useOrg.map(async (org) => {
+                    const allMembers = await ctx.prisma.member.count({
+                        where: {
+                            organizationId: org.id
+                        }
+                    })
+                    const Meta = JSON.parse(org.metadata || "{}") as subMeta
+
+                    return {
+                        name: org.name,
+                        slug: org.slug,
+                        id: org.id,
+                        logo: org.logo,
+                        createdAt: org.createdAt,
+                        currentSeats: allMembers,
+                        maxSeats: Meta.limits?.orgMembers || 0
+                    }
+                })
+            )
+
+            return fullOrgInfo
+
+        } catch (error) {
+            console.error("Error in getOwnerOrganizations:", error);
+            return []
+
+        }
+
+    }),
+
+    getFullOrganizationInfo: protectedProcedure.input(z.object({
+        organizationId: z.string(),
+    })).query(async ({ input, ctx }) => {
+        try {
+            const data = await auth.api.getFullOrganization({
+                query: {
+                    organizationId: "org-id",
+                    organizationSlug: "org-slug",
+                    membersLimit: 100,
+                },
+                headers: ctx.headers,
+            });
+            if (!data) {
+                console.error("Failed to fetch organization info");
+                return {
+                    message: "Failed to fetch organization info",
+                    success: false,
+                    value: null
+                }
+            }
+
+            return {
+                message: "Successfully fetched organization info",
+                success: true,
+                value: {
+                    ...data,
+                    metadata: JSON.parse(data.metadata || "{}") as subMeta
+
+                }
+            }
+
+
+
+
+
+
+        } catch (error) {
+            console.error("Error in getFullOrganizationInfo:", error);
+            return {
+                message: "Failed to fetch organization info",
+                success: false,
+                value: null
+            }
+        }
+    }),
+
+
 
 });
 

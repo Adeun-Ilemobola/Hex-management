@@ -6,11 +6,11 @@ import SubscriptionCard from '@/components/SubscriptionCard'
 import { authClient } from '@/lib/auth-client'
 import { api } from '@/lib/trpc'
 import { toast } from 'sonner'
-
+// import { useRouter } from 'next/navigation'
 const subscriptionPlans = [
   {
-    tier: 'Free' as const,
-    value: 'Free',
+    tier: 'free' as const,
+    value: 'free',
     price: 0,
     isMonthly: true,
     isCurrent: true,
@@ -47,15 +47,17 @@ const subscriptionPlans = [
 ];
 
 export default function Page() {
+  // const router = useRouter();
   const { isPending: sessionLoading } = authClient.useSession();
-  const [subscriptionList, setSubscriptionList] = React.useState(subscriptionPlans);
-  const getUserPlan = api.user.getUserPlan.useQuery()
-  const subscriptionMutation = api.makeSubscription.useMutation({
-    onSuccess({ url, message }) {
-      if (url) {
-        window.location.href = url;
-      } else {
-        toast.success(message);
+  const {data:getUserPlan , isPending:getUserPlanLoading} = api.user.getUserPlan.useQuery()
+  const subscriptionMutation = api.subscription.UpgradeSubscription.useMutation({
+    onSuccess(data) {
+      if (data?.success && data.value?.url){
+        toast.success(data.message);
+        window.location.href = data.value.url
+       
+      }else{
+        toast.error(data.message||"Something went wrong");
       }
     },
     onError(err) {
@@ -63,26 +65,11 @@ export default function Page() {
     },
   });
 
-  React.useEffect(() => {
-    if (getUserPlan.data) {
-      console.log(getUserPlan.data);
-
-      setSubscriptionList(pre => pre.map(p => ({ ...p, isCurrent: (p.tier === getUserPlan.data.value?.planTier) })));
-    }
 
 
-  }, [getUserPlan.data]);
+  
 
-  function handleSelect(tier: 'Free' | 'Deluxe' | 'Premium') {
-    const inOrganization = getUserPlan.data?.value?.inOrganization;
-    if (inOrganization) {
-      toast.warning("You are changing your plan within an organization contact your admin for any issues of the organization");
-      return;
-    }
-    subscriptionMutation.mutate({ tier });
-  };
-
-  const isPending = sessionLoading || subscriptionMutation.isPending || getUserPlan.isPending || getUserPlan.isFetching;
+  const isPending = sessionLoading || subscriptionMutation.isPending ||getUserPlanLoading
 
   
   return (
@@ -98,11 +85,22 @@ export default function Page() {
         </header>
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-          {subscriptionList.map((plan) => (
+          {subscriptionPlans.map((plan) => (
             <SubscriptionCard
               key={plan.tier}
-              data={plan}
-              onSelect={handleSelect}
+              
+              data={
+                {
+                  ...plan,
+                  isCurrent: plan.tier.toLowerCase()  === getUserPlan?.value?.plan.toLowerCase() 
+                }
+              }
+              onSelect={(tier) => {
+                subscriptionMutation.mutate({
+                  plan: tier,
+                  organizationId: null
+                });
+              }}
             />
           ))}
         </div>

@@ -17,7 +17,7 @@ import {
 interface ExternalInvestorInput {
     id: string;
     name: string;
-    status: "DRAFT" | "FINALIZED" | "LOCKED";
+    status: "DRAFT" | "FINALIZED" | "LOCKED" |  "VERIFIED"  ;
     email: string;
     contributionPercentage: number;
     returnPercentage: number;
@@ -36,7 +36,7 @@ function InvestorCard({
     member,
     onEdit,
     onRemove,
-    locked
+    
 }: {
     member: ExternalInvestorInput;
     onEdit: () => void;
@@ -47,6 +47,8 @@ function InvestorCard({
         switch (member.status) {
             case 'FINALIZED': return 'from-green-400 to-emerald-500';
             case 'LOCKED': return 'from-gray-400 to-gray-500';
+            case 'VERIFIED': return 'from-blue-400 to-sky-500';
+            
             default: return 'from-yellow-400 to-amber-500';
         }
     };
@@ -55,6 +57,7 @@ function InvestorCard({
         switch (member.status) {
             case 'FINALIZED': return <CheckCircle2 className="h-3 w-3" />;
             case 'LOCKED': return <Shield className="h-3 w-3" />;
+            case 'VERIFIED': return <TrendingUp className="h-3 w-3" />;
             default: return <AlertCircle className="h-3 w-3" />;
         }
     };
@@ -161,7 +164,7 @@ function InvestorCard({
                     </div>
 
                     {/* Action Buttons */}
-                    {!locked && (
+                    {!(["FINALIZED" , "LOCKED" ,  "VERIFIED" ].includes(member.status)) && (
                         <div className="flex gap-3 pt-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
                             <Button
                                 onClick={onEdit}

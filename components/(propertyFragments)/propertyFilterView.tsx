@@ -1,6 +1,6 @@
 'use client'
 
-import React , {useState} from 'react'
+import React, { useState } from 'react'
 import { authClient } from '@/lib/auth-client'
 import { Nav } from '../Nav'
 import PropertySearchNav from './PropertySearchNav'
@@ -17,31 +17,38 @@ const zSearch = z.object({
 
 })
 export interface CleanProperty {
-  id: string;
-  img?: string;
-  name: string;
-  address: string;
-  status: string;
-  saleStatus: string;
+    id: string;
+    img?: string;
+    name: string;
+    address: string;
+    status: string;
+    saleStatus: string;
 }
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
-    
+    const {  isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
+    const { data: getProperties, isPending: getPropertiesPending } = api.Propertie.getUserProperties.useQuery({ data: data } ,{
+        enabled: !!data,
+        refetchOnWindowFocus: true ,
+        refetchOnReconnect: true,
+        retry: 2
+    })
+
+
     const router = useRouter();
 
     const { data: session, isPending } = authClient.useSession();
-    const {data: plan , isPending:planLoading} = api.user.getUserPlan.useQuery();
-    console.log(plan?.value);
+    const { isPending: planLoading } = api.user.getUserPlan.useQuery();
+    console.log(getProperties?.data);
 
-    const {data:getProperties , isPending:getPropertiesPending} = api.Propertie.getUserProperties.useQuery({data: data })
-     const [isEdit, setIsEdit] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
 
     function NavSearch(urlData: { status: string | null, searchText: string | null }) {
         const vSearch = zSearch.safeParse(urlData);
         if (!vSearch.success) {
             vSearch.error.errors.forEach(error => {
                 toast.warning(`${error.path[0]}: ${error.message}`)
-            }) 
+            })
         }
         router.push(`/home?${urlData.status ? `status=${urlData.status} ` : ""}${urlData.searchText ? `&searchText=${urlData.searchText}` : ""}`)
 
@@ -49,30 +56,30 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
     }
     return (
-        <DropBack 
-        is={isPending || getPropertiesPending || planLoading}
-        isTextMessage={{data:"" }}
+        <DropBack
+            is={isPending || getPropertiesPending || planLoading || subscriptionLoading}
+            isTextMessage={{ data: "" }}
         >
             <div className=' flex-1 flex flex-col gap-2.5'>
                 <Nav session={session} SignOut={authClient.signOut} />
 
-                <PropertySearchNav 
-                onSubmit={NavSearch} 
-                changeMode={(mode) => setIsEdit(mode)}
-                mode={isEdit}
+                <PropertySearchNav
+                    onSubmit={NavSearch}
+                    changeMode={(mode) => setIsEdit(mode)}
+                    mode={isEdit}
                 />
 
                 {/* list  of card  */}
                 <div className=' flex-1 flex flex-row flex-wrap justify-center p-2.5 shrink-0 gap-2.5'>
-                    {getProperties?.data && (getProperties.data as CleanProperty[]).map((item , i)=>{
-                        return(<PropertyCard mode={isEdit} key={i} data={{
+                    {getProperties?.data && (getProperties.data as CleanProperty[]).map((item, i) => {
+                        return (<PropertyCard mode={isEdit} key={i} data={{
                             id: item.id,
                             img: item.img,
                             name: item.name,
                             address: item.address,
                             status: item.status,
                             saleStatus: item.saleStatus
-                        }}/>)
+                        }} />)
                     })}
 
                 </div>
