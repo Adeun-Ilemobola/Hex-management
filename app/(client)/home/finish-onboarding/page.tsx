@@ -24,13 +24,13 @@ const zPassword = z.object({
     message: "Passwords do not match",
     path: ["confirmPassword"],
 });
-export default function Page() {
+
+function FinishOnboardingInner() {
     const searchParams = useSearchParams();
     const orgId = searchParams.get('orgId');
     const role = searchParams.get('role') || "member";
     const ni = api.organization.finishOnboarding.useQuery({ organizationId: orgId || "", role: role as "member" | "owner" | "admin" }, {
         enabled: !!orgId && !!role,
-
     })
     const setPasswordMutation = api.user.setPasswordForOAuth.useMutation({
         onSuccess(data) {
@@ -51,10 +51,6 @@ export default function Page() {
         newPassword: "",
         confirmPassword: ""
     })
-
-
-
-
     function handleSetPassword() {
         const parsed = zPassword.safeParse(Password);
         if (!parsed.success) {
@@ -75,7 +71,7 @@ export default function Page() {
         })
     }
     return (
-        <Suspense fallback={<Loading full={true} />}>
+        
             <div className="flex flex-col min-h-screen items-center justify-center ">
                 <Card>
                     <CardHeader>
@@ -108,6 +104,13 @@ export default function Page() {
 
 
             </div>
+        
+    )
+}
+export default function Page() {
+    return (
+        <Suspense fallback={<Loading full={true} />}>
+           <FinishOnboardingInner/>
         </Suspense>
     )
 }
