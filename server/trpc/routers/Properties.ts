@@ -29,6 +29,16 @@ export type CleanProperty = {
 
 
 export const PropertiesRouter = createTRPCRouter({
+    /**
+ * getUserProperties
+ * Protected query.
+ * Lists properties visible to the current user.
+ * - Detects org memberships and role.
+ * - If NOT an org employee: returns properties owned by the user or their owner orgs (with search/status filters).
+ * - If an org employee: returns properties owned by the active organization (with search/status filters).
+ * Returns { data: CleanProperty[] }.
+ */
+
     getUserProperties: protectedProcedure
         .input(z.object({
             data: z.record(
@@ -69,7 +79,7 @@ export const PropertiesRouter = createTRPCRouter({
                 const { data } = input;
                 if (!isUserAEployeeOfOrg) {
                     console.log("----- user is not an employee of any organization, fetching owned properties ------- ");
-                    
+
                     const getUserItems = await prisma.propertie.findMany({
                         where: {
                             ownerId: {
@@ -104,7 +114,7 @@ export const PropertiesRouter = createTRPCRouter({
                         }
                     })
                     console.log("----- cleaned user owned properties ------- ", userItems);
-                    
+
                     return {
                         data: userItems,
                     }
@@ -163,6 +173,16 @@ export const PropertiesRouter = createTRPCRouter({
 
             }
         }),
+
+    /**
+* getPropertie
+* Protected query.
+* Input: { pID }.
+* Fetch a single property with images and investment block; also loads external investors linked to the block.
+* Normalizes image lastModified to number.
+* Returns { success, message, value: { property, investmentBlock, images, externalInvestors } }.
+*/
+
 
     getPropertie: protectedProcedure
         .input(z.object({ pID: z.string() }))
@@ -229,6 +249,20 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+    /**
+* postPropertie
+* Protected, rate-limited ("heavy") mutation.
+* Input: { property, investmentBlock }.
+* Enforces plan limits; resolves owner contact (user or org owner); creates:
+* - property (with images),
+* - investment block,
+* - optional external investors (emails + verification),
+* - a group chat room for invited investors.
+* On failure, rolls back DB records and deletes uploaded images (Supabase IDs).
+* Returns { success, message, data: createdProperty }.
+*/
+
 
     postPropertie: protectedProcedure
         .use(rateLimit("heavy"))
@@ -416,6 +450,14 @@ export const PropertiesRouter = createTRPCRouter({
         }),
 
 
+    /**
+     * updataPropertie
+     * Protected, rate-limited mutation.
+     * Input: { property, investmentBlock }.
+     * Updates property fields; upserts images (updates existing, creates new);
+     * updates investment block; upserts external investors and emails any newly added investors for verification.
+     * Returns { success, message, data: updatedPropertyWithRelations }.
+     */
 
     updataPropertie: protectedProcedure
         .use(rateLimit())
@@ -558,6 +600,15 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
 
+    /**
+* deleteImage
+* Protected, rate-limited mutation.
+* Input: { id, supabaseID }.
+* Removes image record(s) from DB then deletes the file from storage.
+* Returns { success, message, data: PrismaDeleteResult }.
+*/
+
+
     deleteImage: protectedProcedure
         .use(rateLimit())
         .input(z.object({ id: z.string(), supabaseID: z.string() }))
@@ -592,6 +643,13 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
 
+    /**
+     * updataExternalInvestor
+     * Protected mutation.
+     * Input: { externalInvestors } (single investor payload).
+     * Updates one external investor by id + investmentBlockId.
+     * Returns { success, message, data: updatedInvestor }.
+     */
 
     updataExternalInvestor: protectedProcedure
         .input(z.object({ externalInvestors: externalInvestorSchema }))
@@ -633,6 +691,12 @@ export const PropertiesRouter = createTRPCRouter({
         }),
 
 
+    /**
+     * getUserProfle
+     * Protected query.
+     * Returns the authenticated user’s profile (selected fields), shaped into UserInput.
+     * Returns null if user not found.
+     */
 
     getUserProfle: protectedProcedure
         .query(async ({ ctx }) => {
@@ -677,6 +741,16 @@ export const PropertiesRouter = createTRPCRouter({
         }),
 
 
+    /**
+* updateUserProfle
+* Protected mutation.
+* Input: { user }.
+* Updates the authenticated user’s profile fields.
+* Returns { success, message, data: updatedUser }.
+*/
+
+
+
     updateUserProfle: protectedProcedure
         .input(z.object({ user: userSchema }))
         .mutation(async ({ input, ctx }) => {
@@ -713,6 +787,15 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+    /**
+* viewProperty
+* Protected query.
+* Input: { pID }.
+* Public-friendly property view: selected fields + price summary (from investment block) + images (id/url).
+* Returns { success, message, value: CleanViewProperty }.
+*/
+
 
     viewProperty: protectedProcedure
         .input(z.object({ pID: z.string() }))
@@ -811,6 +894,15 @@ export const PropertiesRouter = createTRPCRouter({
 
         }),
 
+    /**
+* getPropertieNameById
+* Protected query.
+* Input: { pID }.
+* Returns the property name by id, or not-found result.
+* Returns { success, message, value: string | null }.
+*/
+
+
     getPropertieNameById: protectedProcedure
         .input(z.object({ pID: z.string() }))
         .query(async ({ input, ctx }) => {
@@ -844,6 +936,17 @@ export const PropertiesRouter = createTRPCRouter({
             }
 
         }),
+
+    /**
+* acceptInvitePropertie
+* Protected mutation.
+* Input: { investorId, propertieId, code, accepted }.
+* Verifies or denies an external investor invite for the signed-in user:
+* - If accepted: validates access code, marks investor VERIFIED, links user to investment, updates user’s investments.
+* - If denied: marks as DRAFT + accessRevoked.
+* Returns { success, message }.
+*/
+
 
     acceptInvitePropertie: protectedProcedure
         .input(z.object({

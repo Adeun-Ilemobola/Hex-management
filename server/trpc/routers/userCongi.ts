@@ -11,6 +11,14 @@ import { TRPCError } from '@trpc/server';
 
 
 export const userCongiRouter = createTRPCRouter({
+    /**
+ * setPasswordForOAuth
+ * Protected mutation.
+ * If the user has no credential (email/password) account, sets a new password.
+ * Otherwise, changes password using currentPassword → newPassword.
+ * Returns { success: boolean }.
+ */
+
     setPasswordForOAuth: protectedProcedure.input(z.object({ newPassword: z.string(), confirmPassword: z.string(), currentPassword: z.string() }))
         .mutation(async ({ input, ctx }) => {
             try {
@@ -42,6 +50,14 @@ export const userCongiRouter = createTRPCRouter({
             }
         }),
 
+/**
+ * getUserPlan
+ * Protected query.
+ * Resolves the active subscription/plan:
+ * - If the user is an org employee (member/admin) and org metadata exists, parses plan from org metadata.
+ * - Otherwise, parses plan from the user’s own subscription in ctx.
+ * Returns { success, isEployee, role, value: Plan | null }.
+ */
 
     getUserPlan: protectedProcedure.query(async ({ ctx }) => {
         try {
@@ -93,6 +109,14 @@ export const userCongiRouter = createTRPCRouter({
             return { success: false, isEployee: false, role: "", value: null };
         }
     }),
+/**
+ * SearchUserByEmail
+ * Protected mutation.
+ * Input: { email }.
+ * Finds publicly visible user profiles matching the email and returns a lightweight card
+ * (id, name, email, image, directMessage).
+ * Returns { success, value: UserCard[] }.
+ */
 
     SearchUserByEmail: protectedProcedure.input(z.object({ email: z.string() }))
         .mutation(async ({ input, ctx }) => {
@@ -119,6 +143,14 @@ export const userCongiRouter = createTRPCRouter({
             }
         }),
 
+/**
+ * magicLinkVerify
+ * Public/base query.
+ * Input: { token }.
+ * Verifies a magic-link token via auth API using session cookies;
+ * on success returns provider response payload.
+ * Returns { success, message, value? }.
+ */
 
     magicLinkVerify: baseProcedure.input(z.object({ token: z.string() }))
         .query(async ({ input, ctx }) => {

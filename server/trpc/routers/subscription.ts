@@ -1,23 +1,10 @@
 
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure, t } from '../init';
-import { prisma } from '@/lib/prisma';
-import { propertySchema, investmentBlockSchema, externalInvestorSchema, UserInput, userSchema, PropertyTypeEnumType } from '@/lib/Zod';
-import { DeleteImages } from '@/lib/supabase';
-import { sendEmail } from '@/server/actions/sendEmail';
-import { rateLimit } from '../middlewares/rateLimit';
-import { CreateGroupChat } from '@/server/actions/CreateGroupChat';
+import { createTRPCRouter, protectedProcedure } from '../init';
 import { TRPCError } from '@trpc/server';
 import { auth } from '@/lib/auth';
-import { log } from 'console';
 
-// type userOrganizationContributor = {
-//     name: string;
-//     id: string;
-//     permission: "admin" | "member"
-//     organizationProperties: string[];
 
-// }
 
 export type CleanProperty = {
     id: string;
@@ -30,6 +17,16 @@ export type CleanProperty = {
 
 
 export const SubscriptionRouter = createTRPCRouter({
+    /**
+ * UpgradeSubscription
+ * Protected mutation.
+ * Input: { plan: "free" | "Deluxe" | "Premium", organizationId?: string, annual?: boolean }.
+ * - Resolves current active/trialing subscription for user/org.
+ * - If upgrading (non-free) and a Stripe subscription exists → calls auth API to upgrade in place.
+ * - If no active subscription exists → creates a new subscription with redirect URLs.
+ * Returns { success, message, value: providerResponse } or failure when plan is "free" or errors occur.
+ */
+
     UpgradeSubscription: protectedProcedure
         .input(z.object({ plan: z.enum(["free", "Deluxe", "Premium"]), organizationId: z.string().nullable(), annual: z.boolean().default(false) }))
         .mutation(async ({ ctx, input }) => {
@@ -40,11 +37,7 @@ export const SubscriptionRouter = createTRPCRouter({
                 throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
             }
             try {
-                const cookie =
-                    typeof ctx.headers?.get === "function"
-                        ? ctx.headers.get("cookie") ?? ""
-                        : (ctx.headers as any)?.cookie ?? "";
-                console.log("----input----", input);
+                
                 const referenceId = input.organizationId ?? user.id;
                 console.log("----user amd headers----", user);
 
