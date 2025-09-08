@@ -158,7 +158,6 @@ npm run dev
 
 ## 📚 API Endpoints (tRPC)
 
-All routes use `protectedProcedure` and require authentication via **BetterAuth**.
 
 ### **SubscriptionRouter**
 
@@ -298,12 +297,10 @@ See `package.json` for full list. Highlights:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+<!-- This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details. -->
 
 ```
 
 ---
 
-If you want, I can extend this README with **example request/response payloads** for each tRPC endpoint so that other developers can test your API without having to read through the code.  
-That would make the repo *extremely* contributor-friendly. Would you like me to add that?
 ```
