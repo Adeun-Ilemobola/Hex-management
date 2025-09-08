@@ -8,6 +8,15 @@ import { TRPCError } from "@trpc/server";
 
 
 export const ChatRoomRouter = createTRPCRouter({
+    /**
+ * getUserRooms
+ * Protected query.
+ * Lists chat rooms the authenticated user belongs to.
+ * Normalizes each room with: other participants (excluding self), membership ids, admin flag,
+ * join time, unread count, title, and type.
+ * Returns { success, message, value: RoomSummary[] }.
+ */
+
     getUserRooms: protectedProcedure
         .query(async ({ ctx }) => {
             try {
@@ -65,6 +74,15 @@ export const ChatRoomRouter = createTRPCRouter({
             }
         }),
 
+    /**
+* getRoomChatById
+* Protected query.
+* Input: { roomId }
+* Validates the room exists (with participants) and returns its messages (with images).
+* Returns { success, message, value: { chats } } or null if room not found.
+*/
+
+
     getRoomChatById: protectedProcedure.input(z.object({ roomId: z.string() })).query(async ({ input, ctx }) => {
         try {
             const { roomId } = input;
@@ -102,6 +120,15 @@ export const ChatRoomRouter = createTRPCRouter({
             return { success: false, message: "Failed to fetch room", value: null };
         }
     }),
+    /**
+ * newMessage
+ * Protected, rate-limited mutation.
+ * Input: MessageSchema (includes roomId, text/media, etc.).
+ * Creates a message authored by the current user, persists any images,
+ * and increments notificationCount for all other room members.
+ * Returns { success, message, value: createdMessage }.
+ */
+
     newMessage: protectedProcedure.use(rateLimit()).input(MessageSchema).mutation(async ({ input, ctx }) => {
         try {
             console.log("Input:", input);
@@ -154,6 +181,14 @@ export const ChatRoomRouter = createTRPCRouter({
 
         }
     }),
+    /**
+ * userRooms
+ * Protected query.
+ * Lists rooms via a direct room search (participants.some userId = me).
+ * Shapes each room with id, title, my unread count, and other participants’ basic info.
+ * Returns { success, message, value: RoomSummary[] }.
+ */
+
 
     userRooms: protectedProcedure
         .query(async ({ ctx }) => {
@@ -195,6 +230,17 @@ export const ChatRoomRouter = createTRPCRouter({
 
             }
         }),
+
+
+        /**
+ * getUserChats
+ * Protected query.
+ * Input: { roomId }.
+ * Returns room messages (oldest → newest) with images;
+ * then resets my notificationCount for that room to 0.
+ * Returns { success, message, value: ChatMessage[] }.
+ */
+
 
     getUserChats: protectedProcedure
         .input(z.object({ roomId: z.string() }))
@@ -247,6 +293,14 @@ export const ChatRoomRouter = createTRPCRouter({
             }
         }),
 
+/**
+ * createRoom
+ * Protected mutation.
+ * Input: { toId } (receiver user id).
+ * Enforces plan limit (max chat rooms), ensures receiver exists,
+ * prevents duplicate 1:1 room, then creates a PRIVATE room with both participants.
+ * Returns { success, message, value: newRoom }.
+ */
 
     createRoom: protectedProcedure
         .input(z.object({
@@ -265,7 +319,7 @@ export const ChatRoomRouter = createTRPCRouter({
                     }
                 })
 
-                if ( currentRoomCount >= plan.limits.ChatBoxs) {
+                if (currentRoomCount >= plan.limits.ChatBoxs) {
                     return { success: false, message: "You have reached the maximum number of chat rooms for your plan. Please upgrade your plan to create more chat rooms." };
                 }
                 const getReceiver = await ctx.prisma.user.findUnique({
@@ -336,6 +390,15 @@ export const ChatRoomRouter = createTRPCRouter({
 
             }
         }),
+
+        /**
+ * userRoomNotification
+ * Protected mutation.
+ * Input: { roomId }.
+ * Resets the caller’s notificationCount for the given room to 0.
+ * Returns { success, message } (or not-found when no matching membership row).
+ */
+
 
     userRoomNotification: protectedProcedure
         .input(z.object({ roomId: z.string() }))

@@ -13,6 +13,13 @@ import { DateTime } from "luxon";
 
 export const organizationRouter = createTRPCRouter({
 
+    /** 
+ * getActiveMember
+ * Protected query.
+ * Returns the logged-in user's active organization membership if their role is "member" or "admin".
+ * Response: { success: true, value: { name, email, role, organizationId, organizationSlug } } or { success: true, value: null } when not found.
+ * On error: { success: false, value: null }.
+ */
 
     getActiveMember: protectedProcedure
         .query(async ({ ctx }) => {
@@ -56,6 +63,16 @@ export const organizationRouter = createTRPCRouter({
             }
         }),
 
+
+   /**
+ * onboardUserToOrg
+ * Protected, rate-limited mutation.
+ * Owner/admin invites a user to an organization.
+ * - If user exists: creates/resends an org invitation via auth API.
+ * - If user does not exist: sends a magic-link sign-in that routes to finish onboarding for the target org/role.
+ * Validates organization; returns { success, message }.
+ */
+
     onboardUserToOrg: protectedProcedure
         .use(rateLimit())
         .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
@@ -93,7 +110,7 @@ export const organizationRouter = createTRPCRouter({
                             role: input.role,
                             organizationId: org.id,
                             resend: true,
-                           
+
                         },
                         headers: ctx.headers,
                     });
@@ -116,7 +133,7 @@ export const organizationRouter = createTRPCRouter({
                     // if (!mail) {
                     //     return { success: false, message: `Failed to send email to user: ${input.email}` };
                     // }
-                    return { success: true, message: `Successfully invited user: ${input.email} to organization ${org.name}`   };
+                    return { success: true, message: `Successfully invited user: ${input.email} to organization ${org.name}` };
                 }
                 console.log(" -------------------- user does not exist, sending invite -------------------- ");
                 // user does not exist, send invite make it 
@@ -184,6 +201,17 @@ export const organizationRouter = createTRPCRouter({
             }
         }),
 
+
+  /**
+ * finishOnboarding
+ * Protected query.
+ * Completes membership for the currently signed-in user.
+ * - Validates org and prevents duplicates.
+ * - Adds the user to the org with the requested role via auth API.
+ * - Sends a confirmation email.
+ * Returns { success, message, userExists?: true }.
+ */
+
     finishOnboarding: protectedProcedure
         .input(z.object({ organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .query(async ({ input, ctx }) => {
@@ -208,13 +236,13 @@ export const organizationRouter = createTRPCRouter({
                 if (!org) {
                     return { success: false, message: "Organization not found" };
                 }
-                 const userExists = await ctx.prisma.member.findFirst({
+                const userExists = await ctx.prisma.member.findFirst({
                     where: {
                         userId: user.id,
                         organizationId: input.organizationId
 
                     }
-                    
+
                 })
                 if (userExists) {
                     return { success: true, userExists: true, message: `You are already a member of organization ${org.name}` };
@@ -262,13 +290,21 @@ export const organizationRouter = createTRPCRouter({
 
         }),
 
+/**
+ * getAllOrganization
+ * Protected query.
+ * Lists organizations where the user is an OWNER (via auth API),
+ * then augments each with memberCount and parsed metadata.
+ * Returns { success, message, value: OrganizationWithCounts[] }.
+ */
+
     getAllOrganization: protectedProcedure.query(async ({ ctx }) => {
         try {
-            const data = await auth.api.listOrganizations({ 
-                query:{
-                    role:"owner"
+            const data = await auth.api.listOrganizations({
+                query: {
+                    role: "owner"
                 },
-                headers: ctx.headers 
+                headers: ctx.headers
             });
 
             const organizations = await Promise.all(
@@ -276,7 +312,7 @@ export const organizationRouter = createTRPCRouter({
                     const members = await ctx.prisma.member.count({
                         where: {
                             organizationId: org.id
-                            
+
                         }
                     })
                     return {
@@ -302,6 +338,14 @@ export const organizationRouter = createTRPCRouter({
         }
     }),
 
+
+   /**
+ * getOrganization
+ * Protected, rate-limited query.
+ * Fetches full organization details (by id/slug) via auth API,
+ * parses metadata, and computes daysLeft (trial vs. billing period).
+ * Returns { success, message, value: OrganizationX } or null on failure.
+ */
 
     getOrganization: protectedProcedure
         .use(rateLimit())
@@ -370,7 +414,15 @@ export const organizationRouter = createTRPCRouter({
 
         }),
 
-
+        /**
+ * createOrganization
+ * Protected mutation.
+ * Requires active session and subscription.
+ * Enforces plan limit (max organizations), generates a unique slug,
+ * verifies slug availability, then creates the organization with
+ * subscription metadata and keeps it as the active org.
+ * Returns { success, message, value: CreatedOrg }.
+ */
 
     createOrganization: protectedProcedure.input(z.object({ name: z.string() }))
         .mutation(async ({ input, ctx, }) => {
@@ -468,6 +520,14 @@ export const organizationRouter = createTRPCRouter({
             }
         }),
 
+/**
+ * updateMemberRole
+ * Protected mutation.
+ * Updates a member in an organization:
+ * - ActionType "remove": removes member and emails them.
+ * - ActionType "admin" | "owner" | "member": updates role and emails them.
+ * Returns { success, message }.
+ */
 
     updateMemberRole: protectedProcedure.input(z.object({
         organizationId: z.string(),
@@ -551,6 +611,13 @@ export const organizationRouter = createTRPCRouter({
         }
     }),
 
+/**
+ * getOwnerOrganizations
+ * Protected query.
+ * Requires sign-in. Lists orgs where the user is OWNER,
+ * computes currentSeats from Prisma and maxSeats from metadata.
+ * Returns an array of summarized owner org info.
+ */
 
     getOwnerOrganizations: protectedProcedure.query(async ({ ctx }) => {
         try {
@@ -597,6 +664,15 @@ export const organizationRouter = createTRPCRouter({
         }
 
     }),
+
+    /**
+ * getFullOrganizationInfo
+ * Protected query.
+ * Fetches full organization info (members, invitations, etc.) via auth API
+ * and returns it with parsed metadata.
+ * Returns { success, message, value: FullOrganization | null }.
+ */
+
 
     getFullOrganizationInfo: protectedProcedure.input(z.object({
         organizationId: z.string(),
