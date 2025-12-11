@@ -1,12 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from '@/lib/prisma';
+
 import { sendEmail } from "@/server/actions/sendEmail";
 import { organization } from "better-auth/plugins"
 import { createServerCaller } from "@/server/trpc/caller";
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
 import { magicLink } from "better-auth/plugins";
+import prisma from "./prisma";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-07-30.basil",

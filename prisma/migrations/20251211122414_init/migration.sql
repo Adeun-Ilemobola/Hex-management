@@ -4,6 +4,27 @@ CREATE TYPE "InvestmentType" AS ENUM ('INDIVIDUAL', 'POOLED', 'TIC');
 -- CreateEnum
 CREATE TYPE "SaleType" AS ENUM ('SELL', 'RENT', 'LEASE');
 
+-- CreateEnum
+CREATE TYPE "roomType" AS ENUM ('PRIVATE', 'GROUP');
+
+-- CreateEnum
+CREATE TYPE "PropertyType" AS ENUM ('House', 'Apartment', 'Condo', 'Commercial', 'Other');
+
+-- CreateEnum
+CREATE TYPE "PropertyStatus" AS ENUM ('active', 'pending', 'sold');
+
+-- CreateEnum
+CREATE TYPE "OwnerType" AS ENUM ('USER', 'ORGANIZATION');
+
+-- CreateEnum
+CREATE TYPE "PlanTier" AS ENUM ('Free', 'Deluxe', 'Premium');
+
+-- CreateEnum
+CREATE TYPE "InvestmentBlockStatus" AS ENUM ('DRAFT', 'FINALIZED', 'LOCKED', 'VERIFIED');
+
+-- CreateEnum
+CREATE TYPE "FileType" AS ENUM ('image', 'video', 'document', 'audio', 'other');
+
 -- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
@@ -19,37 +40,12 @@ CREATE TABLE "user" (
     "country" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "investments" TEXT[],
+    "directMessage" BOOLEAN NOT NULL DEFAULT true,
+    "profilePublic" BOOLEAN NOT NULL DEFAULT true,
+    "stripeCustomerId" TEXT,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "SubscriptionArchives" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-
-    CONSTRAINT "SubscriptionArchives_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Subscription" (
-    "id" TEXT NOT NULL,
-    "stripeCustomerId" TEXT,
-    "stripeSubscriptionId" TEXT,
-    "priceId" TEXT,
-    "status" TEXT NOT NULL DEFAULT 'active',
-    "isActive" BOOLEAN NOT NULL DEFAULT false,
-    "currentPeriodStart" TIMESTAMP(3),
-    "currentPeriodEnd" TIMESTAMP(3),
-    "cancelAtPeriodEnd" BOOLEAN NOT NULL DEFAULT false,
-    "canceledAt" TIMESTAMP(3),
-    "planTier" TEXT NOT NULL DEFAULT 'Free',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT NOT NULL,
-    "subscriptionArchivesId" TEXT,
-
-    CONSTRAINT "Subscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -57,12 +53,18 @@ CREATE TABLE "externalInvestor" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "contributionPercentage" DOUBLE PRECISION NOT NULL,
-    "returnPercentage" DOUBLE PRECISION NOT NULL,
-    "isInternal" BOOLEAN NOT NULL,
-    "accessRevoked" BOOLEAN NOT NULL,
-    "dollarValueReturn" DOUBLE PRECISION NOT NULL,
+    "status" "InvestmentBlockStatus" NOT NULL DEFAULT 'DRAFT',
+    "investorUserId" TEXT,
+    "contributionPercentage" DECIMAL(8,4) NOT NULL,
+    "returnPercentage" DECIMAL(8,4) NOT NULL,
+    "dollarValueReturn" DECIMAL(18,2) NOT NULL,
+    "isInternal" BOOLEAN NOT NULL DEFAULT false,
+    "accessRevoked" BOOLEAN NOT NULL DEFAULT false,
+    "funded" BOOLEAN NOT NULL DEFAULT false,
+    "fundedAt" TIMESTAMP(3),
     "investmentBlockId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "externalInvestor_pkey" PRIMARY KEY ("id")
 );
@@ -75,30 +77,34 @@ CREATE TABLE "investmentBlock" (
     "margin" DOUBLE PRECISION NOT NULL,
     "typeOfSale" "SaleType" NOT NULL DEFAULT 'SELL',
     "saleDuration" INTEGER NOT NULL DEFAULT 0,
+    "depreciationYears" INTEGER NOT NULL DEFAULT 1,
     "leaseCycle" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "leaseType" TEXT NOT NULL DEFAULT 'Month',
     "finalResult" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "discountPercentage" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "propertieid" TEXT NOT NULL,
+    "propertyId" TEXT NOT NULL,
 
     CONSTRAINT "investmentBlock_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "image" (
+CREATE TABLE "File" (
     "id" TEXT NOT NULL,
+    "type" "FileType" NOT NULL,
     "name" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "size" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
-    "lastModified" BIGINT NOT NULL,
+    "size" DOUBLE PRECISION NOT NULL,
+    "path" TEXT NOT NULL,
+    "tags" TEXT[],
+    "link" TEXT NOT NULL,
+    "mime" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "thumbnail" BOOLEAN NOT NULL,
-    "supabaseID" TEXT NOT NULL,
-    "propertyId" TEXT NOT NULL,
+    "chatRoomID" TEXT DEFAULT '',
+    "chatOwnerID" TEXT DEFAULT '',
+    "messageId" TEXT DEFAULT '',
+    "propertyId" TEXT DEFAULT '',
 
-    CONSTRAINT "image_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "File_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -106,7 +112,7 @@ CREATE TABLE "propertie" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "address" TEXT NOT NULL,
-    "description" TEXT DEFAULT '',
+    "description" TEXT NOT NULL DEFAULT '',
     "yearBuilt" INTEGER NOT NULL DEFAULT 2020,
     "squareFootage" INTEGER NOT NULL DEFAULT 0,
     "numBedrooms" INTEGER NOT NULL DEFAULT 0,
@@ -116,8 +122,8 @@ CREATE TABLE "propertie" (
     "hasPool" BOOLEAN NOT NULL DEFAULT false,
     "amenities" TEXT[],
     "lotSize" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "propertyType" TEXT NOT NULL DEFAULT 'Apartment',
-    "status" TEXT NOT NULL DEFAULT 'active',
+    "propertyType" "PropertyType" NOT NULL DEFAULT 'Apartment',
+    "status" "PropertyStatus" NOT NULL DEFAULT 'active',
     "ownerName" TEXT NOT NULL,
     "contactInfo" TEXT NOT NULL,
     "leavingstatus" TEXT NOT NULL DEFAULT 'Active',
@@ -126,7 +132,8 @@ CREATE TABLE "propertie" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "accessCode" VARCHAR(12) NOT NULL,
-    "userId" TEXT NOT NULL,
+    "ownerId" TEXT NOT NULL,
+    "ownerType" "OwnerType" NOT NULL DEFAULT 'ORGANIZATION',
 
     CONSTRAINT "propertie_pkey" PRIMARY KEY ("id")
 );
@@ -172,6 +179,7 @@ CREATE TABLE "session" (
     "ipAddress" TEXT,
     "userAgent" TEXT,
     "userId" TEXT NOT NULL,
+    "activeOrganizationId" TEXT,
 
     CONSTRAINT "session_pkey" PRIMARY KEY ("id")
 );
@@ -179,7 +187,8 @@ CREATE TABLE "session" (
 -- CreateTable
 CREATE TABLE "ChatRoom" (
     "id" TEXT NOT NULL,
-    "title" TEXT[],
+    "title" TEXT NOT NULL,
+    "type" "roomType" NOT NULL DEFAULT 'PRIVATE',
 
     CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
 );
@@ -191,6 +200,7 @@ CREATE TABLE "Message" (
     "authorId" TEXT NOT NULL,
     "text" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
@@ -200,45 +210,74 @@ CREATE TABLE "ChatRoomMember" (
     "id" TEXT NOT NULL,
     "roomId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "userName" TEXT NOT NULL,
+    "isAdmin" BOOLEAN NOT NULL DEFAULT false,
+    "notificationCount" INTEGER NOT NULL DEFAULT 0,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ChatRoomMember_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "ChatImage" (
+CREATE TABLE "organization" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "size" INTEGER NOT NULL,
-    "type" TEXT NOT NULL,
-    "lastModified" BIGINT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "thumbnail" BOOLEAN NOT NULL,
-    "supabaseID" TEXT NOT NULL,
-    "ChatRoomID" TEXT NOT NULL,
-    "chatOwnerID" TEXT NOT NULL,
-    "messageId" TEXT NOT NULL,
-    "ownerId" TEXT NOT NULL,
+    "slug" TEXT,
+    "logo" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "metadata" TEXT,
 
-    CONSTRAINT "ChatImage_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "organization_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "member" (
+    "id" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "member_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "invitation" (
+    "id" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT,
+    "status" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "inviterId" TEXT NOT NULL,
+
+    CONSTRAINT "invitation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscription" (
+    "id" TEXT NOT NULL,
+    "plan" TEXT NOT NULL,
+    "referenceId" TEXT NOT NULL,
+    "stripeCustomerId" TEXT,
+    "stripeSubscriptionId" TEXT,
+    "status" TEXT,
+    "periodStart" TIMESTAMP(3),
+    "periodEnd" TIMESTAMP(3),
+    "cancelAtPeriodEnd" BOOLEAN,
+    "seats" INTEGER,
+
+    CONSTRAINT "subscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SubscriptionArchives_userId_key" ON "SubscriptionArchives"("userId");
+CREATE UNIQUE INDEX "externalInvestor_investmentBlockId_email_key" ON "externalInvestor"("investmentBlockId", "email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Subscription_userId_key" ON "Subscription"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "externalInvestor_email_key" ON "externalInvestor"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "investmentBlock_propertieid_key" ON "investmentBlock"("propertieid");
+CREATE UNIQUE INDEX "investmentBlock_propertyId_key" ON "investmentBlock"("propertyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "investmentBlock_id_key" ON "investmentBlock"("id");
@@ -252,26 +291,14 @@ CREATE UNIQUE INDEX "ChatRoom_id_key" ON "ChatRoom"("id");
 -- CreateIndex
 CREATE UNIQUE INDEX "ChatRoomMember_roomId_userId_key" ON "ChatRoomMember"("roomId", "userId");
 
--- AddForeignKey
-ALTER TABLE "SubscriptionArchives" ADD CONSTRAINT "SubscriptionArchives_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "organization_slug_key" ON "organization"("slug");
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "externalInvestor" ADD CONSTRAINT "externalInvestor_investmentBlockId_fkey" FOREIGN KEY ("investmentBlockId") REFERENCES "investmentBlock"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Subscription" ADD CONSTRAINT "Subscription_subscriptionArchivesId_fkey" FOREIGN KEY ("subscriptionArchivesId") REFERENCES "SubscriptionArchives"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "externalInvestor" ADD CONSTRAINT "externalInvestor_investmentBlockId_fkey" FOREIGN KEY ("investmentBlockId") REFERENCES "investmentBlock"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "investmentBlock" ADD CONSTRAINT "investmentBlock_propertieid_fkey" FOREIGN KEY ("propertieid") REFERENCES "propertie"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "image" ADD CONSTRAINT "image_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "propertie"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "propertie" ADD CONSTRAINT "propertie_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "investmentBlock" ADD CONSTRAINT "investmentBlock_propertyId_fkey" FOREIGN KEY ("propertyId") REFERENCES "propertie"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -283,16 +310,16 @@ ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Message" ADD CONSTRAINT "Message_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Message" ADD CONSTRAINT "Message_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "ChatRoomMember" ADD CONSTRAINT "ChatRoomMember_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatRoomMember" ADD CONSTRAINT "ChatRoomMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "member" ADD CONSTRAINT "member_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatImage" ADD CONSTRAINT "ChatImage_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "Message"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "member" ADD CONSTRAINT "member_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ChatImage" ADD CONSTRAINT "ChatImage_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "invitation" ADD CONSTRAINT "invitation_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invitation" ADD CONSTRAINT "invitation_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

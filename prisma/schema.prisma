@@ -5,15 +5,16 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  // output   = "./generated/client"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
+
+
 
 enum InvestmentType {
   INDIVIDUAL
@@ -31,6 +32,49 @@ enum roomType {
   PRIVATE
   GROUP
 }
+
+// ─── New enums to match Zod ────────────────────────────────────────────────
+
+enum PropertyType {
+  House
+  Apartment
+  Condo
+  Commercial
+  Other
+}
+
+enum PropertyStatus {
+  active
+  pending
+  sold
+}
+
+enum OwnerType {
+  USER
+  ORGANIZATION
+}
+
+enum PlanTier {
+  Free
+  Deluxe
+  Premium
+}
+
+enum InvestmentBlockStatus {
+  DRAFT
+  FINALIZED // allocations sum to 100%, funding in progress/escrow
+  LOCKED // funds cleared; cap table immutable
+  VERIFIED
+}
+
+enum FileType {
+  image
+  video
+  document
+  audio
+  other
+}
+
 
 model User {
   id            String    @id
@@ -70,48 +114,8 @@ model User {
 
 
 
-// model SubscriptionArchives {
-//   id            String         @id @default(uuid())
-//   Subscriptions Subscription[]
-//   user          User           @relation(fields: [userId], references: [id])
-//   userId        String         @unique
-// }
 
-// model Subscription {
-//   id String @id @default(uuid())
-
-//   stripeCustomerId     String?
-//   stripeSubscriptionId String?
-//   priceId              String? // Stripe Price ID
-//   status               String  @default("active") // active | past_due | canceled | incomplete, etc.
-//   isActive             Boolean @default(false)
-
-//   currentPeriodStart DateTime?
-//   currentPeriodEnd   DateTime?
-
-//   cancelAtPeriodEnd Boolean   @default(false)
-//   canceledAt        DateTime? // optional, if user cancels
-
-//   planTier String @default("Free") // "Free" | "Deluxe" | "Premium", etc.
-
-//   nextStripeSubscriptionId String?
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   user   User   @relation(fields: [userId], references: [id])
-//   userId String @unique
-
-//   SubscriptionArchives   SubscriptionArchives? @relation(fields: [subscriptionArchivesId], references: [id])
-//   subscriptionArchivesId String?
-// }
-
-enum InvestmentBlockStatus {
-  DRAFT
-  FINALIZED // allocations sum to 100%, funding in progress/escrow
-  LOCKED // funds cleared; cap table immutable
-  VERIFIED
-}
+// ─── External Investor (matches externalInvestorSchema) ─────────────────────
 
 model externalInvestor {
   id     String                @id @default(uuid())
@@ -122,14 +126,15 @@ model externalInvestor {
   investorUserId String? // optional link to a User if they do exist
 
   // economics
-  contributionPercentage Decimal   @db.Decimal(8, 4) // was Float
-  returnPercentage       Decimal   @db.Decimal(8, 4) // was Float
-  dollarValueReturn      Decimal   @db.Decimal(18, 2) // was Float
+  contributionPercentage Decimal   @db.Decimal(8, 4)  // z.number().min(0).max(100)
+  returnPercentage       Decimal   @db.Decimal(8, 4)  // z.number().min(0).max(100)
+  dollarValueReturn      Decimal   @db.Decimal(18, 2) // z.number().nonnegative()
+
   // states/flags
-  isInternal             Boolean
-  accessRevoked          Boolean   @default(false)
-  funded                 Boolean   @default(false)
-  fundedAt               DateTime?
+  isInternal   Boolean  @default(false)  // Zod default(false)
+  accessRevoked Boolean @default(false)
+  funded        Boolean @default(false)
+  fundedAt      DateTime?
 
   // parent
   investmentBlockId String
@@ -141,91 +146,103 @@ model externalInvestor {
   @@unique([investmentBlockId, email])
 }
 
+// ─── Investment Block (matches investmentBlockSchema) ───────────────────────
+
 model investmentBlock {
   id               String         @id @default(uuid())
-  //  General information that all type of investment will have
-  typeOfInvestment InvestmentType @default(INDIVIDUAL) // Pooled / TIC , this are going to be the first two the rest will take more time to implement
+  // General information
+  typeOfInvestment InvestmentType @default(INDIVIDUAL) // Zod default("INDIVIDUAL")
 
-  // this will be the coin investment 
+  initialInvestment Float // z.number().positive()
+  margin            Float // z.number().min(0)
 
-  initialInvestment Float // How much money did the user buy this property?
-  margin            Float // Profit percentage Based off the initial investment
-  typeOfSale        SaleType @default(SELL) // Rent , Sell , Lease
-  saleDuration      Int      @default(0) // duration for how long to get my money back from the investment
-  depreciationYears Int      @default(1) //
+  typeOfSale   SaleType @default(SELL)
+  saleDuration Int      @default(0)
+  depreciationYears Int @default(1)
 
-  // ------------------ Lease -------------------------
+  // Lease-specific
   leaseCycle Float  @default(0.0)
-  leaseType  String @default("Month") // Lease candy every week , Every amount of months for  LeaseCycle , can be a certain amount of years plus months for  LeaseCycle
+  leaseType  String @default("Month")
 
-  finalResult Float @default(0.0) // The result for the investment
+  finalResult        Float @default(0.0)
+  discountPercentage Float @default(0) // z.number().min(0).max(100).default(0)
 
-  discountPercentage Float @default(0) // Discount percentage for the property, if applicable
+  // Relation to property — renamed to match Zod's propertyId
+  propertyId String   @unique
+  property   propertie @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
-  propertieid       String             @unique
-  propertie         propertie          @relation(fields: [propertieid], references: [id], onDelete: Cascade)
   externalInvestors externalInvestor[]
 
   @@unique([id])
 }
 
-model image {
-  id           String   @id @default(uuid())
-  name         String // The name of the image file
-  url          String // The URL of the image
-  size         Int // Size of the image in bytes
-  type         String // Type of the image (e.g., "jpg", "png", "gif")
-  lastModified BigInt // Last modified timestamp in milliseconds since epoch
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  thumbnail    Boolean // Whether this image is a thumbnail or not
-  supabaseID   String // The ID of the image in Supabase storage, if applicable
+// ─── Files (matches FileXSchema closely) ────────────────────────────────────
 
-  // Relationships
-  propertyId String
-  property   propertie @relation(fields: [propertyId], references: [id])
+model File {
+  id        String   @id @default(cuid())
+  type      FileType
+  name      String
+  size      Float    // z.number().nonnegative()
+  path      String
+  tags      String[] // z.array(z.string())
+  link      String   // z.string()
+  mime      String   // z.string()
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatRoomID  String? @default("") // optional in Zod
+  chatOwnerID String? @default("") // optional in Zod
+  messageId   String? @default("")
+
+  // Property relationship
+  propertyId  String? @default("")
 }
+
+// ─── Property (matches propertySchema) ──────────────────────────────────────
 
 model propertie {
   id            String  @id @default(uuid())
   name          String
-  address       String // The exact location with the ZIP Code and the general address
-  description   String? @default("") // General description of the property.
-  yearBuilt     Int     @default(2020) // The year the property was built. Helpful for valuation and depreciation.
-  squareFootage Int     @default(0) // Useful for investors, renters, and comparative analysis.
-  numBedrooms   Int     @default(0) // Common requirement for housing.
-  numBathrooms  Int     @default(0) // Same as above.
+  address       String                      // z.string().min(5)
+  description   String  @default("")        // Zod: string().max(1500).default("")
+  yearBuilt     Int     @default(2020)      // Zod min(1800)
+  squareFootage Int     @default(0)
+  numBedrooms   Int     @default(0)
+  numBathrooms  Int     @default(0)
 
   // Amenities and Features
   hasGarage Boolean  @default(false)
   hasGarden Boolean  @default(false)
   hasPool   Boolean  @default(false)
-  amenities String[] // List of amenities (e.g., ["Elevator", "Gym", "Fireplace"]).
+  amenities String[]
 
-  lotSize       Float   @default(0) // Size of the property land, in square meters or feet.
-  propertyType  String  @default("Apartment") // House, Apartment, Condo, Commercial, etc.
-  status        String  @default("active") // active, pending, sold, etc.
-  ownerName     String // Who currently owns the property.
-  contactInfo   String // Contact details for inquiries.
-  leavingstatus String  @default("Active") // Active ,Inactive , Renovation , Developing , Purchase Planning
+  lotSize      Float         @default(0)             // z.number().positive()
+  propertyType PropertyType  @default(Apartment)     // from PropertyTypeEnum
+  status       PropertyStatus @default(active)       // from StatusEnum
+
+  ownerName   String          // z.string().min(2)
+  contactInfo String          // z.string().min(5)
+  leavingstatus String @default("Active") // not in Zod; kept as-is
+
   // Media
-  images        image[] // Array of URLs or id  for property images. Everything will be processed by super bases. That's why it's just a array of strings.
-  videoTourUrl  String? // Optional video tour.
+  // images       File[]         // Zod uses imageSchema; you’re mapping via File
+  videoTourUrl String?
+
   thobNialImgId String?
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accessCode String @db.VarChar(12) // this code is generated by the user that created the property I need to be used for other external users to access the property
+  accessCode String @db.VarChar(12) // length 12 in Zod
 
   // Relationships
   ownerId   String
-  ownerType String @default("ORGANIZATION") // "user" or "organization"
+  ownerType OwnerType @default(ORGANIZATION) // from OwnerTypeEnum
 
   investBlock investmentBlock?
 }
-
 model Account {
   id                    String    @id
   accountId             String
@@ -292,7 +309,7 @@ model Message {
   text      String?
   createdAt DateTime    @default(now())
   isDeleted Boolean     @default(false)
-  images    ChatImage[]
+  // images    File[]      // relation to File model for images
 }
 
 model ChatRoomMember {
@@ -308,23 +325,23 @@ model ChatRoomMember {
   @@unique([roomId, userId])
 }
 
-model ChatImage {
-  id           String   @id @default(uuid())
-  name         String // The name of the image file
-  url          String // The URL of the image
-  size         Int // Size of the image in bytes
-  type         String // Type of the image (e.g., "jpg", "png", "gif")
-  lastModified BigInt // Last modified timestamp in milliseconds since epoch
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  supabaseID   String // The ID of the image in Supabase storage, if applicable
+// model ChatImage {
+//   id           String   @id @default(uuid())
+//   name         String // The name of the image file
+//   url          String // The URL of the image
+//   size         Int // Size of the image in bytes
+//   type         String // Type of the image (e.g., "jpg", "png", "gif")
+//   lastModified BigInt // Last modified timestamp in milliseconds since epoch
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   supabaseID   String // The ID of the image in Supabase storage, if applicable
 
-  ChatRoomID  String // what chat room owns this image?
-  chatOwnerID String // what user posted image
+//   ChatRoomID  String // what chat room owns this image?
+//   chatOwnerID String // what user posted image
 
-  message   Message @relation(fields: [messageId], references: [id])
-  messageId String
-}
+//   message   Message @relation(fields: [messageId], references: [id])
+//   messageId String
+// }
 
 model Organization {
   id          String       @id
@@ -380,3 +397,5 @@ model Subscription {
 
   @@map("subscription")
 }
+
+
