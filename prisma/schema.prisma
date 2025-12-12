@@ -1,0 +1,375 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum InvestmentType {
+  INDIVIDUAL
+  POOLED
+  TIC
+}
+
+enum SaleType {
+  SELL
+  RENT
+  LEASE
+}
+
+enum roomType {
+  PRIVATE
+  GROUP
+}
+
+// ─── New enums to match Zod ────────────────────────────────────────────────
+
+enum PropertyType {
+  House
+  Apartment
+  Condo
+  Commercial
+  Other
+}
+
+enum PropertyStatus {
+  active
+  pending
+  sold
+}
+
+enum OwnerType {
+  USER
+  ORGANIZATION
+}
+
+enum PlanTier {
+  Free
+  Deluxe
+  Premium
+}
+
+enum InvestmentBlockStatus {
+  DRAFT
+  FINALIZED // allocations sum to 100%, funding in progress/escrow
+  LOCKED // funds cleared; cap table immutable
+  VERIFIED
+}
+
+enum FileType {
+  image
+  video
+  document
+  audio
+  other
+}
+
+// ─── External Investor (matches externalInvestorSchema) ─────────────────────
+
+model externalInvestor {
+  id     String                @id @default(uuid())
+  name   String
+  email  String
+  status InvestmentBlockStatus @default(DRAFT)
+
+  investorUserId String? // optional link to a User if they do exist
+
+  // economics
+  contributionPercentage Decimal @db.Decimal(8, 4) // z.number().min(0).max(100)
+  returnPercentage       Decimal @db.Decimal(8, 4) // z.number().min(0).max(100)
+  dollarValueReturn      Decimal @db.Decimal(18, 2) // z.number().nonnegative()
+
+  // states/flags
+  isInternal    Boolean   @default(false) // Zod default(false)
+  accessRevoked Boolean   @default(false)
+  funded        Boolean   @default(false)
+  fundedAt      DateTime?
+
+  // parent
+  investmentBlockId String
+  investmentBlock   investmentBlock @relation(fields: [investmentBlockId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([investmentBlockId, email])
+}
+
+// ─── Investment Block (matches investmentBlockSchema) ───────────────────────
+
+model investmentBlock {
+  id               String         @id @default(uuid())
+  // General information
+  typeOfInvestment InvestmentType @default(INDIVIDUAL) // Zod default("INDIVIDUAL")
+
+  initialInvestment Float // z.number().positive()
+  margin            Float // z.number().min(0)
+
+  typeOfSale        SaleType @default(SELL)
+  saleDuration      Int      @default(0)
+  depreciationYears Int      @default(1)
+
+  // Lease-specific
+  leaseCycle Float  @default(0.0)
+  leaseType  String @default("Month")
+
+  finalResult        Float @default(0.0)
+  discountPercentage Float @default(0) // z.number().min(0).max(100).default(0)
+
+  // Relation to property — renamed to match Zod's propertyId
+  propertyId String    @unique
+  property   propertie @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  externalInvestors externalInvestor[]
+
+  @@unique([id])
+}
+
+// ─── Files (matches FileXSchema closely) ────────────────────────────────────
+
+model File {
+  id        String   @id @default(cuid())
+  type      FileType
+  name      String
+  size      Float // z.number().nonnegative()
+  path      String
+  tags      String[] // z.array(z.string())
+  link      String // z.string()
+  mime      String // z.string()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatRoomID  String? @default("") // optional in Zod
+  chatOwnerID String? @default("") // optional in Zod
+  messageId   String? @default("")
+
+  // Property relationship
+  propertyId String? @default("")
+}
+
+// ─── Property (matches propertySchema) ──────────────────────────────────────
+
+model propertie {
+  id            String @id @default(uuid())
+  name          String
+  address       String // z.string().min(5)
+  description   String @default("") // Zod: string().max(1500).default("")
+  yearBuilt     Int    @default(2020) // Zod min(1800)
+  squareFootage Int    @default(0)
+  numBedrooms   Int    @default(0)
+  numBathrooms  Int    @default(0)
+
+  // Amenities and Features
+  hasGarage Boolean  @default(false)
+  hasGarden Boolean  @default(false)
+  hasPool   Boolean  @default(false)
+  amenities String[]
+
+  lotSize      Float          @default(0) // z.number().positive()
+  propertyType PropertyType   @default(Apartment) // from PropertyTypeEnum
+  status       PropertyStatus @default(active) // from StatusEnum
+
+  ownerName     String // z.string().min(2)
+  contactInfo   String // z.string().min(5)
+  leavingstatus String @default("Active") // not in Zod; kept as-is
+
+  // Media
+  // images       File[]         // Zod uses imageSchema; you’re mapping via File
+  videoTourUrl String?
+
+  thobNialImgId String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accessCode String @db.VarChar(12) // length 12 in Zod
+
+  // Relationships
+  ownerId   String
+  ownerType OwnerType @default(ORGANIZATION) // from OwnerTypeEnum
+
+  investBlock investmentBlock?
+}
+
+model ChatRoom {
+  id           String           @id @default(uuid())
+  title        String // this will be an arry of the two users name so you can switch depends on who is viewing it
+  type         roomType         @default(PRIVATE)
+  participants ChatRoomMember[]
+
+  chats Message[]
+
+  @@unique([id])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  room      ChatRoom @relation(fields: [roomId], references: [id])
+  roomId    String
+  authorId  String
+  text      String?
+  createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+}
+
+model ChatRoomMember {
+  id                String   @id @default(uuid())
+  room              ChatRoom @relation(fields: [roomId], references: [id])
+  roomId            String
+  userId            String
+  userName          String
+  isAdmin           Boolean  @default(false) // Whether the user is an admin of the chat room
+  notificationCount Int      @default(0) // Number of unread messages or notifications for this user in the room
+  joinedAt          DateTime @default(now())
+
+  @@unique([roomId, userId])
+}
+
+model User {
+  id               String       @id
+  name             String
+  email            String
+  emailVerified    Boolean      @default(false)
+  image            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  phoneNumber      String?
+  stripeCustomerId String?
+  country          String?
+  sessions         Session[]
+  accounts         Account[]
+  members          Member[]
+  invitations      Invitation[]
+
+  address String?
+  zipCode String?
+  city    String?
+  state   String?
+   investments   String[]
+
+  directMessage Boolean @default(true)
+  profilePublic Boolean @default(true)
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String
+  logo        String?
+  createdAt   DateTime
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  @@unique([slug])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+model Subscription {
+  id                   String    @id
+  plan                 String
+  referenceId          String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  status               String?   @default("incomplete")
+  periodStart          DateTime?
+  periodEnd            DateTime?
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  cancelAtPeriodEnd    Boolean?  @default(false)
+  seats                Int?
+
+  @@map("subscription")
+}
