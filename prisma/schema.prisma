@@ -168,9 +168,9 @@ model propertie {
   numBathrooms  Int    @default(0)
 
   // Amenities and Features
-  hasGarage Boolean  @default(false)
-  hasGarden Boolean  @default(false)
-  hasPool   Boolean  @default(false)
+  // hasGarage Boolean  @default(false)
+  // hasGarden Boolean  @default(false)
+  // hasPool   Boolean  @default(false)
   amenities String[]
 
   lotSize      Float          @default(0) // z.number().positive()

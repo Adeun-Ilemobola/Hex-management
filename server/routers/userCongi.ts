@@ -25,8 +25,11 @@ export const userCongiRouter = createTRPCRouter({
                 const headers = ctx.headers;
 
                 // 2) Check existing accounts
-                const accounts = await authClient.listAccounts();
-                const hasEmail = accounts.data?.some((a) => a.provider === "credential" )
+                // Use 'api' and pass the headers so it knows WHO the user is
+                const accounts = await auth.api.listUserAccounts({
+                    headers: ctx.headers
+                });
+                const hasEmail = accounts.data?.some((a) => a.provider === "credential")
 
                 if (!hasEmail) {
                     await auth.api.setPassword({
@@ -50,14 +53,14 @@ export const userCongiRouter = createTRPCRouter({
             }
         }),
 
-/**
- * getUserPlan
- * Protected query.
- * Resolves the active subscription/plan:
- * - If the user is an org employee (member/admin) and org metadata exists, parses plan from org metadata.
- * - Otherwise, parses plan from the user’s own subscription in ctx.
- * Returns { success, isEployee, role, value: Plan | null }.
- */
+    /**
+     * getUserPlan
+     * Protected query.
+     * Resolves the active subscription/plan:
+     * - If the user is an org employee (member/admin) and org metadata exists, parses plan from org metadata.
+     * - Otherwise, parses plan from the user’s own subscription in ctx.
+     * Returns { success, isEployee, role, value: Plan | null }.
+     */
 
     getUserPlan: protectedProcedure.query(async ({ ctx }) => {
         try {
@@ -99,14 +102,14 @@ export const userCongiRouter = createTRPCRouter({
             return { success: false, isEployee: false, role: "", value: null };
         }
     }),
-/**
- * SearchUserByEmail
- * Protected mutation.
- * Input: { email }.
- * Finds publicly visible user profiles matching the email and returns a lightweight card
- * (id, name, email, image, directMessage).
- * Returns { success, value: UserCard[] }.
- */
+    /**
+     * SearchUserByEmail
+     * Protected mutation.
+     * Input: { email }.
+     * Finds publicly visible user profiles matching the email and returns a lightweight card
+     * (id, name, email, image, directMessage).
+     * Returns { success, value: UserCard[] }.
+     */
 
     SearchUserByEmail: protectedProcedure.input(z.object({ email: z.string() }))
         .mutation(async ({ input, ctx }) => {
@@ -133,20 +136,20 @@ export const userCongiRouter = createTRPCRouter({
             }
         }),
 
-/**
- * magicLinkVerify
- * Public/base query.
- * Input: { token }.
- * Verifies a magic-link token via auth API using session cookies;
- * on success returns provider response payload.
- * Returns { success, message, value? }.
- */
+    /**
+     * magicLinkVerify
+     * Public/base query.
+     * Input: { token }.
+     * Verifies a magic-link token via auth API using session cookies;
+     * on success returns provider response payload.
+     * Returns { success, message, value? }.
+     */
 
     magicLinkVerify: baseProcedure.input(z.object({ token: z.string() }))
         .query(async ({ input, ctx }) => {
             try {
                 console.log(" ---------------------->  Verifying magic link with token:", input.token);
-                
+
                 if (input.token.trim() === "") {
                     return { success: false, message: "Invalid token" };
                 }

@@ -45,7 +45,7 @@ const baseRegister = z.object({
 });
 
 // Simple Register
-export const zodRegisterSchema = baseRegister.extend({
+export const zodRegisterSchema = baseRegister.safeExtend({
   country: z.string().min(2, "Country required"),
 });
 
@@ -110,7 +110,9 @@ export const externalInvestorSchema = z.object({
 });
 // --- 5.5. File  ---
 export const FileXSchema = z.object({
+    // base
     id: z.string().default(""), 
+    // core fields
     type: z.enum(['image', 'video', 'document', 'audio', 'other']),
     name : z.string(),
     size : z.number().nonnegative({ message: "File size must be a non-negative number" }),
@@ -120,6 +122,7 @@ export const FileXSchema = z.object({
     tags : z.array(z.string()),
     link: z.string(),
     mime: z.string(),
+    // chat fields
     chatRoomID: z.string().optional(),
     messageId : z.string().optional(),
     chatOwnerID : z.string().optional(),
@@ -162,11 +165,11 @@ export const propertySchema = z.object({
     squareFootage: z.number().int().positive(),
     
     // Boolean flags group
-    hasGarage: z.boolean().default(false),
-    hasGarden: z.boolean().default(false),
-    hasPool: z.boolean().default(false),
+    // hasGarage: z.boolean().default(false),
+    // hasGarden: z.boolean().default(false),
+    // hasPool: z.boolean().default(false),
     
-    amenities: z.array(z.string()),
+    amenities: z.array(z.string()).min(3),
     propertyType: PropertyTypeEnum.default("House"),
     status: StatusEnum.default("active"),
     
@@ -254,35 +257,77 @@ export type ChatRoomMember = z.infer<typeof ChatRoomMemberSchema>;
 
 // If you really need a default object for React State:
 export const defaultPropertyInput: PropertyInput = {
-    ...propertySchema.parse({
-        // Only provide required fields that don't have defaults
-        name: "", address: "", ownerName: "", contactInfo: "", 
-        accessCode: "000000000000", ownerId: "", ownerType: "ORGANIZATION",
-        numBedrooms: 0, numBathrooms: 0, lotSize: 1, yearBuilt: 2024, squareFootage: 1,
-        amenities: [], images: []
-    })
+    id: "",
+  name: "", 
+  address: "",
+  description: "",
+  numBedrooms: 0,
+  numBathrooms: 0,
+  lotSize: 1, // Using 1 to avoid 'positive' checks if you have them, or 0 if allowed
+  yearBuilt: new Date().getFullYear(),
+  squareFootage: 1,
+  
+  // Boolean flags
+  // hasGarage: false,
+  // hasGarden: false,
+  // hasPool: false,
+  
+  amenities: [],
+  propertyType: "House", // Must match your PropertyTypeEnum default
+  status: "active",      // Must match your StatusEnum default
+  
+  // Owner Info
+  ownerName: "",
+  contactInfo: "",
+  accessCode: "", // Needs to be length 12 based on your schema
+  ownerId: "",
+  ownerType: "ORGANIZATION", // Must match OwnerTypeEnum
+  
+  images: [],
+  videoTourUrl: null
 };
 
 export const defaultInvestmentBlockInput: InvestmentBlockInput = {
-    ...investmentBlockSchema.parse({
-        initialInvestment: 1, margin: 0, externalInvestors: []
-    })
+  id: "",
+  typeOfInvestment: "INDIVIDUAL",
+  initialInvestment: 1, // Must be positive
+  margin: 0,
+  typeOfSale: "SELL",
+  saleDuration: 0,
+  leaseCycle: 0,
+  leaseType: "Month",
+  discountPercentage: 0,
+  finalResult: 0,
+  propertyId: "",
+  externalInvestors: [],
+  depreciationYears: 1
+    
 };
 
 export const defaultMessageInput: Message = {
-    ...MessageSchema.parse({
-        roomId: "", authorId: "", text: "", isDeleted: false, files: []
-    })
+   id: "", 
+  roomId: "",
+  authorId: "",
+  text: "",
+  createdAt: new Date(),
+  isDeleted: false,
+  files: []
 };
 
 export const defaultChatRoomMemberInput: ChatRoomMember = {
-    ...ChatRoomMemberSchema.parse({
-        roomId: "", userId: "", userName: "", isAdmin: false, notificationCount: 0, joinedAt: new Date()
-    })
+   id: "",
+  roomId: "",
+  userId: "",
+  userName: "",
+  isAdmin: false,
+  notificationCount: 0,
+  joinedAt: new Date()
 };
 
 export const defaultChatRoomInput: ChatRoom = {
-    ...ChatRoomSchema.parse({
-        id: "", title: "", type: "PRIVATE", participants: [], chats: []
-    })
+    id: "",
+  title: "",
+  type: "PRIVATE", // Match RoomTypeEnum
+  participants: [],
+  chats: []
 };

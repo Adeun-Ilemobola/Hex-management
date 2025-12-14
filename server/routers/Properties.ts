@@ -179,7 +179,7 @@ export const PropertiesRouter = createTRPCRouter({
      */
 
     getPropertie: protectedProcedure
-        .input(z.object({ pID: z.string() }))
+        .input(z.object({ pID: z.string().nullable() }))
         .query(async ({ input, ctx }) => {
             try {
                 if (!input.pID) {
@@ -792,9 +792,6 @@ export const PropertiesRouter = createTRPCRouter({
                         id: true,
                         description: true,
                         lotSize: true,
-                        hasGarage: true,
-                        hasGarden: true,
-                        hasPool: true,
                         amenities: true,
                         propertyType: true,
                         status: true,
@@ -840,9 +837,6 @@ export const PropertiesRouter = createTRPCRouter({
                     id: getPropertie.id,
                     description: getPropertie.description || "",
                     lotSize: getPropertie.lotSize, // number
-                    hasGarage: getPropertie.hasGarage, // boolean
-                    hasGarden: getPropertie.hasGarden, // boolean
-                    hasPool: getPropertie.hasPool, // boolean
                     amenities: getPropertie.amenities, //  List of amenities (e.g., ["Elevator", "Gym", "Fireplace"])
                     propertyType: getPropertie.propertyType, // List of property types (e.g., ["Apartment", "House", "Condo"])
                     status: getPropertie.status, // active, pending, sold, etc.

@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import z from "zod";
 
 
-export function usePropertyModification(id: string) {
+export function usePropertyModification(id: string|null) {
     const router = useRouter();
     const session = authClient.useSession();
     
@@ -27,7 +27,7 @@ export function usePropertyModification(id: string) {
 
     // Queries
     const { data: propertyData, isPending: propLoading, refetch } = api.Propertie.getPropertie.useQuery(
-        { pID: id }, 
+        { pID: id  }, 
         { enabled: !!id } // Only run if ID exists
     );
     const { data: memberData, isPending: memberLoading } = api.organization.getActiveMember.useQuery();
@@ -35,8 +35,6 @@ export function usePropertyModification(id: string) {
 
 
     
-
-
 
     const financials = useMemo(() => {
         const { typeOfSale, initialInvestment, margin, discountPercentage, leaseCycle, depreciationYears } = investmentBlock;
