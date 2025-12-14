@@ -155,7 +155,7 @@ function MultiStepForm() {
             {section === 2 && <div> </div>}
             {section === 3 && <div> </div>}
 
-              <div className=' h-20 px-3.5 py-4 flex flex-row justify-center border-t border-t-amber-400/30'>
+              <div className=' fixed bottom-0 left-0 right-0 h-20 px-3.5 py-4 flex flex-row justify-center '>
                     <Button
                         className=' mr-auto text-3xl font-bold '
                         disabled={section === 1}

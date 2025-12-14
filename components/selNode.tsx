@@ -1,6 +1,4 @@
 import React from 'react'
-import { Checkbox } from './ui/checkbox'
-import { Label } from './ui/label'
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -16,7 +14,6 @@ import {
 } from "@/components/ui/input-group"
 import { Search, Check, ChevronDown, X } from 'lucide-react'
 import { clsx } from 'clsx'
-import { Badge } from "@/components/ui/badge" // Assuming you have this, otherwise standard div works
 
 // --- SUB-COMPONENT: INDIVIDUAL ITEM ---
 type SelectionCardProps = {
@@ -30,18 +27,44 @@ function SelectionCard({ selected, toggle, label }: SelectionCardProps) {
         <div 
             onClick={toggle}
             className={clsx(
-                "group cursor-pointer select-none rounded-md border px-4 py-3 text-sm font-medium transition-all duration-200 flex items-center justify-between",
+                // Base Layout & Transitions
+                "group cursor-pointer select-none rounded-md px-4 py-3 text-sm font-medium transition-all duration-300 flex items-center justify-between relative overflow-hidden",
+                
                 selected 
-                    ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600 dark:bg-blue-950 dark:border-blue-500 dark:text-blue-300" 
-                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                    ? clsx(
+                        // --- GLASSMORPHIC SELECTED STATE ---
+                        "bg-primary/10",               
+                        "backdrop-blur-md",            
+                        "border border-primary/50",    
+                        "text-primary",               
+                        "ring-2 ring-primary ring-offset-2 ring-offset-background", 
+                        "shadow-lg shadow-primary/10"  
+                      )
+                    : clsx(
+                        // --- DEFAULT STATE ---
+                        "bg-card",                     
+                        "border border-border",      
+                        "text-card-foreground",
+                        // Hover Effects
+                        "hover:bg-accent hover:text-accent-foreground hover:border-primary/30"
+                      )
             )}
         >
-            <span className="truncate mr-2">{label}</span>
-            {selected && <Check className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />}
+            {/* Optional: Subtle Glass Shine/Gradient for extra "Metamorphic" feel */}
+            {selected && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 opacity-50 dark:via-white/5" />
+            )}
+
+            <span className="truncate mr-2 relative z-10">{label}</span>
+            
+            {selected && (
+                <div className="relative z-10 rounded-full bg-primary/20 p-0.5">
+                    <Check className="h-3.5 w-3.5 text-primary" strokeWidth={3} />
+                </div>
+            )}
         </div>
     )
 }
-
 // --- MAIN COMPONENT ---
 type MultiSelectorProps = {
     list: string[],
@@ -61,7 +84,6 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
         return defaultList
     }
 
-    // Helper to toggle items
     const handleToggle = (name: string) => {
         if (list.includes(name)) {
             updtate(list.filter((item) => item !== name));
@@ -72,9 +94,9 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            {/* Custom Overlay to handle close and reset search */}
+            {/* Overlay: Changed to standard background/80 for proper dimming in both modes */}
             <DialogOverlay
-                className="backdrop-blur-sm bg-black/20"
+                className="bg-black/40 backdrop-blur-sm"
                 onClick={(e) => {
                     e.stopPropagation()
                     setSearchText("")
@@ -83,7 +105,6 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
             />
             
             <DialogTrigger asChild>
-               
                 <div 
                     className="flex min-h-[2.5rem] w-full cursor-pointer items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background hover:bg-accent hover:text-accent-foreground"
                     role="combobox"
@@ -103,12 +124,14 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
 
             <DialogContent 
                 showCloseButton={false}
-                className="flex flex-col gap-4 max-w-2xl max-h-[85vh] p-0 overflow-hidden"
+                // bg-background is usually default, but added here to be safe
+                className="flex flex-col gap-4 max-w-2xl max-h-[85vh] p-0 overflow-hidden bg-background border-border"
             >
-                {/* HEADER SECTION: Title & Search */}
-                <div className="flex flex-col gap-4 border-b p-4 pb-6 bg-white/50">
+                {/* HEADER SECTION */}
+                {/* Replaced border-b with border-border */}
+                <div className="flex flex-col gap-4 border-b border-border p-4 pb-6">
                     <div className="flex items-center justify-between">
-                         <DialogTitle className="text-lg font-semibold tracking-tight">
+                         <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
                             Select Amenities
                         </DialogTitle>
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setOpen(false)}>
@@ -120,9 +143,10 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
                         <InputGroupAddon className="bg-transparent pl-3 text-muted-foreground">
                             <Search className="h-4 w-4" />
                         </InputGroupAddon>
+                        {/* Ensure text color adapts with text-foreground */}
                         <InputGroupInput 
                             placeholder="Search amenities..." 
-                            className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2"
+                            className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 text-foreground placeholder:text-muted-foreground"
                             onChange={(e) => setSearchText(e.target.value)} 
                             value={searchText} 
                             autoFocus
@@ -133,7 +157,7 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
                     </InputGroup>
                 </div>
 
-                {/* SCROLLABLE LIST AREA - Uses CSS Grid now */}
+                {/* SCROLLABLE LIST AREA */}
                 <div className="flex-1 overflow-y-auto p-4 pt-0">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {getFilteredList().map((item) => (
@@ -153,8 +177,9 @@ export function MultiSelector({ list, updtate, open, setOpen, defaultList }: Mul
                     </div>
                 </div>
 
-                {/* FOOTER: Summary (Optional, adds nice touch) */}
-                <div className="border-t bg-gray-50 p-3 flex justify-end">
+                {/* FOOTER */}
+                {/* Replaced border-t with border-border */}
+                <div className="border-t border-border p-3 flex justify-end">
                     <Button onClick={() => setOpen(false)} size="sm">
                         Done
                     </Button>

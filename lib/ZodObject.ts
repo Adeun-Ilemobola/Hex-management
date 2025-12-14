@@ -254,6 +254,16 @@ export type Message = z.infer<typeof MessageSchema>;
 export type ChatRoomMember = z.infer<typeof ChatRoomMemberSchema>;
 
 
+export interface CleanProperty {
+    id: string;
+    img?: string;
+    name: string;
+    address: string;
+    status: string;
+    saleStatus: string;
+}
+
+
 
 // If you really need a default object for React State:
 export const defaultPropertyInput: PropertyInput = {

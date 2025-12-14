@@ -119,7 +119,7 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
         
         {/* --- SECTION 1: PROPERTY DETAILS --- */}
         <section className="flex flex-col gap-4">
-            <FieldLegend className="text-2xl font-semibold text-gray-900 border-b pb-2">
+            <FieldLegend className="text-2xl font-semibold border-b dark:border-b-neutral-100 pb-2">
                 Property Information
             </FieldLegend>
 
@@ -216,7 +216,7 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
 
         {/* --- SECTION 2: FLOOR PLAN & SPECS --- */}
         <section className="flex flex-col gap-4">
-            <FieldLegend className="text-xl font-semibold text-gray-900 border-b pb-2">
+            <FieldLegend className="text-xl font-semibold border-b  dark:border-b-neutral-100 pb-2">
                 Floor Plan Attributes
             </FieldLegend>
 
@@ -351,7 +351,7 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
                     <CardContent className="flex items-center justify-between p-4">
                         <div className="flex-1">
                             {propertyInfo.accessCode.length > 0 ? (
-                                <h1 className="text-xl font-mono font-bold tracking-wider text-gray-800">
+                                <h1 className="text-xl font-mono font-bold tracking-wider">
                                     {propertyInfo.accessCode}
                                 </h1>
                             ) : (

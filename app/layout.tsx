@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TRPCProvider } from "@/lib/client";
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner";
 
 import "./globals.css";
 
@@ -25,11 +27,37 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TRPCProvider>{children}</TRPCProvider>
+         <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+              <TRPCProvider>
+                <div className="relative isolate min-h-dvh">
+        {/* Background (always fills the screen) */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        >
+          <div className="absolute top-32 -right-32 w-64 h-64 rounded-full blur-3xl bg-gradient-to-tr from-blue-500/15 to-purple-500/15" />
+          <div className="absolute bottom-0 -left-32 w-80 h-80 rounded-full blur-3xl bg-gradient-to-tr from-purple-500/10 to-pink-500/10" />
+          <div className="absolute top-1/3 left-1/2 w-56 h-56 -translate-x-1/2 rounded-full blur-2xl bg-gradient-to-tr from-sky-500/10 to-blue-500/10" />
+          <div className="absolute top-0 left-1/2 w-56 h-56 -translate-x-1/2 rounded-full blur-2xl bg-gradient-to-tr from-sky-500/10 to-blue-500/10" />
+        </div>
+
+       
+          <Toaster position="top-right" richColors closeButton duration={5000} />
+          {children}
+     
+      </div>
+              </TRPCProvider>
+          </ThemeProvider>
+      
         
       </body>
     </html>
