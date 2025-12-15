@@ -287,10 +287,10 @@ export const defaultPropertyInput: PropertyInput = {
   status: "active",      // Must match your StatusEnum default
   
   // Owner Info
-  ownerName: "",
-  contactInfo: "",
+  ownerName: "sdfsdfsdfsdfsdfsdfsdfsdf",
+  contactInfo: "sdfsdfsdfsdfsdfsdfsdfsdf",
   accessCode: "", // Needs to be length 12 based on your schema
-  ownerId: "",
+  ownerId: "34534534534534534535345",
   ownerType: "ORGANIZATION", // Must match OwnerTypeEnum
   
   images: [],

@@ -13,13 +13,26 @@ import { Metadata, MetadataT } from '@/lib/ZodObject';
 
 export const createTRPCContext = async () => {
   const webHeaders = await headers();
-  let sub: MetadataT | null = null;
+  
 
   const ip = webHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     webHeaders.get('x-real-ip') ??
     'unknown';
     
   const session = await auth.api.getSession({ headers: webHeaders });
+  let sub: MetadataT  = {
+    daysLeft: 0,
+    status: "",
+    PlanTier: "Free",
+    trialEnd: null,
+    periodEnd: null,
+    stripeCustomerId: session?.user?.stripeCustomerId ?? "",
+    userId: session?.user?.id ?? "",
+
+  };
+
+
+
 
   if (session && session.user) {
     // Fetch subscriptions
@@ -61,7 +74,7 @@ export const createTRPCContext = async () => {
         sub = parsedSub.data;
       } else {
         console.error("Failed to parse subscription metadata", parsedSub.error);
-      }
+      } 
     }
   }
 

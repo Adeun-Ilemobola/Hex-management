@@ -94,9 +94,9 @@ export const userCongiRouter = createTRPCRouter({
                 return { success: true, isEployee: false, role: memberInOrg.role, value: plan }
             }
 
-            const plan = Metadata.parse(ctx.subscription)
+            
 
-            return { success: true, isEployee: false, role: "owner", value: plan };
+            return { success: true, isEployee: false, role: "owner", value: ctx.subscription };
         } catch (error) {
             console.error("Error in getUserPlan:", error);
             return { success: false, isEployee: false, role: "", value: null };

@@ -9,6 +9,7 @@ import Stripe from "stripe"
 import { magicLink } from "better-auth/plugins";
 import prisma from "./prisma"; 
 import { sendEmail } from "@/server/sendEmail";
+import { getPlanLimits } from "./PlanConfig";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -109,8 +110,7 @@ export const auth = betterAuth({
             priceId: "price_1S03q92c20NQVeDjKSDVR7j8",
             annualDiscountPriceId: "price_1S04Wb2c20NQVeDjlhnehbj3",
             limits: {
-              
-
+              ...getPlanLimits("Deluxe")
             }
 
           },
@@ -119,13 +119,14 @@ export const auth = betterAuth({
             priceId: "price_1S03nJ2c20NQVeDj9SMnndNq",
             annualDiscountPriceId: "price_1S04aA2c20NQVeDjTA0JD0aA",
             limits: {
+              ...getPlanLimits("Premium")
              
             }
           },
           {
             name: "free",
             limits: {
-              
+              ...getPlanLimits("Free")
             }
           }
 

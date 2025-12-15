@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import PropertyCard from './PropertyCard'
 import { trpc as api } from '@/lib/client'
 import { CleanProperty, SaleTypeEnum, StatusEnum } from '@/lib/ZodObject'
+import { Nav } from './Nav'
 
 const zSearch = z.object({
     status: z.string().min(4).nullable(),
@@ -42,7 +43,8 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     }
     return (
         <>
-            <div className=' flex-1 flex flex-col gap-2.5'>
+           <Nav session={session} SignOut={() => authClient.signOut()} />
+            <div className=' flex-1 flex flex-col gap-2.5 p-1.5'>
 
                 <PropertySearchNav
                     onSubmit={NavSearch}

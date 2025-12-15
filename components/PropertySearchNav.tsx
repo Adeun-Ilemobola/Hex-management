@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from './ui/checkbox'
+import Link from 'next/link'
 interface PropertySearchNavProps {
     onSubmit: (data: { status: string | null, searchText: string | null }) => void
     changeMode?: (mode: boolean) => void
@@ -30,7 +31,7 @@ export default function PropertySearchNav({onSubmit, changeMode, mode}: Property
         searchText: ""
     })
   return (
-    <div className=' flex flex-row  gap-2.5 items-center'>
+    <div className=' w-full flex flex-row-reverse  gap-2.5 items-center'>
         <ButtonGroup>
       <Input placeholder="Search..." value={search.searchText} onChange={(e) => setSearch({...search, searchText: e.target.value})} />
       <Button variant="outline" aria-label="Search">
@@ -45,6 +46,12 @@ export default function PropertySearchNav({onSubmit, changeMode, mode}: Property
         />
         <label>Edit Mode</label>
     </div>
+
+    <Link href="/home/propertie/new">
+     <Button>Creat Property</Button>
+    </Link>
+
+       
         
     </div>
   )

@@ -5,67 +5,149 @@ function getVerifyEmailHtml(verifyUrl: string): { subject: string, html: string 
   return {
     subject: "Verify your email address",
     html: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verify Email</title>
-      </head>
-      <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-        <div style="max-width:600px;margin:0 auto;background:#ffffff;">
-          <!-- Header with gradient -->
-          <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:40px 20px;text-align:center;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:80px;height:80px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                <path d="M9 12l2 2 4-4"/>
-                <circle cx="12" cy="12" r="9"/>
-              </svg>
-            </div>
-            <h1 style="color:#ffffff;font-size:28px;font-weight:700;margin:0;letter-spacing:-0.5px;">Verify Your Email</h1>
-          </div>
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Verify Email</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #e2e8f0 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important;
+      }
+      .footer-text {
+        color: #64748b !important;
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .security-box {
+        background: rgba(6, 78, 59, 0.3) !important;
+        border-left-color: #34d399 !important;
+      }
+      .security-text {
+        color: #34d399 !important;
+      }
+    }
+  </style>
+</head>
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.6);border-radius:16px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
           
-          <!-- Content -->
-          <div style="padding:40px 30px;">
-            <p style="color:#374151;font-size:18px;line-height:1.6;margin:0 0 30px;text-align:center;">
-              Thanks for signing up! Please verify your email address to complete your account setup and unlock all features.
-            </p>
-            
-            <!-- CTA Button -->
-            <div style="text-align:center;margin:40px 0;">
-              <a href="${verifyUrl}" style="display:inline-block;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;font-weight:600;font-size:16px;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(102,126,234,0.4);transition:all 0.3s ease;border:none;">
-                Verify Email Address
-              </a>
-            </div>
-            
-            <!-- Alternative link -->
-            <div style="background:#f9fafb;border-radius:8px;padding:20px;margin:30px 0;">
-              <p style="color:#6b7280;font-size:14px;margin:0 0 10px;font-weight:500;">Button not working?</p>
-              <p style="color:#374151;font-size:14px;margin:0;word-break:break-all;">
-                Copy and paste this link: <span style="color:#667eea;">${verifyUrl}</span>
+          <tr>
+            <td align="center" style="padding:40px 40px 20px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.4);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+              <h1 class="text-primary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;color:#1e293b;">
+                Verify your email
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 40px 40px;">
+              <p class="text-secondary" style="margin:0 0 32px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;text-align:center;">
+                Thanks for signing up! We're excited to have you on board. Please verify your email address to unlock your full experience.
               </p>
-            </div>
-            
-            <!-- Security notice -->
-            <div style="border-left:4px solid #10b981;background:#ecfdf5;padding:16px 20px;margin:30px 0;border-radius:0 8px 8px 0;">
-              <p style="color:#047857;font-size:14px;margin:0;font-weight:500;">
-                🔒 This link expires in 1 hour for security reasons.
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <a href="${verifyUrl}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                      Verify Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+                <tr>
+                  <td class="inner-glass" style="background-color:#f8fafc;background:rgba(255, 255, 255, 0.5);border:1px solid rgba(255, 255, 255, 0.6);border-radius:8px;padding:20px;">
+                    <p class="text-secondary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+                      Button not working?
+                    </p>
+                    <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#475569;word-break:break-all;">
+                      Copy this link: <span class="text-accent" style="color:#2563eb;font-weight:500;">${verifyUrl}</span>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td class="security-box" style="background-color:#ecfdf5;border-left:4px solid #10b981;border-radius:4px;padding:16px;">
+                    <p class="security-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#047857;font-weight:500;">
+                      🔒 This link expires in 1 hour.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="footer-text" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                If you didn't request this verification, simply ignore this email.
               </p>
-            </div>
-          </div>
-          
-          <!-- Footer -->
-          <div style="background:#f9fafb;padding:30px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:14px;margin:0 0 10px;">
-              If you didn't request this verification, you can safely ignore this email.
-            </p>
-            <p style="color:#9ca3af;font-size:12px;margin:0;">
-              © 2025 Your Company Name. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </body>
-      </html>
+              <p class="footer-text" style="margin:8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 Your Company Name. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+        
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `
   }
 }
@@ -74,71 +156,154 @@ function getResetPasswordEmailHtml(resetUrl: string): { subject: string, html: s
   return {
     subject: "Reset your password",
     html: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Reset Password</title>
-      </head>
-      <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-        <div style="max-width:600px;margin:0 auto;background:#ffffff;">
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);padding:40px 20px;text-align:center;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:80px;height:80px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <circle cx="12" cy="16" r="1"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
-            <h1 style="color:#ffffff;font-size:28px;font-weight:700;margin:0;letter-spacing:-0.5px;">Reset Password</h1>
-          </div>
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Reset Password</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Fallback */
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #cbd5e1 !important;
+      }
+      .text-highlight {
+        color: #d8b4fe !important; /* Primary Dark Token */
+      }
+      .link-text {
+        color: #f472b6 !important; /* Highlight Dark Token */
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .inner-glass-box {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .security-box {
+        background: rgba(127, 29, 29, 0.4) !important;
+        border-left: 4px solid #f87171 !important;
+      }
+      .security-text {
+        color: #fca5a5 !important;
+      }
+      .footer-text {
+        color: #64748b !important;
+      }
+    }
+  </style>
+</head>
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.7);border:1px solid rgba(255, 255, 255, 0.8);border-radius:16px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
           
-          <!-- Content -->
-          <div style="padding:40px 30px;">
-            <p style="color:#374151;font-size:18px;line-height:1.6;margin:0 0 30px;text-align:center;">
-              We received a request to reset your password. Click the button below to create a new secure password.
-            </p>
-            
-            <!-- CTA Button -->
-            <div style="text-align:center;margin:40px 0;">
-              <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;font-weight:600;font-size:16px;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(240,147,251,0.4);transition:all 0.3s ease;border:none;">
-                Reset My Password
-              </a>
-            </div>
-            
-            <!-- Alternative link -->
-            <div style="background:#f9fafb;border-radius:8px;padding:20px;margin:30px 0;">
-              <p style="color:#6b7280;font-size:14px;margin:0 0 10px;font-weight:500;">Button not working?</p>
-              <p style="color:#374151;font-size:14px;margin:0;word-break:break-all;">
-                Copy and paste this link: <span style="color:#f5576c;">${resetUrl}</span>
+          <tr>
+            <td align="center" style="padding:45px 40px 20px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor"></path>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+              <h1 class="text-primary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;color:#1e293b;">
+                Reset Password
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 40px 40px;">
+              <p class="text-secondary" style="margin:0 0 32px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;text-align:center;">
+                We received a request to reset your password. Click the button below to create a new secure password.
               </p>
-            </div>
-            
-            <!-- Security notice -->
-            <div style="border-left:4px solid #ef4444;background:#fef2f2;padding:16px 20px;margin:30px 0;border-radius:0 8px 8px 0;">
-              <p style="color:#dc2626;font-size:14px;margin:0 0 8px;font-weight:500;">
-                ⚠️ Important Security Information
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                      Reset My Password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+                <tr>
+                  <td class="inner-glass-box" style="background-color:#f8fafc;background:rgba(255, 255, 255, 0.5);border:1px solid rgba(255, 255, 255, 0.6);border-radius:8px;padding:20px;">
+                    <p class="text-secondary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+                      Button not working?
+                    </p>
+                    <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#475569;word-break:break-all;">
+                      Copy this link: <span class="link-text" style="color:#db2777;font-weight:500;">${resetUrl}</span>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td class="security-box" style="background-color:#fef2f2;border-left:4px solid #ef4444;border-radius:4px;padding:16px;">
+                    <p class="security-text" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#b91c1c;font-weight:600;">
+                      ⚠️ Important Security Information
+                    </p>
+                    <p class="security-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#b91c1c;line-height:1.4;">
+                      This reset link expires in 15 minutes. If you didn't request this, please ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="footer-text" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                If you didn't request a password reset, you can safely ignore this email.
               </p>
-              <p style="color:#7f1d1d;font-size:13px;margin:0;">
-                This reset link expires in 15 minutes. If you didn't request this, please ignore this email and consider changing your password.
+              <p class="footer-text" style="margin:8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 Your Company Name. All rights reserved.
               </p>
-            </div>
-          </div>
-          
-          <!-- Footer -->
-          <div style="background:#f9fafb;padding:30px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:14px;margin:0 0 10px;">
-              If you didn't request a password reset, you can safely ignore this email.
-            </p>
-            <p style="color:#9ca3af;font-size:12px;margin:0;">
-              © 2025 Your Company Name. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </body>
-      </html>
+            </td>
+          </tr>
+        </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `
   }
 }
@@ -147,81 +312,184 @@ function getWelcomeEmailHtml(userName: string): { subject: string, html: string 
   return {
     subject: `Welcome to the platform, ${userName}!`,
     html: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome</title>
-      </head>
-      <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-        <div style="max-width:600px;margin:0 auto;background:#ffffff;">
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);padding:40px 20px;text-align:center;">
-            <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:80px;height:80px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-                <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/>
-                <path d="M9 7v4"/>
-                <path d="M13 7v4"/>
-                <path d="M17 7l-8-4-8 4"/>
-              </svg>
-            </div>
-            <h1 style="color:#ffffff;font-size:32px;font-weight:700;margin:0;letter-spacing:-0.5px;">Welcome, ${userName}!</h1>
-          </div>
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Welcome</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .text-heading {
+        color: #f1f5f9 !important;
+      }
+      .text-body {
+        color: #cbd5e1 !important;
+      }
+      .feature-card {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .feature-title {
+        color: #e2e8f0 !important;
+      }
+      .feature-desc {
+        color: #94a3b8 !important;
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .footer-text {
+        color: #64748b !important;
+      }
+      .link-text {
+        color: #d8b4fe !important;
+      }
+    }
+  </style>
+</head>
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:16px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
           
-          <!-- Content -->
-          <div style="padding:40px 30px;">
-            <p style="color:#374151;font-size:18px;line-height:1.6;margin:0 0 30px;text-align:center;">
-              We're thrilled to have you join our community! Your account is now ready, and you can start exploring all the amazing features we have to offer.
-            </p>
-            
-            <!-- Feature highlights -->
-            <div style="margin:40px 0;">
-              <div style="display:flex;align-items:center;margin-bottom:20px;padding:15px;background:#f0f9ff;border-radius:8px;border-left:4px solid #0ea5e9;">
-                <div style="color:#0ea5e9;margin-right:15px;">✨</div>
-                <div>
-                  <h3 style="color:#1e293b;font-size:16px;font-weight:600;margin:0 0 5px;">Full Access Unlocked</h3>
-                  <p style="color:#64748b;font-size:14px;margin:0;">Access all premium features and tools</p>
-                </div>
-              </div>
+          <tr>
+            <td align="center" style="padding:45px 40px 20px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                       <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                       <path d="M2 17l10 5 10-5"/>
+                       <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+              <h1 class="text-heading" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;color:#1e293b;">
+                Welcome, ${userName}!
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 10px 40px;">
+              <p class="text-body" style="margin:0 0 30px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;line-height:1.6;color:#475569;text-align:center;">
+                We're thrilled to have you join our community! Your account is ready. Here is a quick overview of what awaits you.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 20px 40px;">
               
-              <div style="display:flex;align-items:center;margin-bottom:20px;padding:15px;background:#f0fdf4;border-radius:8px;border-left:4px solid #22c55e;">
-                <div style="color:#22c55e;margin-right:15px;">🚀</div>
-                <div>
-                  <h3 style="color:#1e293b;font-size:16px;font-weight:600;margin:0 0 5px;">Quick Start Guide</h3>
-                  <p style="color:#64748b;font-size:14px;margin:0;">Get up and running in just a few minutes</p>
-                </div>
-              </div>
-              
-              <div style="display:flex;align-items:center;padding:15px;background:#fefce8;border-radius:8px;border-left:4px solid #eab308;">
-                <div style="color:#eab308;margin-right:15px;">💬</div>
-                <div>
-                  <h3 style="color:#1e293b;font-size:16px;font-weight:600;margin:0 0 5px;">24/7 Support</h3>
-                  <p style="color:#64748b;font-size:14px;margin:0;">Our team is here to help whenever you need</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- CTA Button -->
-            <div style="text-align:center;margin:40px 0;">
-              <a href="https://yourapp.com/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;font-weight:600;font-size:16px;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(79,172,254,0.4);transition:all 0.3s ease;border:none;">
-                Go to Dashboard
-              </a>
-            </div>
-          </div>
-          
-          <!-- Footer -->
-          <div style="background:#f9fafb;padding:30px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:14px;margin:0 0 15px;">
-              Need help getting started? <a href="https://yourapp.com/help" style="color:#4facfe;text-decoration:none;">Visit our Help Center</a>
-            </p>
-            <p style="color:#9ca3af;font-size:12px;margin:0;">
-              © 2025 Your Company Name. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </body>
-      </html>
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+                <tr>
+                  <td class="feature-card" bgcolor="#f0f9ff" style="padding:16px;border-radius:12px;background-color:#f0f9ff;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="40" valign="top" style="font-size:24px;line-height:1;">✨</td>
+                        <td>
+                          <h3 class="feature-title" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#1e293b;">Full Access Unlocked</h3>
+                          <p class="feature-desc" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#64748b;">Access all premium features and tools immediately.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+                <tr>
+                  <td class="feature-card" bgcolor="#f0fdf4" style="padding:16px;border-radius:12px;background-color:#f0fdf4;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="40" valign="top" style="font-size:24px;line-height:1;">🚀</td>
+                        <td>
+                          <h3 class="feature-title" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#1e293b;">Quick Start Guide</h3>
+                          <p class="feature-desc" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#64748b;">Get up and running in just a few minutes.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+                <tr>
+                  <td class="feature-card" bgcolor="#fefce8" style="padding:16px;border-radius:12px;background-color:#fefce8;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="40" valign="top" style="font-size:24px;line-height:1;">💬</td>
+                        <td>
+                          <h3 class="feature-title" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#1e293b;">24/7 Support</h3>
+                          <p class="feature-desc" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#64748b;">Our team is here to help whenever you need.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:20px 40px 40px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <a href="https://yourapp.com/dashboard" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                      Go to Dashboard
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="footer-text" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#9ca3af;">
+                Need help getting started? <a href="https://yourapp.com/help" class="link-text" style="color:#2563eb;text-decoration:none;font-weight:500;">Visit our Help Center</a>
+              </p>
+              <p class="footer-text" style="margin:10px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
+                © 2025 Your Company Name. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `
   }
 }
@@ -238,256 +506,220 @@ function VerifyExternalInvestor(
   return {
     subject: "🔐 Investor Verification Required - Action Needed",
     html: `
-    <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
   <title>Investor Verification</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .access-box {
+        background: rgba(216, 180, 254, 0.1) !important; /* Dark Primary Tint */
+        border: 1px dashed rgba(216, 180, 254, 0.3) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-label {
+        color: #cbd5e1 !important;
+      }
+      .text-value {
+        color: #f8fafc !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important;
+      }
+      .text-highlight {
+        color: #f472b6 !important;
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .divider {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; min-height: 100vh;">
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#f0f9ff;background-image:linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   
-  <!-- Main Container Table -->
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
+      <td align="center" style="padding:40px 20px;">
         
-        <!-- Email Content Container -->
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 640px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); overflow: hidden;">
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:640px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.6);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
           
-          <!-- Header Section -->
           <tr>
-            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 0 40px; text-align: center; position: relative;">
-              <!-- Security Icon -->
-              <div style="width: 80px; height: 80px; margin: 0 auto 24px auto; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.3);">
-                <div style="width: 40px; height: 40px; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDFMMjEgNVYxMUMyMSAxNi41NSAxNi4xNiAyMS43NCA5IDIzQzEuODQgMjEuNzQgLTMgMTYuNTUgLTMgMTFWNUwxMiAxWiIgZmlsbD0iI2ZmZmZmZiIvPgo8cGF0aCBkPSJNMTAgMTVMNi41IDExLjVMNy45MSAxMC4wOUwxMCAxMi4xN0wxNi4wOSA2LjA5TDE3LjUgNy41TDEwIDE1WiIgZmlsbD0iIzY2N2VlYSIvPgo8L3N2Zz4K') center/contain no-repeat;"></div>
-              </div>
-              
-              <h1 style="margin: 0 0 16px 0; font-size: 32px; font-weight: 800; color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <td align="center" style="padding:40px 40px 20px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+              <h1 class="text-primary" style="margin:0 0 10px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:28px;font-weight:800;letter-spacing:-0.5px;color:#1e293b;">
                 Investor Verification
               </h1>
-              <p style="margin: 0 0 40px 0; font-size: 18px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">
-                Confirm your participation in this investment opportunity
+              <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;color:#64748b;font-weight:500;">
+                Confirm your participation in this opportunity
               </p>
             </td>
           </tr>
-          
-          <!-- Main Content -->
+
           <tr>
-            <td style="padding: 0 40px 40px 40px;">
-              
-              <!-- Important Access Code Section -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+            <td style="padding:0 40px 30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f); padding: 24px; border-radius: 16px; text-align: center; position: relative; overflow: hidden;">
-                    <!-- Decorative pattern -->
-                    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+Cjwvc3ZnPg==') repeat; opacity: 0.3; pointer-events: none;"></div>
-                    
-                    <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: rgba(255, 255, 255, 0.9); position: relative; z-index: 1;">
-                      🔑 Your Access Code
+                  <td class="access-box" style="padding:24px;background:rgba(37, 99, 235, 0.05);border:1px dashed rgba(37, 99, 235, 0.2);border-radius:16px;text-align:center;">
+                    <p class="text-secondary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;">
+                      Your Access Code
                     </p>
-                    <div style="background: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.4); border-radius: 12px; padding: 16px; margin-bottom: 16px; position: relative; z-index: 1;">
-                      <p style="margin: 0; font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: 4px; font-family: 'Courier New', monospace; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-                        ${accessCode}
-                      </p>
+                    <div class="text-accent" style="font-family:'Courier New', monospace;font-size:32px;font-weight:700;letter-spacing:4px;color:#2563eb;">
+                      ${accessCode}
                     </div>
-                    <p style="margin: 0; font-size: 14px; color: rgba(255, 255, 255, 0.8); position: relative; z-index: 1;">
-                      Copy this code and paste it when prompted during verification
-                    </p>
                   </td>
                 </tr>
               </table>
-              
-              <!-- Investor Details Card -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 16px; margin-bottom: 24px;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 20px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding: 24px;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #1f2937;">
-                      📋 Investor Information
-                    </h3>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                  <td class="inner-glass" style="padding:24px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    
+                    <h3 class="text-primary" style="margin:0 0 16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#1e293b;">📋 Investor Information</h3>
+                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding-bottom: 12px;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                              <td width="30%" style="vertical-align: top; padding-right: 16px;">
-                                <p style="margin: 0; font-size: 14px; font-weight: 600; color: #6b7280;">Name:</p>
-                              </td>
-                              <td width="70%">
-                                <p style="margin: 0; font-size: 16px; font-weight: 700; color: #1f2937;">${name}</p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
+                        <td width="30%" class="text-label" style="padding-bottom:8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#64748b;">Name:</td>
+                        <td width="70%" class="text-value" style="padding-bottom:8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#334155;">${name}</td>
                       </tr>
                       <tr>
-                        <td>
-                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                              <td width="30%" style="vertical-align: top; padding-right: 16px;">
-                                <p style="margin: 0; font-size: 14px; font-weight: 600; color: #6b7280;">Email:</p>
-                              </td>
-                              <td width="70%">
-                                <p style="margin: 0; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #667eea;">${email}</p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
+                        <td width="30%" class="text-label" style="padding-bottom:8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#64748b;">Email:</td>
+                        <td width="70%" class="text-value" style="padding-bottom:8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#334155;">${email}</td>
                       </tr>
                     </table>
+
+                    <div class="divider" style="height:1px;background-color:rgba(0,0,0,0.05);border-bottom:1px solid rgba(255,255,255,0.5);margin:16px 0;"></div>
+
+                    <h3 class="text-primary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#1e293b;">🏢 ${propertyName}</h3>
+                     <a href="${propertyLink}" class="text-accent" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#2563eb;text-decoration:none;font-weight:500;">
+                       View Property Details &rarr;
+                     </a>
+
                   </td>
                 </tr>
               </table>
-              
-              <!-- Property Information -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 24px;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td>
-                    <!--[if mso]>
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px;">
-                      <tr>
-                        <td style="padding: 24px;">
-                          <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #1f2937;">🏢 ${propertyName}</h3>
-                          <p style="margin: 0; font-size: 16px; color: #6b7280;">Click to view detailed property information</p>
-                        </td>
-                      </tr>
-                    </table>
-                    <![endif]-->
-                    <!--[if !mso]><!-->
-                    <a href="${propertyLink}" style="display: block; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 24px; text-decoration: none; color: inherit; transition: all 0.3s ease; position: relative; overflow: hidden;">
-                      <div style="position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(135deg, #10b981, #06b6d4); border-radius: 16px; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;"></div>
-                      <div style="position: relative; z-index: 1;">
-                        <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #1f2937;">🏢 ${propertyName}</h3>
-                        <p style="margin: 0; font-size: 16px; color: #6b7280;">Click to view detailed property information →</p>
-                      </div>
-                    </a>
-                    <!--<![endif]-->
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Investment Stats Grid -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
-                <tr>
-                  <!-- Contribution Percentage -->
-                  <td width="48%" style="vertical-align: top; padding-right: 12px;">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1)); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px;">
-                      <tr>
-                        <td style="padding: 20px; text-align: center;">
-                          <div style="width: 48px; height: 48px; margin: 0 auto 12px auto; background: linear-gradient(135deg, #10b981, #06b6d4); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <span style="font-size: 20px;">📊</span>
-                          </div>
-                          <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 1px;">Your Contribution</p>
-                          <p style="margin: 0; font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #10b981, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #10b981;">${contributionPercent}%</p>
-                        </td>
-                      </tr>
+                  <td width="48%" valign="top" style="padding-right:8px;">
+                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                       <tr>
+                         <td class="inner-glass" align="center" style="padding:20px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                           <p class="text-label" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;color:#64748b;">Contribution</p>
+                           <p class="text-highlight" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#db2777;">${contributionPercent}%</p>
+                         </td>
+                       </tr>
                     </table>
                   </td>
-                  
-                  <!-- Investment Value -->
-                  <td width="48%" style="vertical-align: top; padding-left: 12px;">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1)); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 16px;">
-                      <tr>
-                        <td style="padding: 20px; text-align: center;">
-                          <div style="width: 48px; height: 48px; margin: 0 auto 12px auto; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <span style="font-size: 20px;">💰</span>
-                          </div>
-                          <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 1px;">Investment Value</p>
-                          <p style="margin: 0; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #fbbf24;">$${DollarValueReturn.toLocaleString()}</p>
-                        </td>
-                      </tr>
+                  <td width="48%" valign="top" style="padding-left:8px;">
+                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                       <tr>
+                         <td class="inner-glass" align="center" style="padding:20px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                           <p class="text-label" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;color:#64748b;">Value</p>
+                           <p class="text-highlight" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#db2777;">$${DollarValueReturn.toLocaleString()}</p>
+                         </td>
+                       </tr>
                     </table>
                   </td>
                 </tr>
               </table>
-              
-              <!-- Call to Action Button -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 40px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center">
-                    <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verificationLink}" style="height:56px;v-text-anchor:middle;width:100%;" arcsize="50%" strokecolor="#667eea" fillcolor="#667eea">
-                      <w:anchorlock/>
-                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:18px;font-weight:700;">🚀 Start Verification Process</center>
-                    </v:roundrect>
-                    <![endif]-->
-                    <!--[if !mso]><!-->
-                    <a href="${verificationLink}" style="display: inline-block; width: 100%; max-width: 400px; padding: 18px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 18px; border-radius: 50px; text-align: center; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; position: relative; overflow: hidden; border: none;">
-                      <span style="position: relative; z-index: 1;">🚀 Start Verification Process</span>
-                      <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.5s ease; pointer-events: none;"></div>
+                    <a href="${verificationLink}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;text-decoration:none;padding:18px 40px;border-radius:50px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                      🚀 Start Verification Process
                     </a>
-                    <!--<![endif]-->
                   </td>
                 </tr>
               </table>
-              
-              <!-- Instructions -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.1); border-radius: 16px; margin-bottom: 24px;">
-                <tr>
-                  <td style="padding: 24px;">
-                    <h4 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: #1f2937;">
-                      📋 Verification Steps
-                    </h4>
-                    <ol style="margin: 0; padding-left: 20px; color: #374151; line-height: 1.6;">
-                      <li style="margin-bottom: 8px; font-size: 16px;">Click the "Start Verification Process" button above</li>
-                      <li style="margin-bottom: 8px; font-size: 16px;">Enter your access code: <strong style="background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace;">${accessCode}</strong></li>
-                      <li style="margin-bottom: 8px; font-size: 16px;">Complete the verification form</li>
-                      <li style="margin: 0; font-size: 16px;">Confirm your participation in the investment</li>
-                    </ol>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Footer -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td style="border-top: 1px solid rgba(156, 163, 175, 0.2); padding-top: 24px; text-align: center;">
-                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">
-                      This verification is required to complete your investment participation.<br>
-                      If you have questions, please contact our support team.
-                    </p>
-                    <p style="margin: 0; font-size: 12px; color: #9ca3af;">
-                      © 2025 Investment Platform. All rights reserved.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
             </td>
           </tr>
           
+          <tr>
+             <td style="padding:0 40px 30px 40px;">
+                <p class="text-label" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#475569;">Verification Steps:</p>
+                <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#64748b;">
+                  1. Click the button above<br>
+                  2. Enter access code: <strong>${accessCode}</strong><br>
+                  3. Confirm details
+                </p>
+             </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="text-secondary" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                This verification is required to complete your investment participation.
+              </p>
+              <p class="text-secondary" style="margin:8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 Investment Platform. All rights reserved.
+              </p>
+            </td>
+          </tr>
         </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
         
       </td>
     </tr>
   </table>
-
-  <!-- Dark Mode Styles -->
-  <style>
-    @media (prefers-color-scheme: dark) {
-      .email-content {
-        background: rgba(17, 24, 39, 0.95) !important;
-        color: #f9fafb !important;
-      }
-    }
-    
-    /* Hover Effects (where supported) */
-    @media screen and (min-width: 600px) {
-      .cta-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
-      }
-      
-      .property-link:hover {
-        transform: translateY(-1px);
-      }
-    }
-  </style>
-
 </body>
-</html>`.trim(),
+</html>
+    `.trim(),
   };
 }
 
@@ -501,209 +733,195 @@ function onboardingFinish(
   return {
     subject: "🚀 Welcome to Your New Fintech Journey",
     html: `
-    <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
+  <title>Welcome Aboard</title>
   <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
     @media (prefers-color-scheme: dark) {
-      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
-      .dark-container { 
-        background: rgba(17, 24, 39, 0.9) !important; 
-        border-color: rgba(55, 65, 81, 0.8) !important;
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
       }
-      .dark-glass { 
-        background: rgba(31, 41, 55, 0.8) !important; 
-        border-color: rgba(75, 85, 99, 0.6) !important; 
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
       }
-      .dark-text { color: #f9fafb !important; }
-      .dark-muted { color: #d1d5db !important; }
-      .dark-border { border-color: rgba(75, 85, 99, 0.4) !important; }
-      .dark-notice { background: rgba(34, 197, 94, 0.15) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
-    }
-    
-    .gradient-text {
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: #3b82f6;
-    }
-    
-    .glass-container {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    }
-    
-    .glass-inner {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      border-radius: 16px;
-    }
-    
-    .gradient-button {
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-      border-radius: 50px;
-      padding: 16px 40px;
-      color: white;
-      font-weight: 700;
-      font-size: 18px;
-      text-decoration: none;
-      display: inline-block;
-      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
-    }
-    
-    .blob-bg {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      background-image: 
-        radial-gradient(circle at 20% 20%, rgba(253, 230, 138, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 40% 70%, rgba(236, 72, 153, 0.4) 0%, transparent 50%);
-      border-radius: 24px;
-      overflow: hidden;
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important; /* Primary Dark Token */
+      }
+      .text-highlight {
+        color: #f472b6 !important; /* Highlight Dark Token */
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .security-box {
+        background: rgba(6, 78, 59, 0.3) !important;
+        border: 1px solid rgba(52, 211, 153, 0.2) !important;
+      }
+      .security-text {
+        color: #34d399 !important;
+      }
+      .divider {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fce7f3 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; min-height: 100vh;" class="dark-mode">
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: transparent;">
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center" style="padding: 60px 20px;">
+      <td align="center" style="padding:40px 20px;">
         
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; position: relative;" class="glass-container dark-container">
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           
           <tr>
-            <td style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
-              <div class="blob-bg"></div>
+            <td align="center" style="padding:45px 40px 10px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+
+              <h1 class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1;color:#1e293b;">
+                Welcome Aboard!
+              </h1>
+              
+              <p class="text-accent" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#2563eb;letter-spacing:0.5px;text-transform:uppercase;">
+                ${organizationName}
+              </p>
             </td>
           </tr>
-          
+
           <tr>
-            <td style="padding: 80px 50px; position: relative; z-index: 10;">
-              
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <td align="center" style="padding:0 40px 30px 40px;">
+              <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;line-height:1.6;color:#475569;">
+                Hey <strong>${name}</strong>! 👋 Your fintech journey starts here. Let's get you signed in and ready to go.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center" style="padding-bottom: 40px;">
-                    <h1 style="margin: 0; font-size: 56px; font-weight: 900; line-height: 0.9; letter-spacing: -0.02em;" class="gradient-text">
-                      Welcome Aboard!
-                    </h1>
-                    <h2 style="margin: 16px 0 0 0; font-size: 28px; font-weight: 800; color: #374151;" class="dark-muted">
-                      ${organizationName}
-                    </h2>
-                  </td>
-                </tr>
-              </table>
-              
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td style="padding-bottom: 32px; text-align: center;">
-                    <p style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937;" class="dark-text">
-                      Hey ${name}! 👋
-                    </p>
-                    <p style="margin: 16px 0 0 0; font-size: 18px; color: #6b7280;" class="dark-muted">
-                      Your fintech journey starts here. Let's get you signed in!
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" class="glass-inner dark-glass" style="margin-bottom: 40px;">
-                <tr>
-                  <td style="padding: 32px;">
-                    <p style="margin: 0 0 24px 0; font-size: 20px; color: #374151; font-weight: 700; text-align: center;" class="dark-text">
+                  <td class="inner-glass" style="padding:24px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    
+                    <p class="text-primary" style="margin:0 0 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1px;text-align:center;">
                       🔐 Your Access Credentials
                     </p>
-                    
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+
+                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding: 16px 0; border-bottom: 1px solid rgba(156, 163, 175, 0.2);" class="dark-border">
-                          <div style="font-size: 14px; color: #6b7280; font-weight: 600; margin-bottom: 4px;" class="dark-muted">EMAIL</div>
-                          <div style="font-size: 18px; font-weight: 800;" class="gradient-text">${email}</div>
+                        <td style="padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,0.05);" class="divider">
+                          <p class="text-secondary" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;">Email</p>
+                          <p class="text-primary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#1e293b;">${email}</p>
                         </td>
                       </tr>
-
-                      ${userExists ? (`
-                        <tr>
-                        <td style="padding: 16px 0;">
-                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">
-                              Sign in with the method you used to create the account.
-                          </div>
-                        </td>
-                      </tr>
-                        
-                        
-                        
-                        `) : (`
-                          <tr>
-                        <td style="padding: 16px 0;">
-                          <div style="font-size: 18px; font-weight: 800; font-family: 'Monaco', monospace; background: rgba(59, 130, 246, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;" class="gradient-text">
-
-                          </div>
-                        </td>
-                      </tr>
-                          
-                          
-                          
-                          `)}
-                      
                     </table>
+
+                    ${userExists ? `
+                    <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+                      <tr>
+                        <td>
+                           <p class="text-secondary" style="margin:0 0 4px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;">Sign-in Method</p>
+                           <div style="background:rgba(37, 99, 235, 0.1);border-radius:8px;padding:8px 12px;display:inline-block;">
+                              <p class="text-accent" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#2563eb;">
+                                Use your existing account method
+                              </p>
+                           </div>
+                        </td>
+                      </tr>
+                    </table>
+                    ` : ``}
+                    
                   </td>
                 </tr>
               </table>
-              
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 40px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center" style="padding-bottom: 40px;">
-                    <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${fallbackUrl}" style="height:56px;v-text-anchor:middle;width:240px;" arcsize="50%" fillcolor="#3b82f6">
-                      <w:anchorlock/>
-                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:18px;font-weight:700;">🚀 Launch Dashboard</center>
-                    </v:roundrect>
-                    <![endif]-->
-                    <!--[if !mso]><!-->
-                    <a href="${fallbackUrl}" class="gradient-button">
+                  <td align="center">
+                    <a href="${fallbackUrl}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;text-decoration:none;padding:16px 40px;border-radius:50px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
                       🚀 Launch Dashboard
                     </a>
-                    <!--<![endif]-->
                   </td>
                 </tr>
               </table>
-              
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td style="border-top: 1px solid rgba(156, 163, 175, 0.2); padding-top: 32px;" class="dark-border">
-                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 20px; text-align: center;" class="dark-notice">
-                      <p style="margin: 0; font-size: 16px; color: #059669; font-weight: 600;" class="dark-muted">
-                        🔒 <strong>Security First:</strong> Please update your password and verify your email after signing in for enhanced protection.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
+            </td>
+          </tr>
+
+          <tr>
+             <td style="padding:0 40px 30px 40px;">
+               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                   <td class="security-box" align="center" style="background-color:#f0fdf4;padding:16px;border-radius:12px;border:1px solid #d1fae5;">
+                     <p class="security-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#059669;font-weight:500;">
+                       🔒 <strong>Security First:</strong> Please verify your settings after signing in for enhanced protection.
+                     </p>
+                   </td>
+                 </tr>
+               </table>
+             </td>
+          </tr>
+
+        </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td align="center" style="padding-top:30px;">
+              <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 ${organizationName}. All rights reserved.
+              </p>
             </td>
           </tr>
         </table>
         
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+
       </td>
     </tr>
   </table>
-
 </body>
 </html>
-    `.trim()
+    `
   };
 }
-
 
 function memberRemovedEmail(
   member: string,
@@ -713,96 +931,140 @@ function memberRemovedEmail(
     subject: `👋 ${member}, your access to ${organizationName} has been removed`,
     html: `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light dark">
+  <title>Access Removed</title>
   <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
     @media (prefers-color-scheme: dark) {
-      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
-      .dark-container { background: rgba(17,24,39,0.9) !important; border-color: rgba(55,65,81,0.8) !important; }
-      .dark-glass { background: rgba(31,41,55,0.8) !important; border-color: rgba(75,85,99,0.6) !important; }
-      .dark-text { color: #f9fafb !important; }
-      .dark-muted { color: #d1d5db !important; }
-      .dark-border { border-color: rgba(75,85,99,0.4) !important; }
-      .dark-notice { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.3) !important; }
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; color: #3b82f6;
-    }
-    .glass-container {
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255,255,255,0.6);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    }
-    .glass-inner {
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(255,255,255,0.5);
-      border-radius: 16px;
-    }
-    .blob-bg {
-      position:absolute; inset:0;
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(253,230,138,0.4) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139,92,246,0.4) 0%, transparent 50%),
-        radial-gradient(circle at 40% 70%, rgba(236,72,153,0.4) 0%, transparent 50%);
-      border-radius: 24px; overflow: hidden;
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important; /* Primary Dark Token */
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .danger-box {
+        background: rgba(127, 29, 29, 0.4) !important;
+        border: 1px solid rgba(248, 113, 113, 0.2) !important;
+      }
+      .danger-text {
+        color: #fca5a5 !important;
+      }
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fce7f3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;min-height:100vh;" class="dark-mode">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:transparent;">
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center" style="padding:60px 20px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;position:relative;" class="glass-container dark-container">
-          <tr><td style="position:absolute;inset:0;"><div class="blob-bg"></div></td></tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
+          
           <tr>
-            <td style="padding:80px 50px;position:relative;z-index:10;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+            <td align="center" style="padding:45px 40px 10px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                 <tr>
-                  <td align="center" style="padding-bottom:40px;">
-                    <h1 style="margin:0;font-size:48px;font-weight:900;line-height:1;letter-spacing:-0.02em;" class="gradient-text">Access Updated</h1>
-                    <h2 style="margin:16px 0 0 0;font-size:24px;font-weight:800;color:#374151;" class="dark-muted">${organizationName}</h2>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="8.5" cy="7" r="4"></circle>
+                      <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
                   </td>
                 </tr>
               </table>
 
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="glass-inner dark-glass" style="margin-bottom:32px;">
+              <h1 class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;color:#1e293b;">
+                Access Updated
+              </h1>
+              
+              <p class="text-accent" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#2563eb;letter-spacing:0.5px;text-transform:uppercase;">
+                ${organizationName}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding:32px;">
-                    <p style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#111827;" class="dark-text">Hi ${member},</p>
-                    <p style="margin:0;color:#6b7280;font-size:16px;" class="dark-muted">
-                      Your membership in <strong>${organizationName}</strong> has been removed by an organization administrator.
+                  <td class="inner-glass" style="padding:24px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <p class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#1e293b;">
+                      Hi ${member},
+                    </p>
+                    <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;">
+                      Your membership in <strong>${organizationName}</strong> has been removed by an organization administrator. You no longer have access to this workspace's resources.
                     </p>
                   </td>
                 </tr>
               </table>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                <tr>
-                  <td style="border-top:1px solid rgba(156,163,175,0.2);padding-top:24px;" class="dark-border">
-                    <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px;text-align:center;" class="dark-notice">
-                      <p style="margin:0;font-size:14px;color:#991b1b;" class="dark-muted">
-                        If you believe this was a mistake, please contact the organization owner or your workspace admin to request reinstatement.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
             </td>
           </tr>
+
+          <tr>
+             <td style="padding:0 40px 30px 40px;">
+               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                   <td class="danger-box" align="center" style="background-color:#fef2f2;padding:16px;border-radius:12px;border:1px solid #fee2e2;">
+                     <p class="danger-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#991b1b;font-weight:500;">
+                       If you believe this was a mistake, please contact the organization owner or your workspace admin to request reinstatement.
+                     </p>
+                   </td>
+                 </tr>
+               </table>
+             </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="text-secondary" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 ${organizationName}. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
         </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+
       </td>
     </tr>
   </table>
 </body>
-</html>`.trim()
+</html>
+    `
   };
 }
 function memberRoleChangedEmail(
@@ -814,495 +1076,519 @@ function memberRoleChangedEmail(
     subject: `🔧 ${member}, your role was updated to ${memberRole}`,
     html: `
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="color-scheme" content="light dark">
-  <meta name="supported-color-schemes" content="light dark">
-  <style>
-    @media (prefers-color-scheme: dark) {
-      .dark-mode { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%) !important; }
-      .dark-container { background: rgba(17,24,39,0.9) !important; border-color: rgba(55,65,81,0.8) !important; }
-      .dark-glass { background: rgba(31,41,55,0.8) !important; border-color: rgba(75,85,99,0.6) !important; }
-      .dark-text { color: #f9fafb !important; }
-      .dark-muted { color: #d1d5db !important; }
-      .dark-border { border-color: rgba(75,85,99,0.4) !important; }
-      .dark-notice { background: rgba(59,130,246,0.15) !important; border-color: rgba(59,130,246,0.3) !important; }
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; color: #3b82f6;
-    }
-    .glass-container {
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255,255,255,0.6);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    }
-    .glass-inner {
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(255,255,255,0.5);
-      border-radius: 16px;
-    }
-    .blob-bg {
-      position:absolute; inset:0;
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(253,230,138,0.4) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139,92,246,0.4) 0%, transparent 50%),
-        radial-gradient(circle at 40% 70%, rgba(236,72,153,0.4) 0%, transparent 50%);
-      border-radius: 24px; overflow: hidden;
-    }
-    .pill {
-      display:inline-block;padding:6px 12px;border-radius:9999px;
-      background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);
-      font-weight:700;font-size:12px;letter-spacing:.02em;
-    }
-  </style>
-</head>
-<body style="margin:0;padding:0;background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fce7f3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6;min-height:100vh;" class="dark-mode">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:transparent;">
-    <tr>
-      <td align="center" style="padding:60px 20px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;position:relative;" class="glass-container dark-container">
-          <tr><td style="position:absolute;inset:0;"><div class="blob-bg"></div></td></tr>
-          <tr>
-            <td style="padding:80px 50px;position:relative;z-index:10;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                <tr>
-                  <td align="center" style="padding-bottom:40px;">
-                    <h1 style="margin:0;font-size:48px;font-weight:900;line-height:1;letter-spacing:-0.02em;" class="gradient-text">Role Updated</h1>
-                    <h2 style="margin:16px 0 0 0;font-size:24px;font-weight:800;color:#374151;" class="dark-muted">${organizationName}</h2>
-                  </td>
-                </tr>
-              </table>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="glass-inner dark-glass" style="margin-bottom:24px;">
-                <tr>
-                  <td style="padding:32px;">
-                    <p style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#111827;" class="dark-text">Hi ${member},</p>
-                    <p style="margin:0;color:#6b7280;font-size:16px;" class="dark-muted">
-                      Your role in <strong>${organizationName}</strong> has been changed.
-                    </p>
-                    <div style="margin-top:16px;text-align:center;">
-                      <span class="pill">New role: ${memberRole}</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
-                <tr>
-                  <td style="border-top:1px solid rgba(156,163,175,0.2);padding-top:24px;" class="dark-border">
-                    <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:16px;text-align:center;" class="dark-notice">
-                      <p style="margin:0;font-size:14px;color:#1e40af;" class="dark-muted">
-                        Changes take effect immediately. If you didn’t expect this update, contact your workspace admin.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`.trim()
-  };
-}
-
-function generateMagicLinkEmail({ email, url }: { email: string; url: string }): { subject: string, html: string } {
-  const subject = "Verify your email address";
-
-  const html = `
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Email Verification</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Role Updated</title>
   <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
     @media (prefers-color-scheme: dark) {
-      .dark-mode-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; }
-      .dark-mode-text { color: #f8fafc !important; }
-      .dark-mode-subtext { color: #cbd5e1 !important; }
-      .dark-mode-glass { 
-        background: rgba(15, 23, 42, 0.2) !important; 
-        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important; /* Primary Dark Token */
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .info-box {
+        background: rgba(30, 58, 138, 0.3) !important;
+        border: 1px solid rgba(96, 165, 250, 0.2) !important;
+      }
+      .info-text {
+        color: #60a5fa !important;
+      }
+      .role-pill {
+        background: rgba(168, 85, 247, 0.2) !important;
+        border: 1px solid rgba(168, 85, 247, 0.3) !important;
+        color: #e9d5ff !important;
       }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 50%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(135deg, #fdf2f8 0%, #ede9fe 50%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
+      <td align="center" style="padding:40px 20px;">
         
-        <!-- Main Container -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden;" class="dark-mode-glass">
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           
-          <!-- Header with Aurora Gradient -->
           <tr>
-            <td style="background: linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(14, 165, 233, 0.2) 100%); padding: 0; height: 4px;"></td>
-          </tr>
-          
-          <!-- Content -->
-          <tr>
-            <td style="padding: 48px 40px 40px 40px;">
-              
-              <!-- Logo/Icon Area -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <td align="center" style="padding:45px 40px 10px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                 <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4);">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                      </svg>
-                    </div>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
                   </td>
                 </tr>
               </table>
+
+              <h1 class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;color:#1e293b;">
+                Role Updated
+              </h1>
               
-              <!-- Main Heading -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 16px;">
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2;" class="dark-mode-text">
-                      Verify Your Email
-                    </h1>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Description -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <p style="margin: 0; font-size: 16px; color: #64748b; line-height: 1.6; max-width: 400px;" class="dark-mode-subtext">
-                      We received a request to verify your email address. Click the button below to complete your verification.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Email Display -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 20px; display: inline-block;" class="dark-mode-glass">
-                      <span style="font-size: 14px; color: #475569; font-weight: 500;" class="dark-mode-subtext">${email}</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- CTA Button -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); color: white; text-decoration: none; font-weight: 600; font-size: 16px; padding: 16px 32px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); transition: all 0.2s ease;">
-                      Verify Email Address
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Alternative Link -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 24px;">
-                    <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.5;" class="dark-mode-subtext">
-                      If the button doesn't work, copy and paste this link into your browser:
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center">
-                    <div style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px 16px; word-break: break-all;" class="dark-mode-glass">
-                      <a href="${url}" style="color: #a855f7; text-decoration: none; font-size: 14px; font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;">${url}</a>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
+              <p class="text-accent" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#2563eb;letter-spacing:0.5px;text-transform:uppercase;">
+                ${organizationName}
+              </p>
             </td>
           </tr>
-          
-          <!-- Footer -->
+
           <tr>
-            <td style="padding: 32px 40px; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05);" class="dark-mode-glass">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <td style="padding:30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center">
-                    <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.4;" class="dark-mode-subtext">
-                      This verification link will expire in 24 hours.<br>
-                      If you didn't request this verification, you can safely ignore this email.
+                  <td class="inner-glass" align="center" style="padding:32px 24px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <p class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#1e293b;">
+                      Hi ${member},
                     </p>
+                    <p class="text-secondary" style="margin:0 0 24px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;">
+                      Your role has been changed. You have been assigned the following permissions level:
+                    </p>
+
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                      <tr>
+                        <td class="role-pill" style="padding:8px 24px;border-radius:50px;background-color:#f3e8ff;background:rgba(147, 51, 234, 0.1);border:1px solid rgba(147, 51, 234, 0.25);color:#9333ea;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:0.5px;">
+                          ${memberRole}
+                        </td>
+                      </tr>
+                    </table>
+
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
-          
-        </table>
-        
-        <!-- Bottom Spacer -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+
           <tr>
-            <td style="height: 40px;"></td>
+             <td style="padding:0 40px 30px 40px;">
+               <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                   <td class="info-box" align="center" style="background-color:#eff6ff;padding:16px;border-radius:12px;border:1px solid #bfdbfe;">
+                     <p class="info-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#2563eb;font-weight:500;">
+                       Changes take effect immediately. If you didn’t expect this update, contact your workspace admin.
+                     </p>
+                   </td>
+                 </tr>
+               </table>
+             </td>
           </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="text-secondary" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 ${organizationName}. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
         </table>
-        
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+
       </td>
     </tr>
   </table>
 </body>
-</html>`.trim();
+</html>
+    `
+  };
+}
 
-  return { subject, html };
+function generateMagicLinkEmail({ email, url }: { email: string; url: string }): { subject: string, html: string } {
+  return {
+    subject: "Verify your email address",
+    html: `
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Verify Email</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-link {
+        color: #d8b4fe !important; /* Primary Dark Token */
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .email-badge {
+        background: rgba(147, 51, 234, 0.2) !important;
+        border: 1px solid rgba(168, 85, 247, 0.3) !important;
+        color: #e9d5ff !important;
+      }
+    }
+  </style>
+</head>
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
+          
+          <tr>
+            <td align="center" style="padding:45px 40px 10px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(37, 99, 235, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+
+              <h1 class="text-primary" style="margin:0 0 16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;color:#1e293b;">
+                Verify Your Email
+              </h1>
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                 <tr>
+                   <td class="email-badge" style="background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);border-radius:50px;padding:6px 16px;">
+                     <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#475569;">
+                       ${email}
+                     </p>
+                   </td>
+                 </tr>
+               </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td class="inner-glass" align="center" style="padding:32px 24px;border-radius:16px;background-color:#f8fafc;background:rgba(255, 255, 255, 0.4);border:1px solid rgba(255, 255, 255, 0.6);">
+                    <p class="text-secondary" style="margin:0 0 24px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;">
+                      We received a request to verify your email address. Click the button below to complete the process.
+                    </p>
+
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td align="center">
+                          <a href="${url}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                            Verify Email Address
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+             <td align="center" style="padding:0 40px 30px 40px;">
+               <p class="text-secondary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#64748b;">
+                 Button not working? Copy and paste this link:
+               </p>
+               <p style="margin:0;word-break:break-all;">
+                 <a href="${url}" class="text-link" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#2563eb;text-decoration:none;">${url}</a>
+               </p>
+             </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="text-secondary" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                This link expires in 24 hours. If you didn't request this, you can ignore this email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `
+  };
 }
 function generateOrganizationInviteEmail({
   organizationName,
   userEmail,
   inviteLink,
   role
-}: TemplateParamMap['generateOrganizationInviteEmail']): { subject: string; html: string } {
+}: {
+  organizationName: string;
+  userEmail: string;
+  inviteLink: string;
+  role: 'member' | 'admin' | 'owner';
+}): { subject: string; html: string } {
   const subject = `You've been invited to join ${organizationName}`;
 
-  // Role configuration
+  // Map roles to Design System Tokens
+  // Member -> Primary, Admin -> Accent, Owner -> Highlight
   const roleConfig = {
     member: {
       title: "Member",
       description: "You'll have access to collaborate and contribute to projects.",
-      color: "#0ea5e9", // sky-500
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="m22 21-3-3m0 0-3-3m3 3 3 3m-3-3V8"/>
-      </svg>`
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 21-3-3m0 0-3-3m3 3 3 3m-3-3V8"/></svg>`,
+      colorLight: "#2563eb", // Primary Base Light
+      colorDark: "#d8b4fe",  // Primary Base Dark
+      bgLight: "rgba(37, 99, 235, 0.1)",
+      borderLight: "rgba(37, 99, 235, 0.2)"
     },
     admin: {
       title: "Administrator",
       description: "You'll have administrative privileges to manage the organization.",
-      color: "#a855f7", // purple-500
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="m2 17 10 5 10-5"/>
-        <path d="m2 12 10 5 10-5"/>
-      </svg>`
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>`,
+      colorLight: "#9333ea", // Accent Base Light
+      colorDark: "#a855f7",  // Accent Base Dark
+      bgLight: "rgba(147, 51, 234, 0.1)",
+      borderLight: "rgba(147, 51, 234, 0.2)"
     },
     owner: {
       title: "Owner",
       description: "You'll have full control and ownership of the organization.",
-      color: "#ec4899", // pink-500
-      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 12l2 2 4-4"/>
-        <path d="M21 12c.552 0 1-.449 1-1V8c0-.551-.448-1-1-1-.551 0-1-.449-1-1V3c0-.551-.448-1-1-1H4c-.552 0-1 .449-1 1v3c0 .551-.449 1-1 1-.552 0-1 .449-1 1v3c0 .551.448 1 1 1 .551 0 1 .449 1 1v3c0 .551.448 1 1 1h15c.552 0 1-.449 1-1v-3c0-.551.449-1 1-1z"/>
-      </svg>`
+      icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c.552 0 1-.449 1-1V8c0-.551-.448-1-1-1-.551 0-1-.449-1-1V3c0-.551-.448-1-1-1H4c-.552 0-1 .449-1 1v3c0 .551-.449 1-1 1-.552 0-1 .449-1 1v3c0 .551.448 1 1 1 .551 0 1 .449 1 1v3c0 .551.448 1 1 1h15c.552 0 1-.449 1-1v-3c0-.551.449-1 1-1z"/></svg>`,
+      colorLight: "#db2777", // Highlight Base Light
+      colorDark: "#f472b6",  // Highlight Base Dark
+      bgLight: "rgba(219, 39, 119, 0.1)",
+      borderLight: "rgba(219, 39, 119, 0.2)"
     }
   };
 
-  const currentRole = roleConfig[role];
+  const currentRole = roleConfig[role] || roleConfig.member;
 
-  const html = `
+  return {
+    subject,
+    html: `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>Organization Invitation</title>
   <style>
-    @media (prefers-color-scheme: dark) {
-      .dark-mode-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%) !important; }
-      .dark-mode-text { color: #f8fafc !important; }
-      .dark-mode-subtext { color: #cbd5e1 !important; }
-      .dark-mode-glass { 
-        background: rgba(15, 23, 42, 0.2) !important; 
-        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
-      }
-      .dark-mode-role-bg { 
-        background: rgba(15, 23, 42, 0.3) !important; 
-        border: 1px solid rgba(255, 255, 255, 0.1) !important; 
-      }
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
     }
-    
-    @media only screen and (max-width: 600px) {
-      .mobile-padding { padding: 24px 20px !important; }
-      .mobile-text { font-size: 24px !important; }
-      .mobile-button { padding: 14px 24px !important; font-size: 15px !important; }
+
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important; /* Outlook Fallback */
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #f1f5f9 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-link {
+        color: #d8b4fe !important;
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      /* Dynamic Role Colors for Dark Mode */
+      .role-icon-container {
+        color: ${currentRole.colorDark} !important;
+      }
+      .role-title {
+        color: #f1f5f9 !important;
+      }
+      .role-box {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 30%, #ede9fe 60%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 30%, #ede9fe 60%, #e0f2fe 100%); min-height: 100vh;" class="dark-mode-bg">
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #fae8ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
+      <td align="center" style="padding:40px 20px;">
         
-        <!-- Main Container -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 640px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(2px); border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden;" class="dark-mode-glass">
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.8);border-radius:24px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
           
-          <!-- Aurora Header -->
           <tr>
-            <td style="background: linear-gradient(90deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(14, 165, 233, 0.2) 100%); padding: 0; height: 4px;"></td>
-          </tr>
-          
-          <!-- Content -->
-          <tr>
-            <td style="padding: 48px 40px 40px 40px;" class="mobile-padding">
-              
-              <!-- Organization Icon -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <td align="center" style="padding:45px 40px 10px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
                 <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <div style="width: 72px; height: 72px; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 20px 25px -5px rgba(168, 85, 247, 0.4); position: relative;">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="m22 21-3-3m0 0-3-3m3 3 3 3m-3-3V8"/>
-                      </svg>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(255, 255, 255, 0.4);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.5);box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+                    <div class="role-icon-container" style="color:${currentRole.colorLight};display:block;line-height:0;">
+                       ${currentRole.icon}
                     </div>
                   </td>
                 </tr>
               </table>
+
+              <h1 class="text-primary" style="margin:0 0 12px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;color:#1e293b;">
+                You've been invited
+              </h1>
               
-              <!-- Main Heading -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 16px;">
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; text-align: center;" class="dark-mode-text mobile-text">
-                      You're invited to join<br>
-                      <span style="background: linear-gradient(135deg, #ec4899, #a855f7, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${organizationName}</span>
-                    </h1>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Invitation Description -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <p style="margin: 0; font-size: 16px; color: #64748b; line-height: 1.6; max-width: 480px; text-align: center;" class="dark-mode-subtext">
-                      You've been invited to collaborate and contribute as a team member. Accept your invitation to get started.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Role Badge -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 20px 24px; display: inline-block; max-width: 320px;" class="dark-mode-role-bg">
-                      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                        <tr>
-                          <td align="center" style="padding-bottom: 12px;">
-                            <div style="color: ${currentRole.color}; display: inline-flex; align-items: center; justify-content: center;">
-                              ${currentRole.icon}
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align="center" style="padding-bottom: 8px;">
-                            <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;" class="dark-mode-text">
-                              ${currentRole.title}
-                            </h3>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align="center">
-                            <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.4; text-align: center;" class="dark-mode-subtext">
-                              ${currentRole.description}
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Email Display -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;" class="dark-mode-subtext">
-                      Invitation sent to
-                    </p>
-                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px 20px; display: inline-block;" class="dark-mode-glass">
-                      <span style="font-size: 15px; color: #475569; font-weight: 500; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;" class="dark-mode-subtext">${userEmail}</span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- CTA Button -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 32px;">
-                    <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #0ea5e9 100%); color: white; text-decoration: none; font-weight: 600; font-size: 16px; padding: 16px 40px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.4); transition: all 0.2s ease; border: none;" class="mobile-button">
-                      Accept Invitation
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Alternative Link Section -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding-bottom: 20px;">
-                    <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; text-align: center;" class="dark-mode-subtext">
-                      If the button doesn't work, copy and paste this link:
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding-bottom: 24px;">
-                    <div style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px 16px; word-break: break-all; max-width: 100%;" class="dark-mode-glass">
-                      <a href="${inviteLink}" style="color: #a855f7; text-decoration: none; font-size: 13px; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; word-break: break-all;">${inviteLink}</a>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              
+              <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:500;color:#64748b;">
+                to join <span style="color:${currentRole.colorLight};font-weight:700;">${organizationName}</span>
+              </p>
             </td>
           </tr>
-          
-          <!-- Footer -->
+
           <tr>
-            <td style="padding: 32px 40px; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05);" class="dark-mode-glass mobile-padding">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <td style="padding:30px 40px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center">
-                    <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;" class="dark-mode-subtext">
-                      This invitation will expire in 7 days.<br>
-                      If you didn't expect this invitation, you can safely ignore this email.
+                  <td class="role-box" align="center" style="padding:24px;border-radius:16px;background-color:#f8fafc;background:${currentRole.bgLight};border:1px solid ${currentRole.borderLight};">
+                    
+                    <h3 class="role-title" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#1e293b;">
+                      ${currentRole.title}
+                    </h3>
+                    
+                    <p class="text-secondary" style="margin:0 0 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#475569;">
+                      ${currentRole.description}
                     </p>
+
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                      <tr>
+                         <td style="background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);border-radius:50px;padding:6px 16px;">
+                           <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:#64748b;">
+                             Invited as: ${userEmail}
+                           </p>
+                         </td>
+                      </tr>
+                    </table>
+
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
-          
-        </table>
-        
-        <!-- Bottom Spacer -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+
           <tr>
-            <td style="height: 40px;"></td>
+             <td align="center" style="padding:0 40px 40px 40px;">
+               <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                 <tr>
+                   <td align="center">
+                     <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.35);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                       Accept Invitation
+                     </a>
+                   </td>
+                 </tr>
+               </table>
+             </td>
           </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;">
+               <p class="text-secondary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#64748b;">
+                 Or copy this link:
+               </p>
+               <p style="margin:0;word-break:break-all;">
+                 <a href="${inviteLink}" class="text-link" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#2563eb;text-decoration:none;">${inviteLink}</a>
+               </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="text-secondary" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                This invitation expires in 7 days.
+              </p>
+              <p class="text-secondary" style="margin:8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 ${organizationName}. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
         </table>
-        
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+
       </td>
     </tr>
   </table>
 </body>
-</html>`.trim();
-
-  return { subject, html };
+</html>
+    `
+  };
 }
 
 
