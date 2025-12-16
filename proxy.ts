@@ -4,22 +4,22 @@ import { getSessionCookie } from "better-auth/cookies";
 
 export async function proxy(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
-  console.log("------- middleware -------");
+  // console.log("------- middleware -------");
   const authPage = pathName.startsWith("/login") || pathName.startsWith("/register");
   const protectedPage = pathName.startsWith("/home") || pathName.startsWith("/test");
   const sessionCookie = getSessionCookie(request);
-  console.log({
-    protectedPage,
-    authPage,
-    sessionCookie,
-    pathName,
-    NODE_ENV: process.env.NODE_ENV,
-    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    AUTH_ORIGIN: process.env.AUTH_ORIGIN,
-    NEXT_PUBLIC_TRPC_URL: process.env.NEXT_PUBLIC_TRPC_URL,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL
-  });
+  // console.log({
+  //   protectedPage,
+  //   authPage,
+  //   sessionCookie,
+  //   pathName,
+  //   NODE_ENV: process.env.NODE_ENV,
+  //   BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+  //   AUTH_ORIGIN: process.env.AUTH_ORIGIN,
+  //   NEXT_PUBLIC_TRPC_URL: process.env.NEXT_PUBLIC_TRPC_URL,
+  //   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  //   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL
+  // });
   // Handle Stripe webhook
   if (pathName.startsWith("/api/webhooks/stripe")) {
     return NextResponse.next();

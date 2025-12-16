@@ -1,0 +1,91 @@
+"use client"
+import React, { useEffect, useState } from 'react' // Import useState
+import { trpc as api } from '@/lib/client'
+import ChatSidebar from "@/components/ChatSidebar"
+import ChatRoom from '@/components/ChatRoom'
+import { authClient } from '@/lib/auth-client'
+import { roomType } from '@/lib/generated/prisma/enums'
+import { Message } from '@/lib/ZodObject'
+
+type Room = {
+   notificationCount: number;
+    RoomMembers: {
+        userId: string;
+        userName: string;
+    }[];
+    id: string;
+    type: roomType;
+    title: string;
+}
+
+
+export default function Page() {
+    const session = authClient.useSession();
+    const [message, setMessage] = useState<Message[]>([])
+    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
+
+    // 1. Subscription: Appends NEW messages as they arrive in real-time
+    api.Chat.onMessage.useSubscription(
+        { roomId: selectedRoom?.id || "" },
+        {
+            enabled: !!selectedRoom?.id, // Only subscribe if a room is selected
+            onData(newMessage) {
+                if (newMessage) {
+                    setMessage((prev) => {
+                        // Optional: Prevent duplicates if strict mode triggers twice
+                        if (prev.some(m => m.id === newMessage.id)) return prev;
+                        return [...prev, newMessage];
+                    })
+                }
+            },
+            onError(err) {
+                console.error("Subscription error:", err);
+            }
+        }
+    );
+
+    const sendMessage = api.Chat.sendMessage.useMutation()
+    const roomList = api.Chat.userRooms.useQuery()
+
+    const FetchMessages = api.Chat.getRoomMessages.useQuery(
+        { roomId: selectedRoom?.id || "" },
+        {
+            enabled: !!selectedRoom?.id, 
+            // refetchOnWindowFocus: false, // Optional: prevents flickering when switching tabs
+        }
+    )
+
+    // 3. Sync: Update state ONLY when the Query data actually changes
+    useEffect(() => {
+        if (FetchMessages.data?.value) {
+            setMessage(FetchMessages.data.value)
+        }
+    }, [FetchMessages.data]) 
+    return (
+        <div className="flex flex-row min-h-screen">
+            <ChatSidebar
+                rooms={roomList.data?.value || []}
+                SelectRoom={(roomId: string) => {
+                    const room = roomList.data?.value?.find(r => r.id === roomId)
+                    if (room) setSelectedRoom(room)
+                }}
+                size={500}
+            />
+
+            <ChatRoom
+                roomId={selectedRoom?.id || ""}
+                authorId={session.data?.user.id || ""}
+                submit={(text) => {
+                    // Optimistic update (Optional: makes UI feel faster)
+                    // You can manually append the message here temporarily if you want
+                    sendMessage.mutate(text)
+                }}
+                roohasSelected={selectedRoom !== null}
+                messages={message}
+                getMembers={(id) => {
+                    return selectedRoom?.RoomMembers.find(member => member.userId === id)?.userName || "Unknown"
+                }}
+            />
+        </div>
+    )
+}

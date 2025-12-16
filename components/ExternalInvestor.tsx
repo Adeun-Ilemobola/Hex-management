@@ -215,137 +215,164 @@ interface InvestorConfigProps {
     maxAllowed: number; // Renamed to clarify this is the cap for this specific user
 }
 
-function InvestorConfig({ investor, setInvestor, showInvestorMod, setShowInvestorMod, mode, onSubmit, maxAllowed }: InvestorConfigProps) {
+
+export function InvestorConfig({ 
+    investor, 
+    setInvestor, 
+    showInvestorMod, 
+    setShowInvestorMod, 
+    mode, 
+    onSubmit, 
+    maxAllowed 
+}: InvestorConfigProps) {
     const [searchMode, setSearchMode] = useState<"Manual" | "Search">("Manual");
     const [textSearch, setTextSearch] = useState<string>("");
     const foundUsers = api.user.SearchUserByEmail.useMutation();
 
-    // Reset search mode when modal closes/opens or mode changes if needed
-    // (Optional optimization)
+    // Glassmorphism Token Classes
+    const glassCard = "bg-white/60 dark:bg-black/40 backdrop-blur-[20px] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] border border-white/40 dark:border-white/10 ring-1 ring-white/20";
+    const glassInput = "bg-white/30 dark:bg-white/5 border border-white/30 dark:border-white/10 focus:ring-2 focus:ring-[#9333ea]/50 dark:focus:ring-[#a855f7]/50 placeholder:text-gray-500/80";
+    const glassButtonSecondary = "bg-white/20 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 border border-white/30 dark:border-white/10 text-slate-700 dark:text-slate-200 backdrop-blur-md transition-all duration-300";
+    const glassButtonPrimary = "bg-[#9333ea]/80 dark:bg-[#a855f7]/80 hover:bg-[#9333ea] dark:hover:bg-[#a855f7] text-white shadow-[0_4px_14px_0_rgba(147,51,234,0.39)] backdrop-blur-md border border-white/20";
 
     return (
         <Dialog open={showInvestorMod} onOpenChange={setShowInvestorMod}>
-            <DialogOverlay className='bg-purple-800/50 backdrop-blur-md' />
-            <DialogContent className='border border-white/20 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/60 rounded-3xl shadow-xl'>
-                <DialogHeader>
-                    <DialogTitle>
-                        {mode === "edit" ? "Edit Investor" : "Add Investor"}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {mode === "edit" ? "Adjust contribution details" : "Add a new external or internal investor"}
-                    </DialogDescription>
-                </DialogHeader>
+            {/* Backdrop with strong blur and deep tint */}
+            <DialogOverlay className="bg-black/20 dark:bg-black/40 backdrop-blur-[10px]" />
+            
+            <DialogContent className={`max-w-md rounded-3xl ${glassCard} p-0 overflow-hidden`}>
+                <div className="p-6 space-y-6">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300">
+                            {mode === "edit" ? "Edit Investor" : "Add Investor"}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-600 dark:text-slate-300">
+                            {mode === "edit" ? "Adjust contribution details" : "Add a new external or internal investor"}
+                        </DialogDescription>
+                    </DialogHeader>
                 
-                <div className='p-3 flex flex-col gap-4'>
-                    {/* Toggle Search/Manual */}
-                    <div className="flex justify-end">
-                         <Button
-                            size="sm"
-                            variant="secondary"
-                            className="text-xs"
-                            onClick={() => setSearchMode(searchMode === "Manual" ? "Search" : "Manual")}>
-                            {searchMode === "Manual" ? (
-                                <><Search className="w-3 h-3 mr-2" /> Switch to Search</>
-                            ) : (
-                                <><UserPen className="w-3 h-3 mr-2" /> Switch to Manual Input</>
-                            )}
-                        </Button>
-                    </div>
+                    <div className='flex flex-col gap-5'>
+                        {/* Toggle Search/Manual - Glass Segmented Control */}
+                        <div className="flex justify-end">
+                             <Button
+                                size="sm"
+                                className={`text-xs h-8 px-4 rounded-full ${glassButtonSecondary}`}
+                                onClick={() => setSearchMode(searchMode === "Manual" ? "Search" : "Manual")}>
+                                {searchMode === "Manual" ? (
+                                    <><Search className="w-3 h-3 mr-2" /> Switch to Search</>
+                                ) : (
+                                    <><UserPen className="w-3 h-3 mr-2" /> Switch to Manual Input</>
+                                )}
+                            </Button>
+                        </div>
 
-                    <div className='flex flex-col gap-4'>
-                        {searchMode === "Manual" && (
-                            <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                                <TextField
-                                    label="Name"
-                                    value={investor.name}
-                                    onChange={(e) => setInvestor(prev => prev ? ({ ...prev, name: e }) : null)}
-                                />
-                                <TextField
-                                    label="Email"
-                                    value={investor.email}
-                                    onChange={(e) => setInvestor(prev => prev ? ({ ...prev, email: e }) : null)}
-                                />
-                            </div>
-                        )}
-
-                        {searchMode === "Search" && (
-                            <div className="animate-in fade-in zoom-in duration-300">
-                                <Command className="border rounded-lg shadow-sm">
-                                    <CommandInput
-                                        placeholder="Search user by email..."
-                                        value={textSearch}
-                                        onValueChange={(e) => {
-                                            setTextSearch(e);
-                                            // Debouncing suggested here in real app
-                                            if(e.length > 2) foundUsers.mutate({ email: e });
-                                        }}
+                        <div className='flex flex-col gap-4 min-h-[140px]'>
+                            {searchMode === "Manual" && (
+                                <div className="space-y-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300">
+                                    <TextField
+                                        
+                                        label="Name"
+                                        placeholder="John Doe"
+                                        value={investor.name}
+                                        onChange={(e) => setInvestor(prev => prev ? ({ ...prev, name: e }) : null)}
                                     />
-                                    <CommandList className="max-h-[200px]">
-                                        <CommandEmpty>No user found.</CommandEmpty>
-                                        <CommandGroup heading="Users">
-                                            {foundUsers.data?.value.map((user, i) => (
-                                                <CommandItem
-                                                    key={i}
-                                                    value={user.email}
-                                                    onSelect={() => {
-                                                        setInvestor(prev => prev ? ({ 
-                                                            ...prev, 
-                                                            name: user.name, 
-                                                            email: user.email, 
-                                                            investorUserId: user.id 
-                                                        }) : null);
-                                                        setSearchMode("Manual");
-                                                    }}
-                                                >
-                                                    <div className='flex flex-row gap-2 items-center'>
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={user.image ?? undefined} />
-                                                            <AvatarFallback className="bg-purple-600 text-white text-xs">
-                                                                {user.name.substring(0, 1)}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div className='flex flex-col'>
-                                                            <span className='font-medium text-sm'>{user.name}</span>
-                                                            <span className='text-xs text-gray-500'>{user.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </div>
-                        )}
+                                    <TextField
+                                        
+                                        label="Email"
+                                        placeholder="john@example.com"
+                                        value={investor.email}
+                                        onChange={(e) => setInvestor(prev => prev ? ({ ...prev, email: e }) : null)}
+                                    />
+                                </div>
+                            )}
 
-                        <div className="pt-2">
-                            <NumberStepper
-                                label="Contribution Percentage (%)"
-                                value={Number(investor.contributionPercentage)}
-                                min={0}
-                                max={maxAllowed} // Uses the corrected math
-                                onChange={(e) => setInvestor(prev => prev ? ({ ...prev, contributionPercentage: e }) : null)}
-                            />
-                            <p className="text-xs text-right text-gray-500 mt-1">
-                                Max allowed: {maxAllowed.toFixed(1)}%
-                            </p>
+                            {searchMode === "Search" && (
+                                <div className="animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-300">
+                                    <Command className={`rounded-xl border border-white/20 ${glassInput}`}>
+                                        <CommandInput
+                                            placeholder="Search user by email..."
+                                            value={textSearch}
+                                            className="bg-transparent border-none focus:ring-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                                            onValueChange={(e) => {
+                                                setTextSearch(e);
+                                                if(e.length > 2) foundUsers.mutate({ email: e });
+                                            }}
+                                        />
+                                        <CommandList className="max-h-[200px] custom-scrollbar">
+                                            <CommandEmpty className="py-4 text-center text-sm text-slate-500">No user found.</CommandEmpty>
+                                            {/* Using a fragment or checking data existence before mapping */}
+                                            {foundUsers.data?.value && foundUsers.data.value.length > 0 && (
+                                                <CommandGroup heading={<span className="text-slate-500 dark:text-slate-400">Users</span>}>
+                                                    {foundUsers.data.value.map((user, i) => (
+                                                        <CommandItem
+                                                            key={i}
+                                                            value={user.email}
+                                                            className="data-[selected=true]:bg-white/40 dark:data-[selected=true]:bg-white/10 cursor-pointer rounded-lg m-1"
+                                                            onSelect={() => {
+                                                                setInvestor(prev => prev ? ({ 
+                                                                    ...prev, 
+                                                                    name: user.name, 
+                                                                    email: user.email, 
+                                                                    investorUserId: user.id 
+                                                                }) : null);
+                                                                setSearchMode("Manual");
+                                                            }}
+                                                        >
+                                                            <div className='flex flex-row gap-3 items-center w-full'>
+                                                                <Avatar className="h-8 w-8 ring-2 ring-white/20">
+                                                                    <AvatarImage src={user.image ?? undefined} />
+                                                                    <AvatarFallback className="bg-[#db2777]/80 text-white text-xs backdrop-blur-md">
+                                                                        {user.name.substring(0, 1)}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                                <div className='flex flex-col'>
+                                                                    <span className='font-medium text-sm text-slate-800 dark:text-slate-200'>{user.name}</span>
+                                                                    <span className='text-xs text-slate-500 dark:text-slate-400'>{user.email}</span>
+                                                                </div>
+                                                            </div>
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            )}
+                                        </CommandList>
+                                    </Command>
+                                </div>
+                            )}
+
+                            <div className="pt-2">
+                                <div className={`p-4 rounded-xl border border-white/20 bg-white/10 dark:bg-white/5`}>
+                                    <NumberStepper
+                                        className="bg-transparent border-none"
+                                        label="Contribution Percentage (%)"
+                                        value={Number(investor.contributionPercentage)}
+                                        min={0}
+                                        max={maxAllowed}
+                                        onChange={(e) => setInvestor(prev => prev ? ({ ...prev, contributionPercentage: e }) : null)}
+                                    />
+                                    <p className="text-xs text-right text-slate-500 dark:text-slate-400 mt-2 font-medium">
+                                        Max allowed: <span className="text-[#db2777] dark:text-[#f472b6]">{maxAllowed.toFixed(1)}%</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <DialogFooter className='sm:justify-between flex-row items-center'>
-                     <Button
-                        variant="ghost"
-                        onClick={() => setShowInvestorMod(false)}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                        onClick={onSubmit}
-                    >
-                        {mode === "edit" ? "Save Changes" : "Add Investor"}
-                    </Button>
-                </DialogFooter>
+                    <DialogFooter className='sm:justify-between flex-row items-center pt-2 gap-2'>
+                         <Button
+                            variant="ghost"
+                            className="hover:bg-white/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                            onClick={() => setShowInvestorMod(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            className={`rounded-xl px-6 ${glassButtonPrimary}`}
+                            onClick={onSubmit}
+                        >
+                            {mode === "edit" ? "Save Changes" : "Add Investor"}
+                        </Button>
+                    </DialogFooter>
+                </div>
             </DialogContent>
         </Dialog>
     )

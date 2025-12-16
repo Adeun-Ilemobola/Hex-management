@@ -1,4 +1,5 @@
 import { createTRPCRouter } from "./init";
+import { ChatRouter } from "./routers/Chat/ChatRouter";
 import { ChatRoomRouter } from "./routers/ChatRoom";
 import { organizationRouter } from "./routers/organization";
 import { PropertiesRouter } from "./routers/Properties";
@@ -11,8 +12,9 @@ export const appRouter = createTRPCRouter({
     Propertie: PropertiesRouter,
   user: userCongiRouter,
   organization:organizationRouter,
-  ChatRoom: ChatRoomRouter,
+  // ChatRoom: ChatRoomRouter,
   subscription: SubscriptionRouter,
+  Chat:ChatRouter
 
 });
 

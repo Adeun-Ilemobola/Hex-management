@@ -216,7 +216,7 @@ model Message {
   room      ChatRoom @relation(fields: [roomId], references: [id])
   roomId    String
   authorId  String
-  text      String?
+  text      String @default("")
   createdAt DateTime @default(now())
   isDeleted Boolean  @default(false)
 }

@@ -4,14 +4,15 @@ import  prisma  from "@/lib/prisma";
 
 interface CreateGroupChatProps {
     // PropertyID: string;
-    PropertyName: string;
+    groupName: string;
     members: string[]
     currentAdminId: string
    
 }
 
 
-export async function CreateGroupChat({  PropertyName, members , currentAdminId }: CreateGroupChatProps) {
+
+export async function CreateGroupChat({  groupName, members , currentAdminId }: CreateGroupChatProps) {
     try {
         const validUsers = await prisma.user.findMany({
             where: {
@@ -20,11 +21,10 @@ export async function CreateGroupChat({  PropertyName, members , currentAdminId 
                 }
             }
         })
-        if(validUsers.length >0){
             const newChatRoon = await prisma.chatRoom.create({
                 data: {
-                    title: PropertyName+" Group Chat",
-                    type:"GROUP"
+                    title: groupName,
+                    type: validUsers.length >0 ? "GROUP" : "PRIVATE",
                 }
             })
             const newMembers= await Promise.all(validUsers.map(async (user) => {
@@ -45,25 +45,12 @@ export async function CreateGroupChat({  PropertyName, members , currentAdminId 
                 message: "Group chat created successfully",
                 roomId: newChatRoon.id
             }
-            
-
-        }else{
-            return{
-                success: false,
-                message: "No valid users found"
-            }
-           
-        }
-      
-
     } catch (error) {
         console.log(error);
         return{
             success: false,
             message: "Failed to create group chat"
         }
-        
-
     }
 }
 

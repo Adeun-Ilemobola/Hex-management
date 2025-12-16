@@ -123,9 +123,9 @@ export const FileXSchema = z.object({
     link: z.string(),
     mime: z.string(),
     // chat fields
-    chatRoomID: z.string().optional(),
-    messageId : z.string().optional(),
-    chatOwnerID : z.string().optional(),
+    chatRoomID: z.string().nullable(),
+    messageId : z.string().nullable(),
+    chatOwnerID : z.string().nullable(),
 });
 
 // ─── 6. CORE DOMAIN: PROPERTY & INVESTMENT ───────────────────────────────────
@@ -202,20 +202,22 @@ export const subscriptionSchema = z.object({
 
 
 // ----- ChatRoom Schema and Components -----
-export const MessageSchema: z.ZodType<any> = z.lazy(() =>
+export const MessageSchema=
   z.object({
     id: uuid,
     roomId: uuid, // if your ChatRoom.id is uuid()
     authorId: uuid, // change to z.string() if not uuid
-    text: z.string().nullable().optional(), // Prisma: String? (often returns null)
+    text: z.string().default(""), // Prisma: String? (often returns null)
     createdAt: dateTime,
     isDeleted: z.boolean(),
     files: z.array(FileXSchema),
   })
-);
 
-export const ChatRoomMemberSchema: z.ZodType<any> = z.lazy(() =>
-  z.object({
+
+
+
+export const ChatRoomMemberSchema =
+z.object({
     id: uuid,
     roomId: uuid,
     userId: uuid, // change to z.string() if not uuid
@@ -225,7 +227,7 @@ export const ChatRoomMemberSchema: z.ZodType<any> = z.lazy(() =>
     joinedAt: dateTime,
     // room: ChatRoomSchema.optional(),
   })
-);
+
 
 export const ChatRoomSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
@@ -263,6 +265,12 @@ export interface CleanProperty {
     saleStatus: string;
 }
 
+export interface CleanExternalInvestor {
+    id: string;
+    status: string;
+    name: string;
+    email: string;
+}
 
 export const defaultExternalInvestorInput = {
   id: "",
