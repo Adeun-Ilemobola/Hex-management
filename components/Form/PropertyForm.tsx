@@ -42,6 +42,8 @@ import { MinusIcon, PlusIcon } from 'lucide-react';
 import { MultiSelector } from '../selNode';
 import { amenitiesItems } from '@/lib/mock-data';
 import FileList from '../FileList';
+import { TextField } from '../TextField';
+import { NumberStepper } from '../NumberStepper';
 interface OwnershipConfigProps {
   data: org[];
   loading: boolean;
@@ -125,27 +127,23 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
 
             {/* Row 1: Name and Address (2 Columns) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="name">Name</FieldLabel>
-                    <Input
-                        id="name"
+                
+                <TextField
+                        label="Name"
                         type="text"
                         value={propertyInfo.name}
-                        onChange={(e) => handleField("name", e.target.value)}
+                        onChange={(e) => handleField("name", e)}
                         className="w-full"
-                    />
-                </Field>
+                        
+                />
 
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="address">Address</FieldLabel>
-                    <Input
-                        id="address"
-                        type="text"
-                        value={propertyInfo.address}
-                        onChange={(e) => handleField("address", e.target.value)}
-                        className="w-full"
-                    />
-                </Field>
+                <TextField
+                    label="Address"
+                    type="text"
+                    value={propertyInfo.address}
+                    onChange={(e) => handleField("address", e)}
+                    className="w-full"
+                />
             </div>
 
             {/* Row 2: Type, Status, Year (3 Columns) */}
@@ -224,104 +222,37 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                 
                 {/* Bedroom */}
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="bedrooms">Bedrooms</FieldLabel>
-                    <ButtonGroup className="w-full flex">
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("numBedrooms", String((Number(propertyInfo.numBedrooms) - 1) < 0 ? 0 : Number(propertyInfo.numBedrooms) - 1), "number")
-                        }}>
-                            <MinusIcon />
-                        </Button>
-                        <Input
-                            placeholder="Bedrooms"
-                            className="text-center"
-                            id="bedrooms"
-                            type="number"
-                            value={propertyInfo.numBedrooms}
-                            onChange={(e) => handleField("numBedrooms", e.target.value, "number")}
-                        />
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("numBedrooms", String(Number(propertyInfo.numBedrooms) + 1), "number")
-                        }}>
-                            <PlusIcon />
-                        </Button>
-                    </ButtonGroup>
-                </Field>
+                <NumberStepper
+                    label="Bathrooms"
+                    value={propertyInfo.numBathrooms}
+                    onChange={(val) => handleField("numBathrooms", val, "number")}
+                    disabled={disable}
+                />
 
                 {/* Bathroom */}
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="bathrooms">Bathrooms</FieldLabel>
-                    <ButtonGroup className="w-full flex">
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("numBathrooms", String((Number(propertyInfo.numBathrooms) - 1) < 0 ? 0 : Number(propertyInfo.numBathrooms) - 1), "number")
-                        }}>
-                            <MinusIcon />
-                        </Button>
-                        <Input
-                            placeholder="Bathrooms"
-                            className="text-center"
-                            id="bathrooms"
-                            type="number"
-                            value={propertyInfo.numBathrooms}
-                            onChange={(e) => handleField("numBathrooms", e.target.value, "number")}
-                        />
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("numBathrooms", String(Number(propertyInfo.numBathrooms) + 1), "number")
-                        }}>
-                            <PlusIcon />
-                        </Button>
-                    </ButtonGroup>
-                </Field>
+                <NumberStepper
+                    label="Bedrooms"
+                    value={propertyInfo.numBedrooms}
+                    onChange={(val) => handleField("numBedrooms", val, "number")}
+                    disabled={disable}
+                />
+
 
                 {/* Square Footage */}
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="squareFootage">Square Footage</FieldLabel>
-                    <ButtonGroup className="w-full flex">
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("squareFootage", String((Number(propertyInfo.squareFootage) - 1) < 0 ? 0 : Number(propertyInfo.numBathrooms) - 1), "number")
-                        }}>
-                            <MinusIcon />
-                        </Button>
-                        <Input
-                            placeholder="Sq Ft"
-                            className="text-center"
-                            id="squareFootage"
-                            type="number"
-                            value={propertyInfo.squareFootage}
-                            onChange={(e) => handleField("squareFootage", e.target.value, "number")}
-                        />
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("squareFootage", String(Number(propertyInfo.squareFootage) + 1), "number")
-                        }}>
-                            <PlusIcon />
-                        </Button>
-                    </ButtonGroup>
-                </Field>
+                <NumberStepper
+                    label="Square Footage"
+                    value={propertyInfo.squareFootage}
+                    onChange={(val) => handleField("squareFootage", val, "number")}
+                    disabled={disable}
+                />
 
                 {/* Lot Size */}
-                <Field className="w-full flex flex-col gap-2">
-                    <FieldLabel htmlFor="lotSize">Lot Size</FieldLabel>
-                    <ButtonGroup className="w-full flex">
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("lotSize", String((Number(propertyInfo.lotSize) - 1) < 0 ? 0 : Number(propertyInfo.numBathrooms) - 1), "number")
-                        }}>
-                            <MinusIcon />
-                        </Button>
-                        <Input
-                            placeholder="Lot Size"
-                            className="text-center"
-                            id="lotSize"
-                            type="number"
-                            value={propertyInfo.lotSize}
-                            onChange={(e) => handleField("lotSize", e.target.value, "number")}
-                        />
-                        <Button variant="outline" size="icon" onClick={() => {
-                            handleField("lotSize", String(Number(propertyInfo.lotSize) + 1), "number")
-                        }}>
-                            <PlusIcon />
-                        </Button>
-                    </ButtonGroup>
-                </Field>
+                <NumberStepper
+                    label="Lot Size"
+                    value={propertyInfo.lotSize}
+                    onChange={(val) => handleField("lotSize", val, "number")}
+                    disabled={disable}
+                />
             </div>
         </section>
 

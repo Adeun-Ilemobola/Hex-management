@@ -11,6 +11,7 @@ import z, { set } from 'zod'
 import { se } from 'date-fns/locale'
 import FinancialMetrics from './FinancialMetrics'
 import InvestmentSummary from './InvestmentSummary'
+import PoolInvestorsSection from './ExternalInvestor'
 
 
 function MultiStepForm() {
@@ -154,12 +155,22 @@ function MultiStepForm() {
 
                         />
                     </>}
-                    {section === 2 && <div>
+                    {section === 2 && <div className=' flex flex-col gap-4 p-3 '>
                         <FinancialMetrics
                             investmentBlock={investmentBlock}
                             setInvestmentBlock={setInvestmentBlock}
                             disable={isSubmitting}
                             allowed={externalInvestor.some(inv => inv.status !== "DRAFT")}
+                        />
+                        <PoolInvestorsSection
+                            members={externalInvestor}
+                            setMembers={setExternalInvestor}
+                            reLoad={organizationsQuery.refetch}
+                            removeInvestor={(email, name) => {
+                                setExternalInvestor(prev => prev.filter(inv => inv.email !== email))
+                                
+                            }}
+                            Locked={() => externalInvestor.some(inv => inv.status !== "DRAFT")}
                         />
                     </div>}
                     {section === 3 && <InvestmentSummary

@@ -264,6 +264,23 @@ export interface CleanProperty {
 }
 
 
+export const defaultExternalInvestorInput = {
+  id: "",
+  status: "DRAFT" as const, // defined in schema
+  name: "",
+  email: "",
+  investorUserId: null, // nullable in schema
+  contributionPercentage: 0,
+  returnPercentage: 0,
+  dollarValueReturn: 0,
+  isInternal: false, // defined in schema
+  accessRevoked: false, // defined in schema
+  funded: false, // defined in schema
+  fundedAt: null, // nullable in schema
+  investmentBlockId: "", // defined in schema
+};
+
+
 
 // If you really need a default object for React State:
 export const defaultPropertyInput: PropertyInput = {
@@ -287,10 +304,10 @@ export const defaultPropertyInput: PropertyInput = {
   status: "active",      // Must match your StatusEnum default
   
   // Owner Info
-  ownerName: "sdfsdfsdfsdfsdfsdfsdfsdf",
-  contactInfo: "sdfsdfsdfsdfsdfsdfsdfsdf",
+  ownerName: "",
+  contactInfo: "",
   accessCode: "", // Needs to be length 12 based on your schema
-  ownerId: "34534534534534534535345",
+  ownerId: "",
   ownerType: "ORGANIZATION", // Must match OwnerTypeEnum
   
   images: [],

@@ -284,7 +284,11 @@ export const PropertiesRouter = createTRPCRouter({
                     name: ctx.user.name,
                     email: ctx.user.email,
                 };
-                const { images, accessCode } = input.property;
+                const { images } = input.property;
+                const UploadImages = await FilesToCloud(images, {
+                    userID: ctx.user.id,
+                    isChat: false,
+                })
                 const { externalInvestors, ...investmentBlock } =
                     input.investmentBlock;
                 const { id, propertyId, ...cleanInvestmentBlock } =
@@ -321,7 +325,7 @@ export const PropertiesRouter = createTRPCRouter({
                     },
                 });
                 await ctx.prisma.file.createMany({
-                    data: images,
+                    data: UploadImages,
                 });
                 const getAllImages = await ctx.prisma.file.findMany({
                     where: {
@@ -393,7 +397,7 @@ export const PropertiesRouter = createTRPCRouter({
                                         DollarValueReturn: rest
                                             .dollarValueReturn.toNumber(),
                                         propertyName: CreateProperty.name,
-                                        accessCode: accessCode,
+                                        accessCode: CreateProperty.accessCode,
                                     },
                                 });
                             }),
