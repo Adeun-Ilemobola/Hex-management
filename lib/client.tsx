@@ -1,3 +1,4 @@
+// src/lib/client.tsx
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import {
 } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 import superjson from 'superjson';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AppRouter } from '@/server/app';
 
 export const trpc = createTRPCReact<AppRouter>();
@@ -22,14 +23,16 @@ function getBaseUrl() {
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  const [wsClient] = useState(() => createWSClient({
+    url: 'ws://localhost:3002',
+  }));
 
-  const [wsClient] = useState(() =>
-    typeof window !== 'undefined'
-      ? createWSClient({
-          url: process.env.NEXT_PUBLIC_WS_URL!, // ws://localhost:3001
-        })
-      : null
-  );
+  // useEffect(() => {
+  //   return () => {
+  //     console.log("Cleaning up WebSocket client");
+  //     wsClient.close();
+  //   };
+  // }, [wsClient]);
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -40,8 +43,8 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           },
 
           // 🔵 WebSocket link
-          true: wsLink({
-            client: wsClient!,
+          true: wsLink<AppRouter>({
+            client: wsClient,
             transformer: superjson,
           }),
 

@@ -8,7 +8,7 @@ import { roomType } from '@/lib/generated/prisma/enums'
 import { Message } from '@/lib/ZodObject'
 
 type Room = {
-   notificationCount: number;
+    notificationCount: number;
     RoomMembers: {
         userId: string;
         userName: string;
@@ -28,13 +28,14 @@ export default function Page() {
     api.Chat.onMessage.useSubscription(
         { roomId: selectedRoom?.id || "" },
         {
-            enabled: !!selectedRoom?.id, // Only subscribe if a room is selected
+            enabled: (!!selectedRoom?.id || selectedRoom?.id !== ""), // Only subscribe if a room is selected
             onData(newMessage) {
-                if (newMessage) {
+                    console.log("⚡️ WEBSOCKET: New message arrived:", newMessage);                if (newMessage) {
                     setMessage((prev) => {
-                        // Optional: Prevent duplicates if strict mode triggers twice
                         if (prev.some(m => m.id === newMessage.id)) return prev;
-                        return [...prev, newMessage];
+
+                        const updated = [...prev, newMessage];
+                        return updated.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
                     })
                 }
             },
@@ -50,8 +51,8 @@ export default function Page() {
     const FetchMessages = api.Chat.getRoomMessages.useQuery(
         { roomId: selectedRoom?.id || "" },
         {
-            enabled: !!selectedRoom?.id, 
-            // refetchOnWindowFocus: false, // Optional: prevents flickering when switching tabs
+            enabled: !!selectedRoom?.id,
+            refetchOnWindowFocus: false, // Optional: prevents flickering when switching tabs
         }
     )
 
@@ -60,9 +61,9 @@ export default function Page() {
         if (FetchMessages.data?.value) {
             setMessage(FetchMessages.data.value)
         }
-    }, [FetchMessages.data]) 
+    }, [FetchMessages.data])
     return (
-        <div className="flex flex-row min-h-screen">
+        <div className="flex flex-row h-screen w-full overflow-hidden bg-background">
             <ChatSidebar
                 rooms={roomList.data?.value || []}
                 SelectRoom={(roomId: string) => {

@@ -6,21 +6,52 @@ import { headers } from 'next/headers';
 import superjson from "superjson";
 import { DateTime } from 'luxon';
 import { Metadata, MetadataT } from '@/lib/ZodObject';
+import type { IncomingMessage, ServerResponse } from 'http';
+
+type ContextInput = {
+  req?: IncomingMessage;
+  res?: ServerResponse;
+};
 
 
+export const createTRPCContext = async (opts?: ContextInput) => {
+  let webHeaders: Headers;
 
+  // ------------------------------------------------------------------
+  // 1. DETERMINE SOURCE: Is this WebSocket (Node) or Next.js?
+  // ------------------------------------------------------------------
+  if (opts?.req && opts?.res) {
+    // ✅ WEBSOCKET PATH (Standalone Node.js)
+    // We must manually convert Node.js req.headers to a standard Web API Headers object
+    // so BetterAuth can read it.
+    webHeaders = new Headers();
+    Object.entries(opts.req.headers).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        webHeaders.set(key, value);
+      } else if (Array.isArray(value)) {
+        value.forEach((v) => webHeaders.append(key, v));
+      }
+    });
+  } else {
+    // ✅ NEXT.JS PATH (App Router)
+    // This is safe to call only when running within Next.js
+    webHeaders = await headers();
+  }
 
-
-export const createTRPCContext = async () => {
-  const webHeaders = await headers();
-  
-
+  // ------------------------------------------------------------------
+  // 2. AUTHENTICATION
+  // ------------------------------------------------------------------
   const ip = webHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     webHeaders.get('x-real-ip') ??
     'unknown';
-    
+
+  // BetterAuth expects a Headers object, which we now have guaranteed
   const session = await auth.api.getSession({ headers: webHeaders });
-  let sub: MetadataT  = {
+
+  // ------------------------------------------------------------------
+  // 3. METADATA LOGIC (Your existing code)
+  // ------------------------------------------------------------------
+  let sub: MetadataT = {
     daysLeft: 0,
     status: "",
     PlanTier: "Free",
@@ -28,14 +59,9 @@ export const createTRPCContext = async () => {
     periodEnd: null,
     stripeCustomerId: session?.user?.stripeCustomerId ?? "",
     userId: session?.user?.id ?? "",
-
   };
 
-
-
-
   if (session && session.user) {
-    // Fetch subscriptions
     const subscriptions = await auth.api.listActiveSubscriptions({
       query: { referenceId: session.user.id },
       headers: webHeaders,
@@ -46,22 +72,18 @@ export const createTRPCContext = async () => {
     );
 
     if (activeSubscription) {
-      // simplified Luxon logic
       const now = DateTime.local();
-      
-      const trialEndVal = activeSubscription.trialEnd 
-        ? DateTime.fromJSDate(activeSubscription.trialEnd) 
+      const trialEndVal = activeSubscription.trialEnd
+        ? DateTime.fromJSDate(activeSubscription.trialEnd)
         : now;
-        
-      const periodEndVal = activeSubscription.periodEnd 
-        ? DateTime.fromJSDate(activeSubscription.periodEnd) 
+      const periodEndVal = activeSubscription.periodEnd
+        ? DateTime.fromJSDate(activeSubscription.periodEnd)
         : now;
 
-      const daysLeft = activeSubscription.status === "trialing" 
+      const daysLeft = activeSubscription.status === "trialing"
         ? trialEndVal.diffNow("days").as("days")
         : periodEndVal.diffNow("days").as("days");
 
-      // Assuming Metadata is a Zod schema imported externally
       const parsedSub = Metadata.safeParse({
         daysLeft: Math.max(0, Math.ceil(daysLeft)),
         status: activeSubscription.status,
@@ -74,7 +96,7 @@ export const createTRPCContext = async () => {
         sub = parsedSub.data;
       } else {
         console.error("Failed to parse subscription metadata", parsedSub.error);
-      } 
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/init"
 import { Message, MessageSchema } from "@/lib/ZodObject";
 import { on } from "events";import { email, z } from "zod";
 import { FilesToCloud } from "@/lib/supabase";
+import superjson from 'superjson';
 import chatEvents from "./chatEvent";
 import { CreateGroupChat } from "@/server/CreateGroupChat";
 import { redisHttp } from "@/lib/redis";
@@ -46,7 +47,7 @@ export const ChatRouter = createTRPCRouter({
                     files,
                 })
 
-                await redisHttp.publish("chat-messages", JSON.stringify(payload));
+                await redisHttp.publish("chat-messages", superjson.stringify(payload));
 
                 return { success: true, message: "Message sent successfully", value: null };
             } catch (error) {

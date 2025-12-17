@@ -79,8 +79,8 @@ export const Metadata = z.object({
   userId: z.string(),
   
   // These come from the auth provider subscription object
-  trialEnd: z.date().nullable().optional(),
-  periodEnd: z.date().nullable().optional(),
+  trialEnd: dateTime.nullable().optional(),
+  periodEnd: dateTime.nullable().optional(),
   
   // This is the custom logic you added in the context
   daysLeft: z.number().min(0),
@@ -95,7 +95,7 @@ export const externalInvestorSchema = z.object({
     id: z.string().default(""), 
     status: z.enum(["DRAFT", "FINALIZED", "LOCKED", "VERIFIED"]).default("DRAFT"),
     name: z.string().min(2),
-    email: z.string().email(),
+    email: z.email(),
     investorUserId: z.string().nullable().optional(),
     contributionPercentage: z.number().min(0).max(100),
     returnPercentage: z.number().min(0).max(100),
@@ -103,10 +103,10 @@ export const externalInvestorSchema = z.object({
     isInternal: z.boolean().default(false),
     accessRevoked: z.boolean().default(false),
     funded: z.boolean().default(false),
-    fundedAt: z.coerce.date().nullable().optional(),
+    fundedAt: dateTime.nullable().optional(),
     investmentBlockId: z.string().default(""),
-    createdAt: z.coerce.date().optional(),
-    updatedAt: z.coerce.date().optional(),
+    createdAt: dateTime.optional(),
+    updatedAt: dateTime.optional(),
 });
 // --- 5.5. File  ---
 export const FileXSchema = z.object({
@@ -117,15 +117,15 @@ export const FileXSchema = z.object({
     name : z.string(),
     size : z.number().nonnegative({ message: "File size must be a non-negative number" }),
     path : z.string(),
-    createdAt : z.coerce.date(),
-    updatedAt : z.coerce.date(),
+    createdAt : dateTime,
+    updatedAt : dateTime,
     tags : z.array(z.string()),
     link: z.string(),
     mime: z.string(),
     // chat fields
-    chatRoomID: z.string().nullable(),
-    messageId : z.string().nullable(),
-    chatOwnerID : z.string().nullable(),
+    chatRoomID: z.string().default(""),
+    messageId : z.string().default(""),
+    chatOwnerID : z.string().default(""),
 });
 
 // ─── 6. CORE DOMAIN: PROPERTY & INVESTMENT ───────────────────────────────────
@@ -195,7 +195,7 @@ export const subscriptionSchema = z.object({
     currentPeriodStart: z.coerce.date().optional(),
     currentPeriodEnd: z.coerce.date().optional(),
     cancelAtPeriodEnd: z.boolean().default(false),
-    canceledAt: z.coerce.date().optional(),
+    canceledAt: dateTime.optional(),
     planTier: PlanTierEnum,
 });
 
@@ -208,9 +208,9 @@ export const MessageSchema=
     roomId: uuid, // if your ChatRoom.id is uuid()
     authorId: uuid, // change to z.string() if not uuid
     text: z.string().default(""), // Prisma: String? (often returns null)
-    createdAt: dateTime,
-    isDeleted: z.boolean(),
-    files: z.array(FileXSchema),
+    createdAt: dateTime.default(new Date()),
+    isDeleted: z.boolean().default(false),
+    files: z.array(FileXSchema).default([]),
   })
 
 

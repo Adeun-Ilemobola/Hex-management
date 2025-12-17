@@ -1,3 +1,4 @@
+// ChatRoom.tsx
 import React, { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from './ui/button'
@@ -55,7 +56,12 @@ export default function ChatRoom({ roomId, authorId, submit, roohasSelected, mes
         // Validate
         const validation = MessageSchema.safeParse({
             ...Message,
-            files,
+            files: files.map(f => ({
+                ...f,
+                chatOwnerID: authorId,
+                chatRoomID: roomId,
+                
+            })),
             roomId,
             authorId
         })
@@ -88,11 +94,11 @@ export default function ChatRoom({ roomId, authorId, submit, roohasSelected, mes
     }
 
     return (
-        <div className="flex flex-col min-h-full w-full bg-background">
+        <div className="flex flex-col h-full w-full bg-background">
             <Header roomId={roomId} />
 
             {/* Messages Area */}
-            <div className='flex-1 p-4 overflow-y-auto space-y-4'>
+            <div className='flex-1 min-h-0 p-4 overflow-y-auto space-y-4'>
                 {/* Map your messages here. Example placeholder: */}
                 {messages.map((message, index) => (
                     <MessageCard

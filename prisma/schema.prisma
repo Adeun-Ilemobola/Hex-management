@@ -147,9 +147,9 @@ model File {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatRoomID  String? @default("") // optional in Zod
-  chatOwnerID String? @default("") // optional in Zod
-  messageId   String? @default("")
+  chatRoomID  String @default("") 
+  chatOwnerID String @default("") 
+  messageId   String @default("")
 
   // Property relationship
   propertyId String? @default("")

@@ -369,7 +369,7 @@ export const PropertiesRouter = createTRPCRouter({
                             return item.email;
                         });
                         const createChatRoom = await CreateGroupChat({
-                            PropertyName: CreateProperty.name,
+                            groupName: CreateProperty.name,
                             members: getEmail,
                             currentAdminId: ctx.user.id,
                         });

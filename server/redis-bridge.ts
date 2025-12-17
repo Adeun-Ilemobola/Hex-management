@@ -1,7 +1,10 @@
 // src/server/redis-bridge.ts
-import Redis from "ioredis";
+import superjson from "superjson";
+
 import chatEvents from "./routers/Chat/chatEvent";
 import { redisSocket } from "@/lib/redis";
+import { MessageSchema } from "@/lib/ZodObject";
+
 // 1. Create a TCP connection for listening
 const subscriber = redisSocket;
 
@@ -13,14 +16,19 @@ export async function setupRedisSubscriber() {
 
   // 3. When a message comes from Redis...
   subscriber.on("message", (channel, message) => {
+    console.log("🔥 BRIDGE: Received message from Redis:", message); 
     try {
       if (channel === "chat-messages") {
-        const parsedMessage = JSON.parse(message);
-        
-        // ...forward it to your local internal event emitter!
-        // This bridges the gap between the separate processes.
-        if (parsedMessage.roomId) {
-            chatEvents.emit(`message:${parsedMessage.roomId}`, parsedMessage);
+         const revived = superjson.parse(message);
+         const parsed = MessageSchema.parse(revived);
+         console.log({
+          revived,
+          parsed
+
+         });
+         
+        if (parsed.roomId) {
+            chatEvents.emit(`message:${parsed.roomId}`, revived);
         }
       }
     } catch (err) {

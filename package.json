@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ws": "bun server/ws.ts",
+    "start:all": "concurrently \"bun run dev\" \"bun run ws\" --kill-others --names \"WEB,SOCK\" --prefix-colors \"blue,magenta\""
   },
   "dependencies": {
     "@better-auth/stripe": "^1.4.6",
@@ -37,6 +39,7 @@
     "@trpc/react-query": "^11.7.2",
     "@trpc/server": "^11.7.2",
     "@trpc/tanstack-react-query": "^11.7.2",
+    "@types/luxon": "^3.7.1",
     "@types/pg": "^8.16.0",
     "@types/randomcolor": "^0.5.9",
     "@upstash/redis": "^1.35.8",
@@ -74,6 +77,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "tailwindcss": "^4",

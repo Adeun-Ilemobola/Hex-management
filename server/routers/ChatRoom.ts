@@ -145,7 +145,7 @@ export const ChatRoomRouter = createTRPCRouter({
         try {
             console.log("Input:", input);
 
-            const { id, images, ...rest } = input;
+            const { id, files, ...rest } = input;
             const user = ctx.session?.user;
             if (!user) {
                 return { success: false, message: "User not authenticated" };
@@ -157,7 +157,7 @@ export const ChatRoomRouter = createTRPCRouter({
                     roomId: input.roomId
                 }
             })
-            const UploadImages = (await FilesToCloud(images, { userID: user.id, isChat: true })).map((img) => {
+            const UploadImages = (await FilesToCloud(files, { userID: user.id, isChat: true })).map((img) => {
                 return {
                     ...img,
                     messageId: message.id,
