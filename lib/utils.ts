@@ -32,6 +32,9 @@ function FileToBase64(params: File): Promise<FileXInput> {
                 tags: [],
                 path: "",
                 id:"",
+                chatRoomID: "",
+                chatOwnerID: "",
+                messageId: "",
             };
             resolve(fileX);
         };
@@ -110,3 +113,8 @@ export function FileX_To_Blub(FileList: FileXInput[]): FileXInput[][] {
 
 export const setThumbnail= "CX-Thumbnail-XC!@#2026";
 
+export function secondsToMilliseconds(params:number | undefined):number{
+  if(!params) return 1000 * 62
+  return params * 1000
+  
+}

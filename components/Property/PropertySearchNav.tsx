@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from './ui/checkbox'
+import { Checkbox } from '../ui/checkbox'
 import Link from 'next/link'
 import { toast } from 'sonner'
 interface PropertySearchNavProps {

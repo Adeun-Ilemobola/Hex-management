@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { Nav } from "@/components/Nav";
 import DropBack from "@/components/DropBack";
 
-import PropertyInvestmentLanding from "@/components/PropertyInvestmentLanding";
+import PropertyInvestmentLanding from "@/components/Property/PropertyInvestmentLanding";
 
 
 export default function Home() {

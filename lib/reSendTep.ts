@@ -1,5 +1,162 @@
 
 
+function getConfirmEmailChangeHtml(confirmUrl: string, newEmail: string): { subject: string, html: string } {
+  return {
+    subject: "Confirm your new email address",
+    html: `
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Confirm Email Change</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      supported-color-schemes: light dark;
+    }
+    
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      .body-bg {
+        background: #0f172a !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #312e81 100%) !important;
+      }
+      .glass-card {
+        background-color: #1e293b !important;
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+      }
+      .inner-glass {
+        background-color: #334155 !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+      }
+      .text-primary {
+        color: #e2e8f0 !important;
+      }
+      .text-secondary {
+        color: #94a3b8 !important;
+      }
+      .text-accent {
+        color: #d8b4fe !important;
+      }
+      .footer-text {
+        color: #64748b !important;
+      }
+      .icon-circle {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+      .security-box {
+        background: rgba(6, 78, 59, 0.3) !important;
+        border-left-color: #34d399 !important;
+      }
+      .security-text {
+        color: #34d399 !important;
+      }
+    }
+  </style>
+</head>
+<body class="body-bg" style="margin:0;padding:0;word-spacing:normal;background-color:#eff6ff;background-image:linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        
+        <table role="presentation" class="glass-card" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff;background:rgba(255, 255, 255, 0.65);border:1px solid rgba(255, 255, 255, 0.6);border-radius:16px;box-shadow:0 8px 32px 0 rgba(31, 38, 135, 0.15);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);">
+          
+          <tr>
+            <td align="center" style="padding:40px 40px 20px 40px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td class="icon-circle" width="80" height="80" align="center" valign="middle" style="background:rgba(147, 51, 234, 0.1);border-radius:50%;border:1px solid rgba(255, 255, 255, 0.4);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="8.5" cy="7" r="4"></circle>
+                      <line x1="20" y1="8" x2="20" y2="14"></line>
+                      <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+              <h1 class="text-primary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;color:#1e293b;">
+                Confirm email change
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 40px 40px 40px;">
+              <p class="text-secondary" style="margin:0 0 16px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#475569;text-align:center;">
+                We received a request to change the email associated with your account to:
+              </p>
+              
+              <div class="inner-glass" style="background:rgba(255, 255, 255, 0.4); border-radius:12px; padding:12px; margin-bottom:32px; text-align:center; border:1px solid rgba(255,255,255,0.3);">
+                <span class="text-primary" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif; font-size:18px; font-weight:700; color:#2563eb;">${newEmail}</span>
+              </div>
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <a href="${confirmUrl}" style="display:inline-block;background:linear-gradient(135deg, #2563eb 0%, #9333ea 100%);color:#ffffff;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;text-decoration:none;padding:16px 36px;border-radius:12px;box-shadow:0 4px 15px rgba(37, 99, 235, 0.3);text-shadow:0 1px 2px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.2);">
+                      Confirm New Email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:40px;">
+                <tr>
+                  <td class="inner-glass" style="background-color:#f8fafc;background:rgba(255, 255, 255, 0.5);border:1px solid rgba(255, 255, 255, 0.6);border-radius:8px;padding:20px;">
+                    <p class="text-secondary" style="margin:0 0 8px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+                      Direct Link
+                    </p>
+                    <p class="text-secondary" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#475569;word-break:break-all;">
+                      <span class="text-accent" style="color:#2563eb;font-weight:500;">${confirmUrl}</span>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                <tr>
+                  <td class="security-box" style="background-color:#fff7ed;border-left:4px solid #f97316;border-radius:4px;padding:16px;">
+                    <p class="security-text" style="margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#9a3412;font-weight:500;">
+                      ⚠️ This request will expire in 1 hour.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 40px 30px 40px;border-top:1px solid rgba(0,0,0,0.05);">
+              <p class="footer-text" style="margin:20px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                If you didn't request this change, please contact support immediately to secure your account.
+              </p>
+              <p class="footer-text" style="margin:8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#94a3b8;">
+                © 2025 Your Company Name. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+        
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="40"><tr><td>&nbsp;</td></tr></table>
+        
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `
+  }
+}
+
 // 1. Verify Email - Modern Professional Design
 function getVerifyEmailHtml(verifyUrl: string): { subject: string, html: string } {
   return {
@@ -1592,7 +1749,7 @@ function generateOrganizationInviteEmail({
 }
 
 
-export type TemplateType = 'generateOrganizationInviteEmail'| 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished' | 'memberRemovedEmail' | 'memberRoleChangedEmail' | 'generateMagicLinkEmail'
+export type TemplateType = 'generateOrganizationInviteEmail'| 'VerifyEmail' | 'ResetPassword' | 'Welcome' | 'VerifyExternalInvestor' | 'onboardingFinished' | 'memberRemovedEmail' | 'memberRoleChangedEmail' | 'generateMagicLinkEmail' |'getConfirmEmailChangeHtml'
 export interface TemplateParamMap {
   VerifyEmail: { verifyUrl: string }
   ResetPassword: { resetUrl: string }
@@ -1631,7 +1788,8 @@ export interface TemplateParamMap {
     userEmail: string;
     inviteLink: string;
     role: "member" | "owner" | "admin";
-  }
+  },
+  getConfirmEmailChangeHtml: { confirmUrl: string; newEmail: string }
 
 
 
@@ -1664,6 +1822,7 @@ const templates: { [K in TemplateType]: (params: TemplateParamMap[K]) => Templat
   memberRoleChangedEmail: (p) => memberRoleChangedEmail(p.member, p.organizationName, p.memberRole),
   generateMagicLinkEmail: (p) => generateMagicLinkEmail(p),
   generateOrganizationInviteEmail: (p) => generateOrganizationInviteEmail(p),
+  getConfirmEmailChangeHtml: (p) => getConfirmEmailChangeHtml(p.confirmUrl, p.newEmail)
 
 }
 export function generateTemplate<T extends TemplateType>(

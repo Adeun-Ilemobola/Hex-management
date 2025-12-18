@@ -1,9 +1,9 @@
 import { InvestmentBlockInput } from '@/lib/ZodObject'
 import React from 'react'
-import { NumberStepper } from './NumberStepper'
+import { NumberStepper } from '@/components/CustomUIComponent/NumberStepper';
 import { Settings } from 'lucide-react'
-import { Field, FieldLabel } from './ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { Field, FieldLabel } from '../ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 const typeOfSaleOP = [
     { value: 'SELL', label: 'SELL' },

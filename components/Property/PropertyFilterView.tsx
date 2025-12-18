@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import PropertyCard from './PropertyCard'
 import { trpc as api } from '@/lib/client'
 import { CleanProperty, SaleTypeEnum, StatusEnum } from '@/lib/ZodObject'
-import { Nav } from './Nav'
+import { Nav } from '../Nav'
 
 const zSearch = z.object({
     status: z.string().min(4).nullable(),

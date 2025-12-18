@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
-import { Badge } from "./ui/badge"; 
-import { Button } from "./ui/button";
+import { Badge } from "../ui/badge"; 
+import { Button } from "../ui/button";
 import Link from "next/link";
 import { MapPin, Eye, Edit, Trash2 } from "lucide-react";
 import z from "zod";
@@ -143,7 +143,7 @@ export default function PropertyCard({ data, mode }: PropertyCardProp) {
           {/* Developer Mode Buttons (Glass Buttons) */}
           {mode && (
             <div className="flex gap-2 mb-4">
-              <Link href={`/home/propertie-mp?id=${id}`} className="flex-1">
+              <Link href={`/home/propertie/update?id=${id}`} className="flex-1">
                 <Button
                   variant="outline"
                   size="sm"

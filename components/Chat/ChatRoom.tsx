@@ -1,9 +1,9 @@
 // ChatRoom.tsx
 import React, { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { ScrollArea } from './ui/scroll-area' // Recommended wrapper
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { ScrollArea } from '../ui/scroll-area' // Recommended wrapper
 import { X, Paperclip, Send } from 'lucide-react' // Icons make it cleaner
 
 // Importing your specific utils
@@ -66,6 +66,8 @@ export default function ChatRoom({ roomId, authorId, submit, roohasSelected, mes
             roomId,
             authorId
         })
+        console.log(validation.data);
+        
 
         if (!validation.success) {
             // detailed error handling
@@ -76,10 +78,13 @@ export default function ChatRoom({ roomId, authorId, submit, roohasSelected, mes
             return
         }
 
+      
+
         // Submit and Reset
         submit(validation.data)
         setMessage(defaultMessageInput)
         setFiles([])
+    // }
     }
     if (!roohasSelected) {
         return (

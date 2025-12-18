@@ -39,11 +39,11 @@ import z from 'zod';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { MinusIcon, PlusIcon } from 'lucide-react';
-import { MultiSelector } from '../selNode';
+import { MultiSelector } from '../CustomUIComponent/selNode';
 import { amenitiesItems } from '@/lib/mock-data';
-import FileList from '../FileList';
-import { TextField } from '../TextField';
-import { NumberStepper } from '../NumberStepper';
+import FileList from '@/components/CustomUIComponent/FileList';
+import { TextField } from '@/components/CustomUIComponent/TextField';
+import { NumberStepper } from '@/components/CustomUIComponent/NumberStepper';
 interface OwnershipConfigProps {
     data: org[];
     loading: boolean;

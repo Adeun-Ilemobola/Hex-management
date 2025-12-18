@@ -1,6 +1,8 @@
 
 
 import { createTRPCRouter, protectedProcedure } from "@/server/init"
+import util from "util";
+
 import { Message, MessageSchema } from "@/lib/ZodObject";
 import { on } from "events";import { email, z } from "zod";
 import { FilesToCloud } from "@/lib/supabase";
@@ -17,6 +19,8 @@ export const ChatRouter = createTRPCRouter({
                 if (!user) {
                     return { success: false, message: "User not authenticated", value: null };
                 }
+ 
+               
                 const newMessage = await ctx.prisma.message.create({
                     data: {
                         roomId: input.roomId,
@@ -25,17 +29,15 @@ export const ChatRouter = createTRPCRouter({
                     },
                 });
                 const sendToCLoud = (await FilesToCloud(input.files, { userID: user.id, isChat: true })).map((image) => {
-                    return {
-                        ...image,
-                        messageId: newMessage.id,
-                        chatRoomID: input.roomId,
-                        chatOwnerID: user.id,
-
-                    }
+                    const { id, ...imageCommon } = image
+                    return {...imageCommon,messageId: newMessage.id,}
                 });
+                
+                
                 await ctx.prisma.file.createMany({
                     data: sendToCLoud
                 });
+
                 const files = await ctx.prisma.file.findMany({
                     where: {
                         messageId: newMessage.id,
@@ -148,11 +150,19 @@ export const ChatRouter = createTRPCRouter({
                             messageId: message.id,
                         },
                     });
-                    return {
+                    const normalizedMessageFULL = MessageSchema.parse({
                         ...message,
-                        files,
+                        files
+                    })
+                    return {
+                       ...normalizedMessageFULL
                     };
                 }))
+                 console.log("-------getRoomMessages------");
+                 
+                 console.log(util.inspect(normalizedMessages, { depth: null, colors: true }));
+                  console.log("-------getRoomMessages------End");
+                
 
                 return { success: true, message: "Messages fetched successfully", value: normalizedMessages };
             } catch (error) {

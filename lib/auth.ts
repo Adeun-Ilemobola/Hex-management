@@ -11,8 +11,8 @@ import prisma from "./prisma";
 import { sendEmail } from "@/server/sendEmail";
 import { getPlanLimits } from "./PlanConfig";
 
-export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-11-17.clover",
+const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-11-17.clover", // Latest API version as of Stripe SDK v20.0.0
 })
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -66,7 +66,25 @@ export const auth = betterAuth({
         required: false,
         input: true
       }
+
+      
     },
+
+    changeEmail: {
+            enabled: true,
+            sendChangeEmailConfirmation: async ({ user, newEmail, url, token }, request) => { 
+                const res = await sendEmail({
+                    templateText: 'getConfirmEmailChangeHtml',
+                    to: user.email,
+                    params: {
+                        confirmUrl: url,
+                        newEmail
+                    }
+                })
+                console.log(res);
+                
+            }
+        }
 
   },
   emailVerification: {
@@ -100,6 +118,10 @@ export const auth = betterAuth({
       stripeClient,
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       createCustomerOnSignUp: true,
+        onCustomerCreate: async ({ stripeCustomer, user }, ctx) => {
+       
+        console.log(`Customer ${stripeCustomer.id} created for user ${user.id} and  email ${user.email}`);
+    },
 
 
       subscription: {

@@ -1,5 +1,5 @@
 
-import PropertyFilterView from "@/components/PropertyFilterView"
+import PropertyFilterView from "@/components/Property/PropertyFilterView"
 import { use } from "react"
 
 

@@ -1,6 +1,6 @@
 import { Users, Search, UserPen } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { defaultExternalInvestorInput, ExternalInvestorInput, externalInvestorSchema } from '@/lib/ZodObject'
 import { toast } from 'sonner';
 import {
@@ -23,8 +23,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import InvestorCard from './InvestorCard';
 import { trpc as api } from '@/lib/client'; 
-import { NumberStepper } from './NumberStepper';
-import { TextField } from './TextField';
+import { NumberStepper } from '@/components/CustomUIComponent/NumberStepper';
+import { TextField } from '@/components/CustomUIComponent/TextField';
 
 interface PoolInvestorsSectionProps {
     members: ExternalInvestorInput[]; // Fixed typo: mebers -> members

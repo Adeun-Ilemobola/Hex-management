@@ -15,8 +15,8 @@ import {
     SheetTitle,
     
 } from "@/components/ui/sheet"
-import { ButtonGroup } from './ui/button-group'
-import { Input } from './ui/input'
+import { ButtonGroup } from '../ui/button-group'
+import { Input } from '../ui/input'
 
 type CreateChatViewProps = {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>

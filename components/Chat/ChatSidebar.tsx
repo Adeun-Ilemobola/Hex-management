@@ -1,6 +1,6 @@
 import React from 'react'
-import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
+import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
 import CreateChatView from './CreateChatView';
 import { Spinner } from "@/components/ui/spinner"
 
@@ -16,7 +16,7 @@ type ChatSidebarProps = {
     rooms: Room[]
     SelectRoom: (roomId: string) => void
     size?: number
-    isLoading?: boolean,
+    isLoading: boolean,
     userId: string
 }
 
@@ -40,23 +40,17 @@ export default function ChatSidebar({ rooms, SelectRoom, size = 300, isLoading ,
             </div>
 
             {/* Room List */}
-            <div className={` flex flex-col flex-1 gap-2 p-2 overflow-y-auto ${isLoading && ' items-center justify-center'}`}>
+            <div className={` flex flex-col flex-1 gap-2 p-2 overflow-y-auto ${isLoading ? ' items-center justify-center' : ''}`}>
 
-                {isLoading && <span className="text-muted-foreground text-sm">Loading...</span>}
+                {isLoading &&  <Spinner className="size-12" />}
                 {
                     !isLoading && rooms.length === 0 &&
                     <span className="text-muted-foreground text-sm">No rooms found</span>
                 }
-                {
-                    isLoading && (<>
-                     <Spinner className="size-6" />
-
-                    </>)
-
-                }
+               
 
                 {
-                    !isLoading && (<>
+                    !isLoading && rooms.length > 0 && (<>
                         {rooms.map(room => (
                             <RoomCard 
                             key={room.id} 

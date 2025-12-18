@@ -3,7 +3,7 @@ import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import { authClient } from '@/lib/auth-client';
 import { auth } from '@/lib/auth';
 
-import { Metadata } from '@/lib/ZodObject';
+import { Metadata, UpdateUser } from '@/lib/ZodObject';
 import { TRPCError } from '@trpc/server';
 import { get } from 'http';
 import { getPlanLimits } from '@/lib/PlanConfig';
@@ -31,7 +31,7 @@ export const userCongiRouter = createTRPCRouter({
                 const accounts = await auth.api.listUserAccounts({
                     headers: ctx.headers
                 });
-                const hasEmail = accounts.data?.some((a) => a.provider === "credential")
+              const hasEmail = accounts.some((a) => a.providerId === "credential");
 
                 if (!hasEmail) {
                     await auth.api.setPassword({
@@ -68,8 +68,8 @@ export const userCongiRouter = createTRPCRouter({
         try {
             const user = ctx.session?.user;
             if (!user) {
-                return { success: true, isEployee: false, role: "", value: getPlanLimits("Free") , planDetail:ctx.subscription }; // { success: true, isEployee: false, role: "" value: plan }
-               
+                return { success: true, isEployee: false, role: "", value: getPlanLimits("Free"), planDetail: ctx.subscription }; // { success: true, isEployee: false, role: "" value: plan }
+
             }
             const memberInOrg = await ctx.prisma.member.findFirst({
                 where: {
@@ -92,15 +92,15 @@ export const userCongiRouter = createTRPCRouter({
                 console.log(JSON.parse(memberInOrg.organization.metadata));
 
                 const planDetail = Metadata.parse(JSON.parse(memberInOrg.organization.metadata))
-                return { success: true, isEployee: false, role: memberInOrg.role, value: getPlanLimits(planDetail.PlanTier), planDetail:planDetail };
+                return { success: true, isEployee: false, role: memberInOrg.role, value: getPlanLimits(planDetail.PlanTier), planDetail: planDetail };
             }
 
-            
 
-            return { success: true, isEployee: false, role: "owner", value: getPlanLimits(ctx.subscription.PlanTier), planDetail:ctx.subscription };
+
+            return { success: true, isEployee: false, role: "owner", value: getPlanLimits(ctx.subscription.PlanTier), planDetail: ctx.subscription };
         } catch (error) {
             console.error("Error in getUserPlan:", error);
-            return { success: false, isEployee: false, role: "", value: getPlanLimits("Free") , planDetail:ctx.subscription };
+            return { success: false, isEployee: false, role: "", value: getPlanLimits("Free"), planDetail: ctx.subscription };
         }
     }),
     /**
@@ -170,6 +170,45 @@ export const userCongiRouter = createTRPCRouter({
 
             }
 
+        }),
+
+
+    updateUserProfle: protectedProcedure
+        .input(UpdateUser)
+        .mutation(async ({ input, ctx }) => {
+            try {
+                const user = ctx.session?.user;
+                if (!user) {
+                    return { success: false, message: "User not found" };
+                }
+                if (user.email !== input.email.trim()) {
+                    await auth.api.changeEmail({
+                        body: {
+                            newEmail: input.email
+                        },
+                        headers: ctx.headers
+                    })
+                }
+
+                const updatedUser = await ctx.prisma.user.update({
+                    where: {
+                        id: user.id,
+                    },
+                    data: {
+                        city: input.city,
+                        country: input.country,
+                        name: input.name,
+                        phoneNumber: input.phoneNumber,
+                        state: input.state,
+                        address: input.address,
+                        zipCode: input.zipCode
+                    },
+                });
+                return { success: true, message: "User profile updated successfully", value: updatedUser };
+            } catch (error) {
+                console.error("Error in updateUserProfle:", error);
+                return { success: false, message: "User profile update failed" };
+            }
         })
 
 

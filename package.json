@@ -11,7 +11,7 @@
     "start:all": "concurrently \"bun run dev\" \"bun run ws\" --kill-others --names \"WEB,SOCK\" --prefix-colors \"blue,magenta\""
   },
   "dependencies": {
-    "@better-auth/stripe": "^1.4.6",
+    "@better-auth/stripe": "^1.4.7",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",

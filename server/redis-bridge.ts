@@ -1,5 +1,6 @@
 // src/server/redis-bridge.ts
 import superjson from "superjson";
+import util from "util";
 
 import chatEvents from "./routers/Chat/chatEvent";
 import { redisSocket } from "@/lib/redis";
@@ -21,15 +22,15 @@ export async function setupRedisSubscriber() {
       if (channel === "chat-messages") {
          const revived = superjson.parse(message);
          const parsed = MessageSchema.parse(revived);
-         console.log({
-          revived,
-          parsed
-
-         });
+         const deepData = superjson.parse(message);
+      
          
+         console.log("🔥 BRIDGE: Revived message from Redis:", parsed);
+        
         if (parsed.roomId) {
-            chatEvents.emit(`message:${parsed.roomId}`, revived);
+          
         }
+         console.log("--------------redis-bridge.ts------------- End");
       }
     } catch (err) {
       console.error("Redis message parse error", err);

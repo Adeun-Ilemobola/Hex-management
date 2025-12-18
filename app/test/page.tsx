@@ -2,7 +2,7 @@
 import PropertyForm from '@/components/Form/PropertyForm'
 import { usePropertyModification } from '@/components/Hook/usePropertyModification'
 import MultiStepForm from '@/components/MultiStepForm'
-import PropertyCard from '@/components/PropertyCard'
+import PropertyCard from '@/components/Property/PropertyCard'
 import { tr } from 'date-fns/locale'
 import React from 'react'
 import z from 'zod'

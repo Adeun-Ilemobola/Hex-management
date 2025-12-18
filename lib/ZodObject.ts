@@ -1,3 +1,4 @@
+import { de } from 'date-fns/locale';
 import { z } from 'zod';
 
 /**
@@ -58,17 +59,17 @@ export const zodRegisterFullSchema = baseRegister.and(z.object({
   country: z.string().min(2),
 }));
 
-// ─── 4. IMAGE & MEDIA ────────────────────────────────────────────────────────
-// export const imageSchema = z.object({
-//   id: z.string().default(""),
-//   name: z.string().min(1),
-//   url: z.string().url(),
-//   size: z.number().int().nonnegative(),
-//   type: z.string().min(1),
-//   lastModified: z.bigint().or(z.number().transform(n => BigInt(n))), // Handle potential number inputs
-//   thumbnail: z.boolean().default(false),
-//   supabaseID: z.string().default(""),
-// });
+export const UpdateUser = z.object({
+  name: z.string().min(2),
+  email: z.email(),
+  phoneNumber: z.string(),
+  address: z.string().min(5),
+  zipCode: z.string().min(4),
+  city: z.string().min(2),
+  state: z.string().min(2),
+  country: z.string().min(2),
+});
+
 
 
 export const Metadata = z.object({
@@ -254,6 +255,7 @@ export type FileXInput = z.infer<typeof FileXSchema>;
 export type ChatRoom = z.infer<typeof ChatRoomSchema>;
 export type Message = z.infer<typeof MessageSchema>;
 export type ChatRoomMember = z.infer<typeof ChatRoomMemberSchema>;
+export type updateUser = z.infer<typeof UpdateUser>;
 
 
 export interface CleanProperty {
@@ -270,6 +272,19 @@ export interface CleanExternalInvestor {
     status: string;
     name: string;
     email: string;
+}
+
+export const defaultUpdateUser: updateUser = {
+  name: "",
+  email: "",
+  phoneNumber:"",
+  address: "",
+  zipCode: "",
+  city: "",
+  state: "",
+  country: "",
+
+  
 }
 
 export const defaultExternalInvestorInput = {

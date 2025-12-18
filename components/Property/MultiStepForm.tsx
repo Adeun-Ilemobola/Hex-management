@@ -9,9 +9,9 @@ import { Button } from './ui/button'
 import PropertyForm from './Form/PropertyForm'
 import z, { set } from 'zod'
 import { se } from 'date-fns/locale'
-import FinancialMetrics from './FinancialMetrics'
-import InvestmentSummary from './InvestmentSummary'
-import PoolInvestorsSection from './ExternalInvestor'
+import FinancialMetrics from './Property/FinancialMetrics'
+import InvestmentSummary from './Property/InvestmentSummary'
+import PoolInvestorsSection from './Property/ExternalInvestor'
 import { Spinner } from './ui/spinner'
 
 
