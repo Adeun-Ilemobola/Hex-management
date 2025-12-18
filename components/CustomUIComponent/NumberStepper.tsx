@@ -7,9 +7,9 @@ import {
     FieldLegend,
    
 } from "@/components/ui/field"
-import { Button } from "./ui/button";
-import { ButtonGroup } from "./ui/button-group";
-import { Input } from "./ui/input";
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { Input } from '@/components/ui/input';
 
 interface NumberStepperProps {
   label: string;

@@ -5,9 +5,9 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import React, { useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { IconUpload } from '@tabler/icons-react';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 type FileListProps = {
     disabled?: boolean;

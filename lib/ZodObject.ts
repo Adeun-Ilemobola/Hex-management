@@ -77,6 +77,7 @@ export const Metadata = z.object({
   status: z.enum(["active", "trialing", "past_due", "canceled", "unpaid"]).or(z.string()),
   PlanTier: PlanTierEnum,
   stripeCustomerId: z.string(),
+  stripeSubscriptionId: z.string(),
   userId: z.string(),
   
   // These come from the auth provider subscription object

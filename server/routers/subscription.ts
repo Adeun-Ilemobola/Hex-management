@@ -28,18 +28,31 @@ export const SubscriptionRouter = createTRPCRouter({
  */
 
     UpgradeSubscription: protectedProcedure
-        .input(z.object({ plan: z.enum(["free", "Deluxe", "Premium"]), organizationId: z.string().nullable(), annual: z.boolean().default(false) }))
+        .input(
+            z.object({
+                plan: z.enum(["free", "deluxe", "premium", "Deluxe", "Premium"]).transform((val) => val.toLowerCase()),
+                organizationId: z.string().nullable(),
+                annual: z.boolean().default(false),
+            })
+        )
         .mutation(async ({ ctx, input }) => {
             const user = ctx.session?.user;
+
             if (!user) {
-                console.warn("[makeSubscription] not signed in, tier=", input.plan);
-                // you can either throw or return a shaped error
                 throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
             }
+
             try {
-                
                 const referenceId = input.organizationId ?? user.id;
-                console.log("----user amd headers----", user);
+
+
+                if (input.plan === "free") {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "To downgrade to free, please cancel your current subscription."
+                    });
+                }
+
 
                 const subscription = await ctx.prisma.subscription.findFirst({
                     where: {
@@ -47,72 +60,46 @@ export const SubscriptionRouter = createTRPCRouter({
                         referenceId,
                         status: { in: ["active", "trialing"] },
                     },
-                })
-                console.log("----subscription----", subscription || "no current subscription");
+                });
+                const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-                if (input.plan !== "free") {
-                    if (subscription?.stripeSubscriptionId) {
-                        // upgrade the current subscription
-                        const data = await auth.api.upgradeSubscription({
-                            body: {
-                                plan: input.plan.toLowerCase(), // required
-                                annual: input.annual,
-                                referenceId,
-                                subscriptionId: subscription.stripeSubscriptionId,
-                                successUrl: `${process.env.NEXTAUTH_URL}/home/account?success=true`, // required
-                                cancelUrl: `${process.env.NEXTAUTH_URL}/home/account?canceled=true`, // required
-                                disableRedirect: true, // required
-                            },
-                            // This endpoint requires session cookies.
-                            headers:ctx.headers
-                        });
-                        console.log("----data----", data);
-                        return {
-                            message: "Subscription upgraded",
-                            success: true,
-                            value: data
-                        }
-                    } else {
-                        // make a new subscription
-                        const data = await auth.api.upgradeSubscription({
-                            body: {
-                                plan: input.plan.toLowerCase(), // required
-                                annual: input.annual,
-                                referenceId,
-                                successUrl: `${process.env.NEXTAUTH_URL}/home/account?success=true`, // required
-                                cancelUrl: `${process.env.NEXTAUTH_URL}/home/account?canceled=true`, // required
-                                disableRedirect: true, // required
-                            },
-                            // This endpoint requires session cookies.
-                             headers:ctx.headers
-                        });
-                        console.log("----data----", data);
-                        return {
-                            message: "Subscription upgraded",
-                            success: true,
-                            value: data
-                        }
-                    }
+
+                const apiBody: any = {
+                    plan: input.plan,
+                    annual: input.annual,
+                    referenceId, // Binds subscription to User or Org
+                    successUrl: `${baseUrl}/home/account?success=true`,
+                    cancelUrl: `${baseUrl}/home/account?canceled=true`,
+                    disableRedirect: true,
+                };
+
+                if (subscription?.stripeSubscriptionId) {
+                    apiBody.subscriptionId = subscription.stripeSubscriptionId;
                 }
+
+                // Call the better-auth server-side API
+                const data = await auth.api.upgradeSubscription({
+                    body: apiBody,
+                    headers: ctx.headers,
+                });
 
                 return {
-                    message: "Failed to upgrade subscription",
-                    success: false,
-                    value: null
-                }
-
+                    message: "Checkout session created",
+                    success: true,
+                    value: data,
+                };
 
             } catch (error) {
-                console.error("Error in UpgradeSubscription:", error);
-                return {
-                    message: "Failed to upgrade subscription",
-                    success: false,
-                    value: null
-                }
+                console.error("[UpgradeSubscription] Error:", error);
 
+                if (error instanceof TRPCError) throw error;
 
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to initiate subscription upgrade.",
+                    cause: error,
+                });
             }
-
-        })
+        }),
 
 })

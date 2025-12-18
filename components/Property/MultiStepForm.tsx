@@ -1,18 +1,18 @@
 "use client"
 import { useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
-import { usePropertyModification } from './Hook/usePropertyModification'
+import { usePropertyModification } from '@/components/Hook/usePropertyModification'
 import { investmentBlockSchema, OwnerTypeEnum, propertySchema } from '@/lib/ZodObject'
 import { toast } from 'sonner'
 import { trpc as api } from '@/lib/client'
-import { Button } from './ui/button'
-import PropertyForm from './Form/PropertyForm'
+import { Button } from '@/components/ui/button'
+import PropertyForm from '@/components/Form/PropertyForm'
 import z, { set } from 'zod'
 import { se } from 'date-fns/locale'
-import FinancialMetrics from './Property/FinancialMetrics'
-import InvestmentSummary from './Property/InvestmentSummary'
-import PoolInvestorsSection from './Property/ExternalInvestor'
-import { Spinner } from './ui/spinner'
+import FinancialMetrics from '@/components/Property/FinancialMetrics'
+import InvestmentSummary from '@/components/Property/InvestmentSummary'
+import PoolInvestorsSection from '@/components/Property/ExternalInvestor'
+import { Spinner } from '@/components/ui/spinner'
 
 
 function MultiStepForm() {

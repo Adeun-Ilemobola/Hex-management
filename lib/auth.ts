@@ -7,12 +7,12 @@ import { organization } from "better-auth/plugins"
 import { stripe } from "@better-auth/stripe"
 import Stripe from "stripe"
 import { magicLink } from "better-auth/plugins";
-import prisma from "./prisma"; 
+import prisma from "./prisma";
 import { sendEmail } from "@/server/sendEmail";
 import { getPlanLimits } from "./PlanConfig";
 
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-11-17.clover", // Latest API version as of Stripe SDK v20.0.0
+  apiVersion: "2025-11-17.clover", // Latest API version as of Stripe SDK v20.0.0
 })
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
@@ -67,24 +67,24 @@ export const auth = betterAuth({
         input: true
       }
 
-      
+
     },
 
     changeEmail: {
-            enabled: true,
-            sendChangeEmailConfirmation: async ({ user, newEmail, url, token }, request) => { 
-                const res = await sendEmail({
-                    templateText: 'getConfirmEmailChangeHtml',
-                    to: user.email,
-                    params: {
-                        confirmUrl: url,
-                        newEmail
-                    }
-                })
-                console.log(res);
-                
-            }
-        }
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url, token }, request) => {
+        const res = await sendEmail({
+          templateText: 'getConfirmEmailChangeHtml',
+          to: user.email,
+          params: {
+            confirmUrl: url,
+            newEmail
+          }
+        })
+        console.log(res);
+
+      }
+    }
 
   },
   emailVerification: {
@@ -118,38 +118,33 @@ export const auth = betterAuth({
       stripeClient,
       stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       createCustomerOnSignUp: true,
-        onCustomerCreate: async ({ stripeCustomer, user }, ctx) => {
-       
+      onCustomerCreate: async ({ stripeCustomer, user }, ctx) => {
+
         console.log(`Customer ${stripeCustomer.id} created for user ${user.id} and  email ${user.email}`);
-    },
+      },
 
 
       subscription: {
         enabled: true,
         plans: [
           {
-            name: "Deluxe",
+            name: "deluxe",
             priceId: "price_1S03q92c20NQVeDjKSDVR7j8",
             annualDiscountPriceId: "price_1S04Wb2c20NQVeDjlhnehbj3",
-            limits: {
-              ...getPlanLimits("Deluxe")
-            }
-
+            limits: { ...getPlanLimits("Deluxe") }
           },
           {
-            name: "Premium",
+            name: "premium",
             priceId: "price_1S03nJ2c20NQVeDj9SMnndNq",
             annualDiscountPriceId: "price_1S04aA2c20NQVeDjTA0JD0aA",
-            limits: {
-              ...getPlanLimits("Premium")
-             
-            }
+            limits: { ...getPlanLimits("Premium") }
           },
           {
             name: "free",
-            limits: {
-              ...getPlanLimits("Free")
-            }
+            // No priceId here means this is a logical plan only.
+            // You CANNOT "upgrade" to this via Stripe.
+            // Users must cancel their sub to fall back to this.
+            limits: { ...getPlanLimits("Free") }
           }
 
         ],
@@ -172,7 +167,7 @@ export const auth = betterAuth({
     magicLink({
       sendMagicLink: async ({ email, token, url }) => {
         console.log(token);
-        
+
         await sendEmail({
           templateText: "generateMagicLinkEmail",
           to: email,
@@ -185,7 +180,7 @@ export const auth = betterAuth({
     }),
 
     organization({
-      requireEmailVerificationOnInvitation: true, 
+      requireEmailVerificationOnInvitation: true,
       async sendInvitationEmail(data) {
         const inviteLink = `${process.env.NEXTAUTH_URL}/accept-invite?id=${data.id}`;
         const sendPayload = {
@@ -200,22 +195,16 @@ export const auth = betterAuth({
           to: data.email,
           params: sendPayload
         })
-       
+
       },
 
 
-    //   allowUserToCreateOrganization: async () => {
-    //     const caller = await createServerCaller();
-    //     const dataPlan = await caller.user.getUserPlan();
-
-    //     if (!dataPlan.value) return false;
-    //     const { role, isEployee, value } = dataPlan
-    //     if (isEployee === false && role === "owner" && value.plan !== "free") return true;
-    //     return false
-
-
-
-    //   }
+      allowUserToCreateOrganization: async (user) => {
+        const sub = await prisma.subscription.findFirst({
+          where: { referenceId: user.id, status: "active" }
+        });
+        return !!sub;
+      }
     })
   ]
 

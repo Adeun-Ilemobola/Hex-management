@@ -59,6 +59,8 @@ export const createTRPCContext = async (opts?: ContextInput) => {
     periodEnd: null,
     stripeCustomerId: session?.user?.stripeCustomerId ?? "",
     userId: session?.user?.id ?? "",
+    stripeSubscriptionId: "",
+    
   };
 
   if (session && session.user) {
@@ -90,6 +92,9 @@ export const createTRPCContext = async (opts?: ContextInput) => {
         PlanTier: activeSubscription.plan,
         trialEnd: trialEndVal.isValid ? trialEndVal.toJSDate() : null,
         periodEnd: periodEndVal.isValid ? periodEndVal.toJSDate() : null,
+        stripeCustomerId: activeSubscription.stripeCustomerId,
+        userId: activeSubscription.referenceId,
+        stripeSubscriptionId: activeSubscription.id
       });
 
       if (parsedSub.success) {
