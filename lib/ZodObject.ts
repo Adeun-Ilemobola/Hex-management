@@ -174,10 +174,10 @@ export const propertySchema = z.object({
     status: StatusEnum.default("active"),
     
     // Owner Info
-    ownerName: z.string().min(2),
+    ownerName: z.string().min(1 ,"You must select an owner"),
     contactInfo: z.string().min(5),
-    accessCode: z.string().length(12),
-    ownerId: z.string(),
+    accessCode: z.string().length(12,"Access code must generate "),
+    ownerId: z.string().min(1 ,"You must select an owner"),
     ownerType: OwnerTypeEnum,
 
     images: z.array(FileXSchema),

@@ -98,28 +98,30 @@ export function usePropertyModification(id: string|null) {
 
     // --- Mutations ---
     const handleMutationSuccess = (msg: string) => {
-        toast.success(msg);
+        toast.success(msg , { id: "property" });
         router.push("/home");
     };
 
     const handleMutationError = (err: any) => {
-        toast.error(err.message || "Operation failed");
+        toast.error(err.message || "Operation failed" , { id: "property" });
         console.error(err);
     };
 
     const postProperty = api.Propertie.postPropertie.useMutation({
         onSuccess: (data) => data?.success ? handleMutationSuccess(data.message) : toast.error(data?.message),
-        onError: handleMutationError
+        onError: handleMutationError,
+        onMutate: () => toast.loading("Creating property..." , { id: "property" })
     });
 
     const updateProperty = api.Propertie.updataPropertie.useMutation({
         onSuccess: (data) => data?.success ? handleMutationSuccess(data.message) : toast.error(data?.message),
-        onError: handleMutationError
+        onError: handleMutationError,
+        onMutate: () => toast.loading("Updating property..." , { id: "property" })
     });
 
     const delImage = api.Propertie.deleteImage.useMutation({
-        onSuccess: (d) => d?.success ? toast.success(d.message) : toast.error(d.message),
-        onMutate: () => toast.loading("Deleting image...")
+        onSuccess: (d) => d?.success ? toast.success(d.message) : toast.error(d.message , { id: "file" }),
+        onMutate: () => toast.loading("Deleting image..." , { id: "file" })
     });
     const getSubmissionData = () => ({
         property: propertyInfo,
@@ -180,7 +182,7 @@ export function usePropertyModification(id: string|null) {
         if (orgMember && ["member", "admin"].includes(orgMember.role || "")) {
             setPropertyInfo(prev => ({ ...prev, ownerId: orgMember.organizationId, ownerType: "ORGANIZATION" }));
         }
-    }, [memberData, session.data, id]); // Simplified deps
+    }, [propertyInfo.ownerId , propertyInfo.ownerType ]); // Simplified deps
 
 
    

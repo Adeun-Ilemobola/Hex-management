@@ -19,7 +19,7 @@ const zSearch = z.object({
 
 
 export default function PropertyFilterView({ data }: { data: { [key: string]: string | string[] | undefined; } }) {
-    const { isPending: subscriptionLoading } = api.user.getUserPlan.useQuery();
+    const { isPending: subscriptionLoading  , data: subscription} = api.user.getUserPlan.useQuery();
     const { data: getProperties, isPending: getPropertiesPending } = api.Propertie.getUserProperties.useQuery({ data: data }, {
         enabled: !!data,
         refetchOnWindowFocus: true,
@@ -41,6 +41,22 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
         router.push(`/home?${urlData.status ? `status=${urlData.status} ` : ""}${urlData.searchText ? `&searchText=${urlData.searchText}` : ""}`)
 
     }
+    function Allow() {
+        const plan = subscription?.value
+        const userProperties = getProperties?.data 
+        if (plan && userProperties) {
+            return  {
+                allowed: userProperties.length < plan.maxProjects,
+                message: `You have ${plan.maxProjects - userProperties.length} properties left`
+            }
+  
+        }
+        return {
+            allowed: false,
+            message: "You have no properties"
+        }
+        
+    }
     return (
         <>
            <Nav session={session} SignOut={() => authClient.signOut()} />
@@ -50,6 +66,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
                     onSubmit={NavSearch}
                     changeMode={(mode) => setIsEdit(mode)}
                     mode={isEdit}
+                    allowed={Allow()}
                 />
 
 

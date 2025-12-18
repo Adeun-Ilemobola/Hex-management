@@ -263,37 +263,16 @@ export const PropertiesRouter = createTRPCRouter({
         )
         .mutation(async ({ input, ctx }) => {
             let propertyIdGo: string | null = null;
-            let supabaseIDList: string[] = [];
+            let fileListIdsForDeletion: string[] = [];
             try {
-                const plan = ctx.subscription;
-                const getUserPlan =  getPlanLimits(plan?.PlanTier as PlanTier)
-                const cont = await getOwnerPropertieCount({
-                    ownerType: input.property.ownerType,
-                    ownerId: input.property.ownerId,
-                });
-                if (cont && cont >= getUserPlan.maxProjects) {
-                    return {
-                        message: input.property.ownerType === "USER"
-                            ? "You have reached the maximum number of properties for your plan. Please upgrade your plan to add more properties."
-                            : "Your organization has reached the maximum number of properties for your plan. Please contact user oganization owner or admin to upgrade the plan.",
-                        success: false,
-                    };
-                }
-
                 let ownerShip = {
                     name: ctx.user.name,
                     email: ctx.user.email,
                 };
-                const { images } = input.property;
-                const UploadImages = await FilesToCloud(images, {
-                    userID: ctx.user.id,
-                    isChat: false,
-                })
-                const { externalInvestors, ...investmentBlock } =
-                    input.investmentBlock;
-                const { id, propertyId, ...cleanInvestmentBlock } =
-                    investmentBlock;
-                const { id: pId, ...propertyData } = input.property;
+                const {id: pId, images ,...propertyData } = input.property;
+                
+                const { externalInvestors, ...investmentBlock } =input.investmentBlock;
+                const { id, propertyId, ...cleanInvestmentBlock } =investmentBlock;
                 if (propertyData.ownerType === "ORGANIZATION") {
                     const getOrgOwner = await ctx.prisma.member.findFirst({
                         where: {
@@ -324,25 +303,45 @@ export const PropertiesRouter = createTRPCRouter({
                         contactInfo: ownerShip.email,
                     },
                 });
+                  propertyIdGo = CreateProperty.id;
+
+                  console.log("CreateProperty ==>", CreateProperty);
+                  
+
+
+                const UploadImages = await FilesToCloud(images, {
+                    userID: ctx.user.id,
+                    isChat: false,
+                })
                 await ctx.prisma.file.createMany({
-                    data: UploadImages,
+                    data: UploadImages.map((item) => {
+                        const { id, ...rest } = item;
+                        return {
+                            ...rest,
+                            propertyId: CreateProperty.id,
+                        };
+                    }),
                 });
                 const getAllImages = await ctx.prisma.file.findMany({
                     where: {
                         propertyId: CreateProperty.id,
                     },
                 });
+                fileListIdsForDeletion = getAllImages.map((item) => {
+                    return item.path;
+                });
+
+                console.log("UploadImages ==>", getAllImages);
+                
 
                 if (!CreateProperty) {
+                    console.log("Failed to create property");
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
                         message: "Failed to create property",
                     });
                 }
-                propertyIdGo = CreateProperty.id;
-                supabaseIDList = getAllImages.map((item) => {
-                    return item.path;
-                });
+               
 
                 const CreateinvestmentBlock = await ctx.prisma.investmentBlock
                     .create({
@@ -351,6 +350,16 @@ export const PropertiesRouter = createTRPCRouter({
                             propertyId: CreateProperty.id,
                         },
                     });
+
+                if (!CreateinvestmentBlock) {
+                    console.log("Failed to create investment block");
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to create investment block",
+                    });
+                }
+                console.log("CreateinvestmentBlock ==>", CreateinvestmentBlock);
+                
 
                 if (CreateinvestmentBlock) {
                     const CreateExternalInvestors = await Promise.all(
@@ -364,16 +373,20 @@ export const PropertiesRouter = createTRPCRouter({
                             });
                         }),
                     );
+                    console.log("CreateExternalInvestors ==>", CreateExternalInvestors);
+                    
                     if (CreateExternalInvestors.length > 0) {
                         const getEmail = CreateExternalInvestors.map((item) => {
                             return item.email;
                         });
                         const createChatRoom = await CreateGroupChat({
                             groupName: CreateProperty.name,
-                            members: getEmail,
+                            members: [...getEmail, ctx.user.email],
                             currentAdminId: ctx.user.id,
                         });
                         if (!createChatRoom.success) {
+                            console.log("fail to create chat room");
+                            
                             throw new TRPCError({
                                 code: "INTERNAL_SERVER_ERROR",
                                 message: "Failed to create chat room",
@@ -412,21 +425,33 @@ export const PropertiesRouter = createTRPCRouter({
                 };
             } catch (error) {
                 if (propertyIdGo) {
+                    // await ctx.prisma.investmentBlock.delete({
+                    //     where: {
+                    //         propertyId: propertyIdGo,
+                    //     },
+                    // })
+                    // await ctx.prisma.externalInvestor.deleteMany({
+                    //     where: {
+                    //         investmentBlock: {
+                    //             propertyId: propertyIdGo,
+                    //         },
+                    //     },
+                    // })
                     await ctx.prisma.propertie.delete({
                         where: {
                             id: propertyIdGo,
                         },
                     });
                 }
-                if (supabaseIDList.length > 0) {
+                if (fileListIdsForDeletion.length > 0) {
                     await ctx.prisma.file.deleteMany({
                         where: {
                             path: {
-                                in: supabaseIDList,
+                                in: fileListIdsForDeletion,
                             },
                         },
                     });
-                    await DeleteImages(supabaseIDList);
+                    await DeleteImages(fileListIdsForDeletion);
                 }
                 console.error("Error in postPropertie:", error);
                 return {

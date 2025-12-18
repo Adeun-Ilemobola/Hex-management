@@ -5,6 +5,8 @@ import { auth } from '@/lib/auth';
 
 import { Metadata } from '@/lib/ZodObject';
 import { TRPCError } from '@trpc/server';
+import { get } from 'http';
+import { getPlanLimits } from '@/lib/PlanConfig';
 
 
 
@@ -66,9 +68,8 @@ export const userCongiRouter = createTRPCRouter({
         try {
             const user = ctx.session?.user;
             if (!user) {
-                console.warn("[getUserPlan] not signed in");
-                // you can either throw or return a shaped error
-                throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
+                return { success: true, isEployee: false, role: "", value: getPlanLimits("Free") , planDetail:ctx.subscription }; // { success: true, isEployee: false, role: "" value: plan }
+               
             }
             const memberInOrg = await ctx.prisma.member.findFirst({
                 where: {
@@ -90,16 +91,16 @@ export const userCongiRouter = createTRPCRouter({
             if (memberInOrg && memberInOrg.organization.metadata) {
                 console.log(JSON.parse(memberInOrg.organization.metadata));
 
-                const plan = Metadata.parse(JSON.parse(memberInOrg.organization.metadata))
-                return { success: true, isEployee: false, role: memberInOrg.role, value: plan }
+                const planDetail = Metadata.parse(JSON.parse(memberInOrg.organization.metadata))
+                return { success: true, isEployee: false, role: memberInOrg.role, value: getPlanLimits(planDetail.PlanTier), planDetail:planDetail };
             }
 
             
 
-            return { success: true, isEployee: false, role: "owner", value: ctx.subscription };
+            return { success: true, isEployee: false, role: "owner", value: getPlanLimits(ctx.subscription.PlanTier), planDetail:ctx.subscription };
         } catch (error) {
             console.error("Error in getUserPlan:", error);
-            return { success: false, isEployee: false, role: "", value: null };
+            return { success: false, isEployee: false, role: "", value: getPlanLimits("Free") , planDetail:ctx.subscription };
         }
     }),
     /**

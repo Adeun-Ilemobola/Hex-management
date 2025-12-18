@@ -19,11 +19,12 @@ type ChatRoomProps = {
     submit: (data: Message) => void;
     roohasSelected: boolean,
     messages: Message[],
-    getMembers: (id: string) => string
+    getMembers: (id: string) => string,
+    messageSending: boolean
 }
 
 // --- Main Component ---
-export default function ChatRoom({ roomId, authorId, submit, roohasSelected, messages, getMembers }: ChatRoomProps) {
+export default function ChatRoom({ roomId, authorId, submit, roohasSelected, messages, getMembers , messageSending }: ChatRoomProps) {
     const [files, setFiles] = useState<FileXInput[]>([])
     const [Message, setMessage] = useState<Message>({ ...defaultMessageInput })
 
@@ -119,6 +120,7 @@ export default function ChatRoom({ roomId, authorId, submit, roohasSelected, mes
                 onFileSelect={handleFileSelect}
                 onRemoveFile={removeFile}
                 sendMessage={handleSendMessage}
+                messageSending={messageSending}
             />
         </div>
     )
@@ -140,10 +142,11 @@ type FooterProps = {
     setText: (s: string) => void,
     sendMessage: () => void,
     onFileSelect: (f: File[]) => void,
-    onRemoveFile: (index: number) => void
+    onRemoveFile: (index: number) => void,
+    messageSending: boolean
 }
 
-function Footer({ files, text, setText, sendMessage, onFileSelect, onRemoveFile }: FooterProps) {
+function Footer({ files, text, setText, sendMessage, onFileSelect, onRemoveFile , messageSending }: FooterProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Handle native file input change
@@ -191,6 +194,7 @@ function Footer({ files, text, setText, sendMessage, onFileSelect, onRemoveFile 
                     multiple // Allow multiple files
                     className='hidden'
                     onChange={handleInputChange}
+                    disabled={messageSending}
                 />
 
                 <Button
@@ -198,6 +202,7 @@ function Footer({ files, text, setText, sendMessage, onFileSelect, onRemoveFile 
                     size="icon"
                     onClick={() => fileInputRef.current?.click()}
                     title="Upload images"
+                    disabled={messageSending}
                 >
                     <Paperclip className="h-4 w-4" />
                 </Button>
@@ -209,9 +214,10 @@ function Footer({ files, text, setText, sendMessage, onFileSelect, onRemoveFile 
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                     className="flex-1"
+                    disabled={messageSending}
                 />
 
-                <Button onClick={sendMessage} size="icon">
+                <Button onClick={sendMessage} disabled={messageSending} size="icon">
                     <Send className="h-4 w-4" />
                 </Button>
             </div>

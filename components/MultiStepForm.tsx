@@ -12,6 +12,7 @@ import { se } from 'date-fns/locale'
 import FinancialMetrics from './FinancialMetrics'
 import InvestmentSummary from './InvestmentSummary'
 import PoolInvestorsSection from './ExternalInvestor'
+import { Spinner } from './ui/spinner'
 
 
 function MultiStepForm() {
@@ -35,25 +36,17 @@ function MultiStepForm() {
         member
 
     } = usePropertyModification(Id)
-    const { data: orgList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery();
-    const [ownerList, setOwnerList] = useState(() => {
-        const cleaned = orgList?.value.map(org => ({
-            id: org.id,
-            name: org.name,
-            selected: false,
-            type: "ORGANIZATION" as z.infer<typeof OwnerTypeEnum>
-        })) || [];
-        if (Session.data?.user) {
-            cleaned.push({
-                id: Session.data.user.id,
-                name: Session.data.user.name,
-                type: "USER" as z.infer<typeof OwnerTypeEnum>,
-                selected: false
-            })
-        }
-        return cleaned
-
-    })
+     
+    const { data: ownerList, ...organizationsQuery } = api.organization.getAllOrganization.useQuery(undefined, {
+        
+    });
+//    const [ownerList, setOwnerList] = useState(() => {
+//         const list =orgList?.value
+//         if (list) {
+//             return [...list]
+//         }
+//         return []
+//     })
 
     const [section, Setsection] = useState(1)
 
@@ -89,23 +82,7 @@ function MultiStepForm() {
         return validatedProperty.data
     }
 
-    function orgListClean() {
-        const cleaned = orgList?.value.map(org => ({
-            id: org.id,
-            name: org.name,
-            selected: propertyInfo.ownerId === org.id,
-            type: "ORGANIZATION" as z.infer<typeof OwnerTypeEnum>
-        })) || [];
-        if (Session.data?.user) {
-            cleaned.push({
-                id: Session.data.user.id,
-                name: Session.data.user.name,
-                selected: propertyInfo.ownerId === Session.data.user.id,
-                type: "USER" as z.infer<typeof OwnerTypeEnum>
-            });
-        }
-        return cleaned;
-    }
+    
     async function handleSubmit() {
         const data = validation()
         if (!data) { return; }
@@ -133,10 +110,12 @@ function MultiStepForm() {
                                 // RemoveImage(id, supabaseID)
                             }}
                             orgInfo={{
-                                data: ownerList,
+                                data: ownerList?.value || [],
                                 loading: organizationsQuery.isLoading,
                                 userId: Session.data?.user?.id || "",
-                                refetch: organizationsQuery.refetch,
+                                refetch: () => {
+                                    organizationsQuery.refetch()
+                                },
                                 showOwnershipConfig: true,
                                 disabled: false,
                                 handleSelectOrg: (id, type) => {
@@ -145,12 +124,8 @@ function MultiStepForm() {
                                         ownerId: id,
                                         ownerType: type
                                     }))
-                                    setOwnerList(prev => prev.map(org => ({
-                                        ...org,
-                                        selected: org.id === id
-                                    })))
-
-                                }
+                                },
+                                SelectedID: propertyInfo.ownerId
                             }}
 
                         />
@@ -205,7 +180,7 @@ function MultiStepForm() {
                                 }
                             }}
                         >
-                            {section === 3 ? "submit" : "Next"}
+                            {section === 3 ? ( isSubmitting ? (<> <Spinner /> {"Submitting" }</>): "Submit") : "Next"}
                         </Button>
                     </div>
                 </section>

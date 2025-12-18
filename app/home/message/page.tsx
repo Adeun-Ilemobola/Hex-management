@@ -70,6 +70,7 @@ export default function Page() {
                     const room = roomList.data?.value?.find(r => r.id === roomId)
                     if (room) setSelectedRoom(room)
                 }}
+                userId={session.data?.user.id || ""}
                 size={500}
             />
 
@@ -77,8 +78,7 @@ export default function Page() {
                 roomId={selectedRoom?.id || ""}
                 authorId={session.data?.user.id || ""}
                 submit={(text) => {
-                    // Optimistic update (Optional: makes UI feel faster)
-                    // You can manually append the message here temporarily if you want
+                    
                     sendMessage.mutate(text)
                 }}
                 roohasSelected={selectedRoom !== null}
@@ -86,6 +86,7 @@ export default function Page() {
                 getMembers={(id) => {
                     return selectedRoom?.RoomMembers.find(member => member.userId === id)?.userName || "Unknown"
                 }}
+                messageSending={sendMessage.isPending}
             />
         </div>
     )

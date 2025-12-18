@@ -46,6 +46,19 @@ export const ChatRouter = createTRPCRouter({
                     ...newMessage,
                     files,
                 })
+                await ctx.prisma.chatRoomMember.updateMany({
+                    where: {
+                        roomId: input.roomId,
+                        userId: {
+                            not: user.id,
+                        },
+                    },
+                    data: {
+                        notificationCount: {
+                            increment: 1,
+                        },
+                    },
+                });
 
                 await redisHttp.publish("chat-messages", superjson.stringify(payload));
 
@@ -94,8 +107,6 @@ export const ChatRouter = createTRPCRouter({
 
 
                     });
-
-
                     //get all the room members
                     const getallMembers = await ctx.prisma.chatRoomMember.findMany({
                         where: {

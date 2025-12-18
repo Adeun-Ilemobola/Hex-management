@@ -87,7 +87,7 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                                 {/* Notification Button */}
                                 <Button  
                                     variant={'ghost'}
-                                    onClick={() => router.push("/home/chat")}
+                                    onClick={() => router.push("/home/message")}
                                     className="relative p-3 h-auto rounded-xl bg-white/10 dark:bg-slate-900/10 backdrop-blur-[2px] border border-white/10 dark:border-white/5 hover:bg-white/20 dark:hover:bg-slate-900/20 hover:scale-[1.02] text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-all duration-300"
                                 >
                                     <Bell className="w-5 h-5" />

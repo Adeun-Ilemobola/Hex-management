@@ -48,6 +48,9 @@ export async function FilesToCloud(files: FileXInput[] , { userID, isChat }: Upl
             tags: [],
             path: path,
             id: "",
+            chatRoomID: "",
+            chatOwnerID: "",
+            messageId: "",
         };
         return fileX;
         });
