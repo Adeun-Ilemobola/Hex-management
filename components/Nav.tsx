@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Session } from '@/lib/auth-client'
+import { authClient, Session } from '@/lib/auth-client'
 import { 
     Bell, User, Settings, CreditCard, Users, 
     LogOut, Home, Building2, BarChart3, LucideIcon 
@@ -16,6 +16,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import CustomSVG from './Icon/logo'
+import { auth } from '@/lib/auth'
+import { Spinner } from './ui/spinner'
 
 // --- Reusable Styles ---
 // Centralized glassmorphism style to keep the code clean
@@ -38,9 +40,12 @@ const NavLink = ({ href, icon: Icon, children }: NavLinkProps) => (
 
 // --- Main Component ---
 
-export function Nav({ session, SignOut }: { session: Session | null, SignOut: () => void }) {
+export function Nav({ }: { session: Session | null, SignOut: () => void }) {
+
     const router = useRouter()
-    console.log(session);
+    
+    const { data: session, isPending } = authClient.useSession();
+    const SignOut = authClient.signOut
     
 
     return (
@@ -72,8 +77,7 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                         </div>
                     </Link>
 
-                    {/* Navigation Links - Desktop */}
-                    {/* Now using the reusable NavLink component to avoid code duplication */}
+                  
                     <div className="hidden md:flex items-center space-x-2">
                         <NavLink href="/home" icon={Home}>Dashboard</NavLink>
                         <NavLink href="/properties" icon={Building2}>Properties</NavLink>
@@ -81,7 +85,14 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                     </div>
 
                     {/* User Section */}
-                    <div className="flex items-center space-x-3">
+                    {isPending ?(<>
+                     <div className="flex items-center space-x-3 justify-center">  
+                        <Spinner className="size-12" />
+                     </div>
+
+                    
+                    </>) :(<>
+                     <div className="flex items-center space-x-3">
                         {session ? (
                             <>
                                 {/* Notification Button */}
@@ -97,7 +108,7 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                                 
                                 <UserCard
                                     user={session.user}
-                                    onLogout={SignOut}
+                                    onLogout={() => SignOut()}
                                     onNavigate={(path) => router.push(path)}
                                 />
                             </>
@@ -111,6 +122,13 @@ export function Nav({ session, SignOut }: { session: Session | null, SignOut: ()
                             </Link>
                         )}
                     </div>
+                    
+                    
+                    </>)}
+
+
+
+                   
                 </div>
             </div>
         </nav>

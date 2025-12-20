@@ -804,83 +804,35 @@ export const PropertiesRouter = createTRPCRouter({
         .query(async ({ input, ctx }) => {
             try {
                 const { pID } = input;
-                const getPropertie = await ctx.prisma.propertie.findUnique({
+                const FetchProperty = await ctx.prisma.propertie.findUnique({
                     where: {
                         id: pID,
-                    },
-                    select: {
-                        investBlock: {
-                            select: {
-                                finalResult: true,
-                                typeOfSale: true,
-                                leaseCycle: true,
-                            },
-                        },
-                        name: true,
-                        address: true,
-                        id: true,
-                        description: true,
-                        lotSize: true,
-                        amenities: true,
-                        propertyType: true,
-                        status: true,
-                        ownerName: true,
-                        contactInfo: true,
-                        leavingstatus: true,
-                        numBathrooms: true,
-                        numBedrooms: true,
-                        yearBuilt: true,
-                    },
-                });
+                    }
+                })
 
-                if (!getPropertie) {
-                    return {
-                        message: "Failed to process property XXXXXX",
-                        success: false,
-                        value: null,
-                    };
+               if (!FetchProperty) {
+                   throw new TRPCError({
+                       code: "NOT_FOUND",
+                       message: "Property not found",
+                   })
                 }
-                const getImages = await ctx.prisma.file.findMany({
-                    where: {
-                        propertyId: pID,
-                    },
-                    select: {
-                        link: true,
-                        id: true,
-                    },
-                });
+               const getPropertieImage = await ctx.prisma.file.findMany({
+                   where: {
+                       propertyId: pID,
+                   }
+               })
 
-                const cleanData = {
-                    images: getImages, // { url: the image url, id: the image id }, this is an array
-                    price: {
-                        finalResult: getPropertie.investBlock
-                            ?.finalResult as number,
-                        typeOfSale:
-                            getPropertie.investBlock?.typeOfSale as string ||
-                            "SELL",
-                        leaseCycle: getPropertie.investBlock
-                            ?.leaseCycle as number,
-                    }, // { finalResult: the final result, typeOfSale: the type of sale [SELL, RENT, LEASE], leaseCycle: the lease cycle }, this is an object
-                    name: getPropertie.name,
-                    address: getPropertie.address,
-                    id: getPropertie.id,
-                    description: getPropertie.description || "",
-                    lotSize: getPropertie.lotSize, // number
-                    amenities: getPropertie.amenities, //  List of amenities (e.g., ["Elevator", "Gym", "Fireplace"])
-                    propertyType: getPropertie.propertyType, // List of property types (e.g., ["Apartment", "House", "Condo"])
-                    status: getPropertie.status, // active, pending, sold, etc.
-                    ownerName: getPropertie.ownerName,
-                    contactInfo: getPropertie.contactInfo, // this ia an email
-                    numBathrooms: getPropertie.numBathrooms, // number
-                    numBedrooms: getPropertie.numBedrooms, // number
-                    yearBuilt: getPropertie.yearBuilt, // number
-                };
-                console.log("cleanData", cleanData);
+               const propertyParse = propertySchema.parse({
+                   ...FetchProperty,
+                   images: getPropertieImage,
+               })
+               
 
+                
                 return {
                     message: "successfully created property listing",
                     success: true,
-                    value: cleanData,
+                    value: propertyParse,
                 };
             } catch (error) {
                 console.error("Error in viewProperty:", error);

@@ -1,17 +1,12 @@
 // src/server/redis-bridge.ts
 import superjson from "superjson";
-import util from "util";
-
 import chatEvents from "./routers/Chat/chatEvent";
 import { redisSocket } from "@/lib/redis";
 import { MessageSchema } from "@/lib/ZodObject";
-
 // 1. Create a TCP connection for listening
 const subscriber = redisSocket;
-
 export async function setupRedisSubscriber() {
   console.log("✅ Connecting to Redis Subscriber...");
-
   // 2. Subscribe to a global chat channel
   await subscriber.subscribe("chat-messages");
 
@@ -22,12 +17,11 @@ export async function setupRedisSubscriber() {
       if (channel === "chat-messages") {
          const revived = superjson.parse(message);
          const parsed = MessageSchema.parse(revived);
-         const deepData = superjson.parse(message);
       
-         
          console.log("🔥 BRIDGE: Revived message from Redis:", parsed);
         
         if (parsed.roomId) {
+          chatEvents.emit(`message:${parsed.roomId}`, parsed);
           
         }
          console.log("--------------redis-bridge.ts------------- End");

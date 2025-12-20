@@ -6,7 +6,7 @@ import ChatRoom from '@/components/Chat/ChatRoom'
 import { authClient } from '@/lib/auth-client'
 import { roomType } from '@/lib/generated/prisma/enums'
 import { Message } from '@/lib/ZodObject'
-
+import {propertySchema} from '@/lib/ZodObject'
 type Room = {
     notificationCount: number;
     RoomMembers: {
@@ -30,7 +30,8 @@ export default function Page() {
         {
             enabled: (!!selectedRoom?.id || selectedRoom?.id !== ""), // Only subscribe if a room is selected
             onData(newMessage) {
-                    console.log("⚡️ WEBSOCKET: New message arrived:", newMessage);                if (newMessage) {
+                console.log("⚡️ WEBSOCKET: New message arrived:", newMessage); 
+                if (newMessage) {
                     setMessage((prev) => {
                         if (prev.some(m => m.id === newMessage.id)) return prev;
 
@@ -79,7 +80,7 @@ export default function Page() {
                 roomId={selectedRoom?.id || ""}
                 authorId={session.data?.user.id || ""}
                 submit={(text) => {
-                    
+
                     sendMessage.mutate(text)
                 }}
                 roohasSelected={selectedRoom !== null}
