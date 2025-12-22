@@ -200,12 +200,12 @@ export const auth = betterAuth({
       },
 
 
-      allowUserToCreateOrganization: async (user) => {
-        const sub = await prisma.subscription.findFirst({
-          where: { referenceId: user.id, status: "active" }
-        });
-        return !!sub;
-      }
+      // allowUserToCreateOrganization: async (user) => {
+      //   const sub = await prisma.subscription.findFirst({
+      //     where: { referenceId: user.id, status: "active" }
+      //   });
+      //   return !!sub;
+      // }
     })
   ]
 

@@ -80,7 +80,7 @@ export function Nav({ }: { session: Session | null, SignOut: () => void }) {
                   
                     <div className="hidden md:flex items-center space-x-2">
                         <NavLink href="/home" icon={Home}>Dashboard</NavLink>
-                        <NavLink href="/properties" icon={Building2}>Properties</NavLink>
+                        <NavLink href="/home/Organization" icon={Building2}>Organization</NavLink>
                         <NavLink href="/analytics" icon={BarChart3}>Analytics</NavLink>
                     </div>
 

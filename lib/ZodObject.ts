@@ -1,3 +1,4 @@
+import { Invitation, Member } from 'better-auth/plugins';
 import { de } from 'date-fns/locale';
 import { z } from 'zod';
 
@@ -266,6 +267,30 @@ export interface CleanProperty {
     address: string;
     status: string;
     saleStatus: string;
+}
+
+export interface MemberX extends Member  {
+  email: string;
+  name: string;
+  
+}
+export type OrganizationInfoFull = {
+  members: MemberX[];
+    invitations: Invitation[];
+    id: string;
+    name: string;
+    slug: string;
+    createdAt: Date;
+    logo?: string | null;
+    metadata: any;
+}
+export type OrgList ={
+  name: string;
+    slug: string;
+    id: string;
+    logo: string | null | undefined;
+    createdAt: Date;
+    currentSeats: number;
 }
 
 export interface CleanExternalInvestor {

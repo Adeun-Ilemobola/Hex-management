@@ -1,11 +1,13 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../init";
+import { createTRPCRouter, protectedProcedure, t } from "../init";
 import { auth } from "@/lib/auth";
-import { MetadataT, OwnerTypeEnum } from "@/lib/ZodObject";
+import { MemberX, MetadataT, OwnerTypeEnum } from "@/lib/ZodObject";
 import { sendEmail } from "../sendEmail";
 
 import { TRPCError } from "@trpc/server";
 import { getPlanLimits } from "@/lib/PlanConfig";
+import { th } from "date-fns/locale";
+import { log } from "console";
 
 
 
@@ -72,7 +74,7 @@ export const organizationRouter = createTRPCRouter({
   * Validates organization; returns { success, message }.
   */
 
-    onboardUserToOrg: protectedProcedure
+    onboardNewMember: protectedProcedure
         // .use(rateLimit())
         .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
         .mutation(async ({ input, ctx }) => {
@@ -86,7 +88,7 @@ export const organizationRouter = createTRPCRouter({
                         name: true,
                     }
                 });
-                const org = await ctx.prisma.organization.findUnique({
+                const organization = await ctx.prisma.organization.findUnique({
                     where: {
                         id: input.organizationId
                     },
@@ -96,107 +98,62 @@ export const organizationRouter = createTRPCRouter({
                         slug: true
                     }
                 });
-                if (!org) {
-                    return { success: false, message: "Organization not found" };
+                if (!organization) {
+                   throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
                 }
 
                 if (userExists) {
                     console.log("-------------------- user exists, adding to organization --------------------");
 
-                    const data = await auth.api.createInvitation({
+                    await auth.api.createInvitation({
                         body: {
                             email: input.email,
                             role: input.role,
-                            organizationId: org.id,
+                            organizationId: organization.id,
                             resend: true,
 
                         },
                         headers: ctx.headers,
                     });
 
-                    if (!data) {
-                        return { success: false, message: `Failed to add user: ${input.email} to organization ${org.name}` };
-                    }
-                    // const mail = await sendEmail({
-                    //     templateText: "onboardingFinished",
-                    //     to: input.email,
-                    //     params: {
-                    //         name: userExists.name,
-                    //         organizationName: org.name,
-                    //         fallbackUrl: `${process.env.NEXTAUTH_URL}`,
-                    //         email: input.email,
-                    //         userExists: true
+                    await sendEmail({
+                        templateText: "onboardingFinished",
+                        to: input.email,
+                        params: {
+                            name: userExists.name,
+                            organizationName: organization.name,
+                            fallbackUrl: `${process.env.NEXTAUTH_URL}`,
+                            email: input.email,
+                            userExists: true
 
-                    //     }
-                    // })
-                    // if (!mail) {
-                    //     return { success: false, message: `Failed to send email to user: ${input.email}` };
-                    // }
-                    return { success: true, message: `Successfully invited user: ${input.email} to organization ${org.name}` };
+                        }
+                    })
+                    
+                    return { success: true, message: `Successfully invited user: ${input.email} to organization ${organization.name}` };
                 }
-                console.log(" -------------------- user does not exist, sending invite -------------------- ");
-                // user does not exist, send invite make it 
+                log("user does not exist, sending magic link");
+                //  usser does not exist, send magic link to create account
                 const data = await auth.api.signInMagicLink({
                     body: {
                         email: input.email, // required
                         name: input.name,
-                        callbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${org.id}&role=${input.role}`,
-                        newUserCallbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${org.id}&role=${input.role}`,
+                        callbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${organization.id}&role=${input.role}`,
+                        newUserCallbackURL: `${process.env.NEXTAUTH_URL}/home/finish-onboarding?orgId=${organization.id}&role=${input.role}`,
                         errorCallbackURL: `${process.env.NEXTAUTH_URL}/error?error=magic_link_failed`,
                     },
                     headers: ctx.headers,
                 });
                 if (!data) {
-                    return { success: false, message: `Failed to create magic link for  user: ${input.email} please try again` };
+                    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to send magic link" });
                 }
-                // const getNewUser = await ctx.prisma.user.findUnique({
-                //     where: {
-                //         email: input.email
-                //     },
-                //     select: {
-                //         id: true,
-                //         name: true,
-                //     }
-                // });
-                // if (!getNewUser) {
-                //     return { success: false, message: `Failed to find newly created user: ${input.email} please try again` };
-                // }
-                // const dataNew = await auth.api.addMember({
-                //         body: {
-                //             role: input.role,
-                //             userId: getNewUser.id,
-                //             organizationId: input.organizationId,
+               
 
-                //         },
-                //         headers: ctx.headers
-                //     })
-
-                //     if (!dataNew) {
-                //         return { success: false, message: `Failed to add user: ${input.email} to organization ${org.name}` };
-                //     }
-                //     const mail = await sendEmail({
-                //         templateText: "onboardingFinished",
-                //         to: input.email,
-                //         params: {
-                //             name: getNewUser.name,
-                //             organizationName: org.name,
-                //             fallbackUrl: `${process.env.NEXTAUTH_URL}`,
-                //             email: input.email,
-                //             userExists: true
-
-                //         }
-                //     })
-                //     if (!mail) {
-                //         return { success: false, message: `Failed to send email to user: ${input.email}` };
-                //     }
-                //     return { success: true, message: `Successfully added user: ${input.email} to organization ${org.name}` };
-
-                return { success: true, message: `Successfully sent invite to user: ${input.email} to join organization ${org.name}` };
+                return { success: true, message: `Successfully sent invite to user: ${input.email} to join organization ${organization.name}` };
 
 
             } catch (error) {
                 console.error("Error in onboardUserToOrg:", error);
-                return { success: false, message: "Failed to onboard user to organization" };
+              throw new  TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to invite user with this  error: " + error  });
             }
         }),
 
@@ -435,30 +392,10 @@ export const organizationRouter = createTRPCRouter({
         .mutation(async ({ input, ctx, }) => {
             try {
                 if (!ctx.session) {
-                    return {
-                        message: "Failed to create organization",
-                        success: false,
-                        value: null
-                    }
+                    throw new TRPCError({ code: "UNAUTHORIZED" , message: "You must be logged in to create an organization." })
                 }
-                const userSub = ctx.subscription
-                const DBuser = await ctx.prisma.user.findUnique({
-                    where: {
-                        id: ctx.session.user.id
-                    },
-                    select: {
-                        stripeCustomerId: true
-                    }
-                })
-                if (!userSub || !DBuser?.stripeCustomerId) {
-                    return {
-                        message: " you are not subscribed to any plan",
-                        success: false,
-                        value: null
-                    }
-                }
-
-                const getUserPlan = getPlanLimits(userSub.PlanTier)
+                const userPlan = ctx.subscription
+                const getPlan = getPlanLimits(userPlan.PlanTier)
                 const orgList = await auth.api.listOrganizations({
                     headers: ctx.headers,
                     query: {
@@ -467,51 +404,28 @@ export const organizationRouter = createTRPCRouter({
 
                 });
 
-                if (getUserPlan.maxOrgs <= orgList.length) {
-                    return {
-                        message: `You have reached the maximum number of organizations for your plan (${getUserPlan.maxOrgs}). Please contact support to upgrade your plan.`,
-                        success: false,
-                        value: null
+                if (getPlan.maxOrgs <= orgList.length) {
+                   throw new TRPCError({ code: "UNAUTHORIZED" , message: "You have reached your organization limit." })
+                }
+                let slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
+
+                const  maxCheck = 5
+                for (let i = 0; i < maxCheck; i++) {
+                    const { status } = await auth.api.checkOrganizationSlug({
+                        body: {
+                            slug: slug,
+                        },
+                    });
+                    if (status ) {
+                        break;
                     }
+                    slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
                 }
+              
 
-
-
-                const slug = `${input.name.replace(/\s+/g, '-').toLowerCase()}-${Math.floor(Math.random() * 1000)}`
-                const metadata: MetadataT = {
-                    PlanTier: userSub.PlanTier,
-                    userId: ctx.session.user.id,
-                    stripeCustomerId: DBuser.stripeCustomerId,
-                    status: userSub.status,
-                    daysLeft: userSub.daysLeft,
-                    trialEnd: userSub.trialEnd,
-                    periodEnd: userSub.periodEnd,
-
-
-                }
-
-                const { status } = await auth.api.checkOrganizationSlug({
-                    body: {
-                        slug: slug,
-                    },
-                });
-
-                if (!status) {
-                    console.log("Organization with slug already exists");
-
-                    return {
-                        message: `Organization with slug ${slug} already exists`,
-                        success: false,
-                        value: null
-                    }
-                }
-
-                console.log("Organization with slug does not exist" + status);
-
-                const res = await auth.api.createOrganization({
+                const newOrg = await auth.api.createOrganization({
                     body: {
                         name: input.name,
-                        metadata,
                         slug: slug,
                         userId: ctx.session.user.id,
                         keepCurrentActiveOrganization: true
@@ -519,29 +433,20 @@ export const organizationRouter = createTRPCRouter({
                     headers: ctx.headers
                 })
 
-                if (!res) {
-                    console.log("Failed to create organization");
-
-                    return {
-                        message: "Failed to create organization",
-                        success: false,
-                        value: null
-                    }
+                if (!newOrg) {
+                   throw new TRPCError({ code: "UNAUTHORIZED" , message: "Failed to create organization" })
                 }
+               
 
                 return {
                     message: "Successfully created organization",
                     success: true,
-                    value: res
+                    value: newOrg
                 }
 
             } catch (error) {
                 console.error("Error in createOrganization:", error);
-                return {
-                    message: "Failed to create organization",
-                    success: false,
-                    value: null
-                }
+               throw new TRPCError({ code: "UNAUTHORIZED" , message: "Failed to create organization" })
 
             }
         }),
@@ -557,11 +462,11 @@ export const organizationRouter = createTRPCRouter({
 
     updateMemberRole: protectedProcedure.input(z.object({
         organizationId: z.string(),
-        memberId: z.string(),
+        memberEmail: z.string(),
         memberName: z.string(),
         ActionType: z.enum(["admin", "remove", "owner", "member"]),
         organizationName: z.string(),
-        memberEmail: z.string(),
+        memberId: z.string(),
     })).mutation(async ({ input, ctx }) => {
         try {
             console.log("Updating member role:", input);
@@ -569,17 +474,13 @@ export const organizationRouter = createTRPCRouter({
             if (input.ActionType === "remove") {
                 const data = await auth.api.removeMember({
                     body: {
-                        memberIdOrEmail: input.memberId, // required
+                        memberIdOrEmail: input.memberEmail, 
                         organizationId: input.organizationId,
                     },
                     headers: ctx.headers
                 });
                 if (!data) {
-                    console.error("Failed to remove member from organization");
-                    return {
-                        message: "Failed to remove member from organization",
-                        success: false,
-                    }
+                   throw new TRPCError({ code: "UNAUTHORIZED" , message: "Failed to remove member" })
                 }
                 await sendEmail({
                     templateText: "memberRemovedEmail",
@@ -594,7 +495,7 @@ export const organizationRouter = createTRPCRouter({
                     success: true,
                 }
             }
-            else if (input.ActionType === "admin" || input.ActionType === "owner" || input.ActionType === "member") {
+            else if (input.ActionType === "admin" || input.ActionType === "member") {
                 const dataRole = await auth.api.updateMemberRole({
                     body: {
                         role: input.ActionType,
@@ -603,13 +504,7 @@ export const organizationRouter = createTRPCRouter({
                     },
                     headers: ctx.headers
                 });
-                if (!dataRole) {
-                    console.error("Failed to update member role");
-                    return {
-                        message: "Failed to update member role",
-                        success: false,
-                    }
-                }
+               
                 await sendEmail({
                     templateText: "memberRoleChangedEmail",
                     to: input.memberEmail,
@@ -628,11 +523,7 @@ export const organizationRouter = createTRPCRouter({
 
         } catch (error) {
             console.error("Error in updateMemberRole:", error);
-            return {
-                message: "Failed to update member role",
-                success: false,
-
-            }
+            throw new TRPCError({ code: "UNAUTHORIZED" , message: "Failed to update member role" })
 
         }
     }),
@@ -662,12 +553,11 @@ export const organizationRouter = createTRPCRouter({
 
             const fullOrgInfo = await Promise.all(
                 useOrg.map(async (org) => {
-                    const allMembers = await ctx.prisma.member.count({
+                    const orgMembersCount = await ctx.prisma.member.count({
                         where: {
                             organizationId: org.id
                         }
                     })
-                    const Meta = JSON.parse(org.metadata || "{}") as MetadataT
 
                     return {
                         name: org.name,
@@ -675,9 +565,7 @@ export const organizationRouter = createTRPCRouter({
                         id: org.id,
                         logo: org.logo,
                         createdAt: org.createdAt,
-                        currentSeats: allMembers,
-                        Meta
-
+                        currentSeats: orgMembersCount,
                     }
                 })
             )
@@ -701,15 +589,15 @@ export const organizationRouter = createTRPCRouter({
  */
 
 
-    getFullOrganizationInfo: protectedProcedure.input(z.object({
+    OrganizationInfo: protectedProcedure.input(z.object({
         organizationId: z.string(),
+        organizationSlug: z.string(),
     })).query(async ({ input, ctx }) => {
         try {
             const data = await auth.api.getFullOrganization({
                 query: {
-                    organizationId: "org-id",
-                    organizationSlug: "org-slug",
-                    membersLimit: 100,
+                    organizationId: input.organizationId,
+                    organizationSlug: input.organizationSlug,
                 },
                 headers: ctx.headers,
             });
@@ -721,14 +609,42 @@ export const organizationRouter = createTRPCRouter({
                     value: null
                 }
             }
+            
+
+
+            const updatedMembers:MemberX[] = await Promise.all(data.members.map(async(member) => {
+                const updatedMember =  await ctx.prisma.member.findFirst({
+                    where: {
+                        userId: member.userId
+                    },
+                    select: {
+                        user: {
+                            select: {
+                                name: true,
+                                email: true
+                            }
+                        }
+
+                    }
+                })
+               
+                return {
+                    ...member,
+                    name: updatedMember?.user?.name || 'unknown',
+                    email: updatedMember?.user?.email || 'unknown'
+
+                };
+                
+            }))
+
+
 
             return {
                 message: "Successfully fetched organization info",
                 success: true,
                 value: {
                     ...data,
-                    metadata: JSON.parse(data.metadata || "{}") as MetadataT
-
+                    members: updatedMembers
                 }
             }
 
@@ -739,11 +655,7 @@ export const organizationRouter = createTRPCRouter({
 
         } catch (error) {
             console.error("Error in getFullOrganizationInfo:", error);
-            return {
-                message: "Failed to fetch organization info",
-                success: false,
-                value: null
-            }
+           throw new TRPCError({ code: "UNAUTHORIZED", message: "Failed to fetch organization info" })
         }
     }),
 

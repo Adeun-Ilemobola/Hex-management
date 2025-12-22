@@ -14,9 +14,7 @@ interface SendEmailInput {
 
 export async function sendEmail(input: SendEmailInput) {
   const { templateText, to, params } = input;
-
   try {
-    // Here you can generate your subject and HTML using your templates
     const { subject, html } = generateTemplate(templateText, { ...params });
 
     const response = await resend.emails.send({
@@ -25,11 +23,16 @@ export async function sendEmail(input: SendEmailInput) {
       subject,
       html,
     });
+    console.log("response for email =>", response);
+    if (response.error) {
+      throw new Error("Email sending failed with error: " + response.error);
+    }
+    
 
     return { success: true, response };
   } catch (error) {
     console.error("Email sending failed:", error);
-    return { success: false, error: "Email sending failed" };
+    throw error;
   }
 }
 
