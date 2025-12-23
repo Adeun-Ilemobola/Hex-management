@@ -129,7 +129,7 @@ export default function Page() {
                   subscriptionMutation.mutate({
 
                     plan: plan.value,
-                    organizationId: null,
+                    // organizationId: null,
                     annual: false
                   });
                 }}
