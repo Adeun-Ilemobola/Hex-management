@@ -209,7 +209,7 @@ function OrganizationCard({ name, slug, id, logo, createdAt, currentSeats }: Org
     const formattedDate = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
     return (
-        <Link href={`/home/Organization/${id}`} className="block h-full">
+        <Link href={`/home/Organization/${id}/${slug}`} className="block h-full">
             <Card className="
                 h-full
                 group relative overflow-hidden

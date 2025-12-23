@@ -23,7 +23,7 @@ export default function DropBack({ is, children, isTextMessage }: DropBackProps)
 
       {/* The Loader Overlay */}
       {shouldShowLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md">
           {/* We turn off 'full' here because the parent div controls the size now */}
           <Loading text={loadingText} />
         </div>

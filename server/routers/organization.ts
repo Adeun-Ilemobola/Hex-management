@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, t } from "../init";
 import { auth } from "@/lib/auth";
-import { MemberX, MetadataT, OwnerTypeEnum } from "@/lib/ZodObject";
+import { MemberX, MetadataT, onboardingSchema, OrganizationInfoFull, OwnerTypeEnum } from "@/lib/ZodObject";
 import { sendEmail } from "../sendEmail";
 
 import { TRPCError } from "@trpc/server";
@@ -76,7 +76,7 @@ export const organizationRouter = createTRPCRouter({
 
     onboardNewMember: protectedProcedure
         // .use(rateLimit())
-        .input(z.object({ name: z.string(), email: z.string(), organizationId: z.string(), role: z.enum(["member", "admin", "owner"]) }))
+        .input(onboardingSchema)
         .mutation(async ({ input, ctx }) => {
             try {
                 const userExists = await ctx.prisma.user.findUnique({
@@ -637,15 +637,17 @@ export const organizationRouter = createTRPCRouter({
                 
             }))
 
+            const mwte:OrganizationInfoFull = {
+                ...data,
+                members: updatedMembers
+            }
+
 
 
             return {
                 message: "Successfully fetched organization info",
                 success: true,
-                value: {
-                    ...data,
-                    members: updatedMembers
-                }
+                value: mwte
             }
 
 

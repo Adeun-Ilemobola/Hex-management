@@ -23,6 +23,7 @@ export const StatusEnum = z.enum(["active", "pending", "sold"]);
 export const PlanTierEnum = z.enum(["Free", "Deluxe", "Premium"]);
 export const OwnerTypeEnum = z.enum(["USER", "ORGANIZATION"]);
 export const RoomTypeEnum = z.enum(["PRIVATE", "GROUP"]);
+export const RoleEnum = z.enum(["member", "admin", "owner"]) 
 
 // ─── 3. AUTH SCHEMAS (Composition) ───────────────────────────────────────────
 export const zodLoginSchema = z.object({
@@ -243,6 +244,16 @@ export const ChatRoomSchema: z.ZodType<any> = z.lazy(() =>
 );
 
 
+//  ----- organization Schema and Components -----
+export const onboardingSchema = z.object({
+   name: z.string(),
+    email: z.string(), 
+    organizationId: z.string(), 
+    role: RoleEnum,
+  
+})
+
+
 
 
 // ─── 8. TYPES ────────────────────────────────────────────────────────────────
@@ -258,6 +269,7 @@ export type ChatRoom = z.infer<typeof ChatRoomSchema>;
 export type Message = z.infer<typeof MessageSchema>;
 export type ChatRoomMember = z.infer<typeof ChatRoomMemberSchema>;
 export type updateUser = z.infer<typeof UpdateUser>;
+export type Onboarding = z.infer<typeof onboardingSchema>;
 
 
 export interface CleanProperty {
@@ -282,7 +294,7 @@ export type OrganizationInfoFull = {
     slug: string;
     createdAt: Date;
     logo?: string | null;
-    metadata: any;
+    metadata?: any;
 }
 export type OrgList ={
   name: string;
@@ -310,6 +322,14 @@ export const defaultUpdateUser: updateUser = {
   state: "",
   country: "",
 
+  
+}
+
+export const defaultOnboarding: Onboarding = {
+  name: "",
+  email: "",
+  organizationId: "",
+  role: "member",
   
 }
 
