@@ -2,6 +2,22 @@ import { Invitation, Member } from 'better-auth/plugins';
 import { de } from 'date-fns/locale';
 import { z } from 'zod';
 
+import type { IncomingMessage, ServerResponse } from "http";
+
+export type ContextInput =
+  | {
+      // ✅ Fetch / App Router / Edge / Webhook
+      req: Request;
+      res?: never;
+    }
+  | {
+      // ✅ Node / WebSocket
+      req: IncomingMessage;
+      res: ServerResponse;
+    }
+  | undefined;
+
+
 /**
  * 2) Common primitives
  */

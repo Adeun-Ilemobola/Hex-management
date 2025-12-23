@@ -17,4 +17,15 @@ applyWSSHandler({
   },
 });
 
-console.log('✅ WebSocket running on ws://localhost:3002');
+process.on('SIGTERM', () => {
+  console.log('🛑 WS server shutting down');
+  wss.close();
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 WS server shutting down');
+  wss.close();
+});
+
+
+console.log(`✅ WebSocket running on ${process.env.NEXT_PUBLIC_WS_URL}`);

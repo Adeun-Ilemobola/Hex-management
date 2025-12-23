@@ -1,6 +1,5 @@
 // src/lib/client.tsx
 'use client';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   httpBatchLink,
@@ -12,27 +11,27 @@ import { createTRPCReact } from '@trpc/react-query';
 import superjson from 'superjson';
 import { useEffect, useState } from 'react';
 import type { AppRouter } from '@/server/app';
+import { wsClient } from './ws-client';
 
 export const trpc = createTRPCReact<AppRouter>();
 
-function getBaseUrl() {
-  if (typeof window !== 'undefined') return '';
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return 'http://localhost:3000';
-}
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const [wsClient] = useState(() => createWSClient({
-    url: 'ws://localhost:3002',
-  }));
 
-  // useEffect(() => {
-  //   return () => {
-  //     console.log("Cleaning up WebSocket client");
-  //     wsClient.close();
-  //   };
-  // }, [wsClient]);
+  function SetupWebSocket() {
+    if (wsClient) {
+      return wsLink({
+        client: wsClient,
+        transformer: superjson,
+      })
+    }
+    return httpBatchLink({
+      url: `${process.env.NEXT_PUBLIC_APP_URL!}/api/trpc`,
+      transformer: superjson,
+    });
+
+  }
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -43,14 +42,10 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           },
 
           // 🔵 WebSocket link
-          true: wsLink<AppRouter>({
-            client: wsClient,
-            transformer: superjson,
-          }),
-
+          true: SetupWebSocket(),
           // 🟢 HTTP link
           false: httpBatchLink({
-            url: `${getBaseUrl()}/api/trpc`,
+            url: `${process.env.NEXT_PUBLIC_APP_URL!}/api/trpc`,
             transformer: superjson,
           }),
         }),

@@ -15,8 +15,8 @@ const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover", // Latest API version as of Stripe SDK v20.0.0
 })
 export const auth = betterAuth({
-  secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.NEXTAUTH_URL?.trim() || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: process.env.APP_URL!,
   
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -29,7 +29,6 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "https://hex-management.vercel.app", // ✅ Production URL
     "https://hex-management-7t951livfx-adeuns-projects-408b65cf.vercel.app",
-    process.env.NEXTAUTH_URL as string || "http://localhost:3000",
   ],
 
   socialProviders: {
@@ -117,7 +116,7 @@ export const auth = betterAuth({
   plugins: [
     stripe({
       stripeClient,
-      stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+      stripeWebhookSecret:`${process.env.APP_URL!}/api/auth/stripe/webhook`,
       createCustomerOnSignUp: true,
       onCustomerCreate: async ({ stripeCustomer, user }, ctx) => {
 
@@ -183,7 +182,7 @@ export const auth = betterAuth({
     organization({
       requireEmailVerificationOnInvitation: true,
       async sendInvitationEmail(data) {
-        const inviteLink = `${process.env.NEXTAUTH_URL}/accept-invite?id=${data.id}`;
+        const inviteLink = `${process.env.APP_URL}/accept-invite?id=${data.id}`;
         const sendPayload = {
           organizationName: data.organization.name,
           userEmail: data.email,

@@ -5,18 +5,13 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 import superjson from "superjson";
 import { DateTime } from 'luxon';
-import { Metadata, MetadataT } from '@/lib/ZodObject';
+import { ContextInput, Metadata, MetadataT } from '@/lib/ZodObject';
 import type { IncomingMessage, ServerResponse } from 'http';
 
-type ContextInput = {
-  req?: IncomingMessage;
-  res?: ServerResponse;
-};
 
 
 export const createTRPCContext = async (opts?: ContextInput) => {
   let webHeaders: Headers;
-
   // ------------------------------------------------------------------
   // 1. DETERMINE SOURCE: Is this WebSocket (Node) or Next.js?
   // ------------------------------------------------------------------
@@ -37,7 +32,6 @@ export const createTRPCContext = async (opts?: ContextInput) => {
     // This is safe to call only when running within Next.js
     webHeaders = await headers();
   }
-
   // ------------------------------------------------------------------
   // 2. AUTHENTICATION
   // ------------------------------------------------------------------
