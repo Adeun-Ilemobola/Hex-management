@@ -1,21 +1,11 @@
 "use client"
-import React, { useState } from 'react'
-import { Check, SearchIcon } from "lucide-react"
-
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { PackagePlus, SearchCheck } from 'lucide-react'
+import  { useState } from 'react'
+import {  SearchIcon } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
-import { Checkbox } from '../ui/checkbox'
-import Link from 'next/link'
+import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from 'sonner'
 interface PropertySearchNavProps {
     onSubmit: (data: { status: string | null, searchText: string | null }) => void
@@ -46,9 +36,9 @@ export default function PropertySearchNav({onSubmit, changeMode, mode , allowed}
 
     <div className=' flex flex-row gap-1.5 items-center'>
         <Checkbox 
-         checked={mode}
-         onCheckedChange={changeMode}
-        />
+        checked={mode}
+        onCheckedChange={(e) => changeMode && changeMode(e === "indeterminate" ? true : e)}
+         />
         <label>Edit Mode</label>
     </div>
 

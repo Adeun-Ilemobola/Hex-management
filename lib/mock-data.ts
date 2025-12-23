@@ -1,6 +1,5 @@
 // You may need to update this import path depending on where your types live
 // or simply use the interfaces defined below.
-import { PropertyTypeEnum, StatusEnum } from "@/lib/ZodObject";
 
 // ─── 1. AMENITIES ────────────────────────────────────────────────────────────
 export const amenitiesItems: { value: string; label: string }[] = [

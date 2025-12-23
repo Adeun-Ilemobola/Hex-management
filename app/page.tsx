@@ -13,7 +13,7 @@ export default function Home() {
   
 
   return (
-    <DropBack is={false} isTextMessage={{ data: "Loading..." }}>
+    <DropBack is={isPending} isTextMessage={{ data: "Loading..." }}>
       <div className="relative flex flex-col  min-h-screen  overflow-hidden">
         <Nav session={session} SignOut={() => authClient.signOut()} />
 

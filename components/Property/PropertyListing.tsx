@@ -7,26 +7,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React from 'react';
 import {
   MapPin,
   Bed,
   Bath,
-  Square,
   Calendar,
   Phone,
-  Mail,
-  Share2,
-  Heart,
-  CheckCircle2,
-  Home,
-  ChevronLeft,
-  ChevronRight,
-  ImageOff,
+ 
   Maximize,
   User,
-  ImageIcon
+  ImageIcon,
+  Home
 } from 'lucide-react';
 
 // UI Components
@@ -38,13 +30,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { defaultPropertyInput, PropertyInput } from '@/lib/ZodObject'
 import { trpc as api } from '@/lib/client';
 import DropBack from '../DropBack';
-import { Nav } from '../Nav';
 import { Skeleton } from '../ui/skeleton';
 
 type PropertyLandingPageProps = {
@@ -82,6 +72,7 @@ export default function PropertyLandingPage({ id }: PropertyLandingPageProps) {
   }
 
   return (
+    <DropBack is={getProperty.isLoading}>
     <div className="min-h-screen w-full relative overflow-hidden font-sans selection:bg-[#db2777]/30">
       
       {/* 1. Dynamic Background (Blobs for Depth) */}
@@ -263,6 +254,7 @@ export default function PropertyLandingPage({ id }: PropertyLandingPageProps) {
         </div>
       </main>
     </div>
+    </DropBack>
   );
 }
 

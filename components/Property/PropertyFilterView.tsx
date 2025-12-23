@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
-import { authClient } from '@/lib/auth-client'
+import  { useState } from 'react'
 
 import PropertySearchNav from './PropertySearchNav'
 import { z } from 'zod'
@@ -11,6 +10,7 @@ import PropertyCard from './PropertyCard'
 import { trpc as api } from '@/lib/client'
 import { CleanProperty, SaleTypeEnum, StatusEnum } from '@/lib/ZodObject'
 import { Nav } from '../Nav'
+import DropBack from '../DropBack'
 
 const zSearch = z.object({
     status: z.string().min(4).nullable(),
@@ -27,7 +27,6 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
         retry: 2
     })
     const router = useRouter();
-    const { data: session, isPending } = authClient.useSession();
     const { isPending: planLoading } = api.user.getUserPlan.useQuery();
     const [isEdit, setIsEdit] = useState(false)
 
@@ -59,7 +58,8 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
     }
     return (
         <>
-           <Nav session={session} SignOut={() => authClient.signOut()} />
+        <DropBack is={planLoading || getPropertiesPending || subscriptionLoading}>
+           <Nav session={null} SignOut={() => {}} />
             <div className=' flex-1 flex flex-col gap-2.5 p-1.5'>
 
                 <PropertySearchNav
@@ -74,7 +74,7 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
                     {getProperties?.data && (getProperties.data as CleanProperty[]).map((item, i) => {
                         return (<PropertyCard mode={isEdit} key={i} data={{
                             id: item.id,
-                            img: item.img,
+                            img: item.img || "",
                             name: item.name,
                             address: item.address,
                             status: item.status as z.infer<typeof StatusEnum>,
@@ -86,6 +86,8 @@ export default function PropertyFilterView({ data }: { data: { [key: string]: st
 
 
             </div>
+
+            </DropBack>
 
         </>
     )

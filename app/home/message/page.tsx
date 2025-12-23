@@ -1,12 +1,11 @@
 "use client"
-import React, { useEffect, useState } from 'react' // Import useState
+import  { useEffect, useState } from 'react' // Import useState
 import { trpc as api } from '@/lib/client'
 import ChatSidebar from "@/components/Chat/ChatSidebar"
 import ChatRoom from '@/components/Chat/ChatRoom'
 import { authClient } from '@/lib/auth-client'
 import { roomType } from '@/lib/generated/prisma/enums'
 import { Message } from '@/lib/ZodObject'
-import {propertySchema} from '@/lib/ZodObject'
 type Room = {
     notificationCount: number;
     RoomMembers: {

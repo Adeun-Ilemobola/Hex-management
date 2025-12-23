@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react'
 import { trpc as api } from '@/lib/client' 
-import { Search, Loader2, UserX, SearchIcon } from 'lucide-react'
+import {  Loader2, UserX, SearchIcon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner' 

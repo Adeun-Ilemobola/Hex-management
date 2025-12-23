@@ -1,12 +1,11 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, t } from "../init";
+import { createTRPCRouter, protectedProcedure } from "../init";
 import { auth } from "@/lib/auth";
 import { MemberX, MetadataT, onboardingSchema, OrganizationInfoFull, OwnerTypeEnum } from "@/lib/ZodObject";
 import { sendEmail } from "../sendEmail";
 
 import { TRPCError } from "@trpc/server";
 import { getPlanLimits } from "@/lib/PlanConfig";
-import { th } from "date-fns/locale";
 import { log } from "console";
 
 
@@ -25,11 +24,14 @@ export const organizationRouter = createTRPCRouter({
     getActiveMember: protectedProcedure
         .query(async ({ ctx }) => {
             try {
-                console.log("-------- getActiveMember called---------");
+                const user = ctx.session?.user;
+                if (!user) {
+                    throw new TRPCError({ code: 'UNAUTHORIZED' });
+                }
 
                 const memberOfOrg = await ctx.prisma.member.findFirst({
                     where: {
-                        userId: ctx.session?.user.id,
+                        userId: user.id,
                         role: {
                             in: ["member", "admin"]
                         }
@@ -39,7 +41,7 @@ export const organizationRouter = createTRPCRouter({
                         user: true
                     }
                 });
-                if (!memberOfOrg) {
+                if (!memberOfOrg  ) {
                     console.log("No active member found for user:", ctx.session?.user.id);
                     return { success: true, value: null };
                 }
@@ -639,7 +641,8 @@ export const organizationRouter = createTRPCRouter({
 
             const mwte:OrganizationInfoFull = {
                 ...data,
-                members: updatedMembers
+                members: updatedMembers,
+                logo: data.logo || null
             }
 
 

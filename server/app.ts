@@ -1,6 +1,5 @@
 import { createTRPCRouter } from "./init";
 import { ChatRouter } from "./routers/Chat/ChatRouter";
-import { ChatRoomRouter } from "./routers/ChatRoom";
 import { organizationRouter } from "./routers/organization";
 import { PropertiesRouter } from "./routers/Properties";
 import { SubscriptionRouter } from "./routers/subscription";

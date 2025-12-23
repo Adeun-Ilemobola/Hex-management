@@ -72,7 +72,7 @@ export const auth = betterAuth({
 
     changeEmail: {
       enabled: true,
-      sendChangeEmailConfirmation: async ({ user, newEmail, url, token }, request) => {
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
         const res = await sendEmail({
           templateText: 'getConfirmEmailChangeHtml',
           to: user.email,
@@ -118,7 +118,7 @@ export const auth = betterAuth({
       stripeClient,
       stripeWebhookSecret:`${process.env.APP_URL!}/api/auth/stripe/webhook`,
       createCustomerOnSignUp: true,
-      onCustomerCreate: async ({ stripeCustomer, user }, ctx) => {
+      onCustomerCreate: async ({ stripeCustomer, user }) => {
 
         console.log(`Customer ${stripeCustomer.id} created for user ${user.id} and  email ${user.email}`);
       },

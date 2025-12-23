@@ -1,8 +1,7 @@
 import { OwnerTypeEnum, PropertyInput } from '@/lib/ZodObject';
-import { IconBath, IconBathFilled, IconBedFilled, IconGrain } from '@tabler/icons-react';
 import { nanoid } from 'nanoid'
 import { useState } from "react"
-import { Building2, Check, Loader2, User } from "lucide-react" // Assuming you use lucide-react
+import { Building2, Check, Loader2 } from "lucide-react" // Assuming you use lucide-react
 import {
     Dialog,
     DialogContent,
@@ -94,7 +93,7 @@ type Props = {
 }
 
 
-export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, handleSSubscriptionRequirement, RemoveImage, orgInfo }: Props) {
+export default function PropertyForm({ propertyInfo, setPropertyInfo, disable,  orgInfo }: Props) {
     const [amenitiesOpen, setAmenitiesOpen] = React.useState<boolean>(false)
 
     const handleField = (
@@ -107,13 +106,13 @@ export default function PropertyForm({ propertyInfo, setPropertyInfo, disable, h
             [field]: type === "number" ? Number(val) : val,
         }));
     };
-    function handleSelectOrg(id: string, type: z.infer<typeof OwnerTypeEnum>) {
-        setPropertyInfo((prev) => ({
-            ...prev,
-            ownerId: id,
-            ownerType: type
-        }));
-    }
+    // function handleSelectOrg(id: string, type: z.infer<typeof OwnerTypeEnum>) {
+    //     setPropertyInfo((prev) => ({
+    //         ...prev,
+    //         ownerId: id,
+    //         ownerType: type
+    //     }));
+    // }
 
 
     //    w-full max-w-5xl mx-auto

@@ -31,20 +31,19 @@ export const SubscriptionRouter = createTRPCRouter({
         .input(
             z.object({
                 plan: z.enum(["free", "deluxe", "premium", "Deluxe", "Premium"]).transform((val) => val.toLowerCase()),
-                organizationId: z.string().nullable(),
+                // organizationId: z.string().nullable(),
                 annual: z.boolean().default(false),
             })
         )
         .mutation(async ({ ctx, input }) => {
             const user = ctx.session?.user;
+            const userStripeCustomerId = user?.stripeCustomerId; 
 
-            if (!user) {
+            if (!user || !userStripeCustomerId) {
                 throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be signed in" });
             }
-
             try {
-                const referenceId = input.organizationId ?? user.id;
-
+              
 
                 if (input.plan === "free") {
                     throw new TRPCError({
@@ -56,8 +55,8 @@ export const SubscriptionRouter = createTRPCRouter({
 
                 const subscription = await ctx.prisma.subscription.findFirst({
                     where: {
-                        stripeCustomerId: user.stripeCustomerId,
-                        referenceId,
+                        stripeCustomerId: userStripeCustomerId,
+                        referenceId: user.id,
                         status: { in: ["active", "trialing"] },
                     },
                 });
@@ -67,7 +66,7 @@ export const SubscriptionRouter = createTRPCRouter({
                 const apiBody: any = {
                     plan: input.plan,
                     annual: input.annual,
-                    referenceId, // Binds subscription to User or Org
+                    referenceId: user.id, // Binds subscription to User or Org
                     successUrl: `${baseUrl}/home/account?success=true`,
                     cancelUrl: `${baseUrl}/home/account?canceled=true`,
                     disableRedirect: true,

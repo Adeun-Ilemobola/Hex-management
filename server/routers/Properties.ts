@@ -7,17 +7,15 @@ import {
     externalInvestorSchema,
     investmentBlockSchema,
     propertySchema,
-    UserInput,
+    
 } from "@/lib/ZodObject";
 // import { DeleteImages } from "@/lib/supabase";
 import { sendEmail } from "../sendEmail";
 
 import { TRPCError } from "@trpc/server";
 import { setThumbnail } from "@/lib/utils";
-import path from "path";
 import { DeleteImages, FilesToCloud } from "@/lib/supabase";
-import { getPlanLimits, PlanTier } from "@/lib/PlanConfig";
-import { CreateGroupChat, getOwnerPropertieCount } from "../CreateGroupChat";
+import { CreateGroupChat } from "../CreateGroupChat";
 
 // type userOrganizationContributor = {
 //     name: string;
@@ -180,7 +178,7 @@ export const PropertiesRouter = createTRPCRouter({
 
     getPropertie: protectedProcedure
         .input(z.object({ pID: z.string().nullable() }))
-        .query(async ({ input, ctx }) => {
+        .query(async ({ input }) => {
             try {
                 if (!input.pID) {
                     return {
@@ -197,17 +195,16 @@ export const PropertiesRouter = createTRPCRouter({
                         investBlock: true,
                     },
                 });
-                if (!getPropertie) {
-                    return {
-                        message: "Failed to process property ",
-                        success: false,
-                        value: null,
-                    };
+                if (!getPropertie || !getPropertie.investBlock) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Property not found",
+                    });
                 }
                 const getExternalInvestors = await prisma.externalInvestor
                     .findMany({
                         where: {
-                            investmentBlockId: getPropertie.investBlock?.id,
+                            investmentBlockId: getPropertie.investBlock.id ,
                         },
                     });
                 const getImages = await prisma.file.findMany({
@@ -301,6 +298,7 @@ export const PropertiesRouter = createTRPCRouter({
                         ...propertyData,
                         ownerName: ownerShip.name,
                         contactInfo: ownerShip.email,
+                        videoTourUrl: propertyData.videoTourUrl || null,
                     },
                 });
                   propertyIdGo = CreateProperty.id;
@@ -361,14 +359,17 @@ export const PropertiesRouter = createTRPCRouter({
                 console.log("CreateinvestmentBlock ==>", CreateinvestmentBlock);
                 
 
-                if (CreateinvestmentBlock) {
+                if (CreateinvestmentBlock && externalInvestors.length > 0) {
                     const CreateExternalInvestors = await Promise.all(
                         externalInvestors.map(async (item) => {
-                            const { id, ...rest } = item;
+                            const { id,createdAt,updatedAt, ...rest } = item;
                             return await ctx.prisma.externalInvestor.create({
                                 data: {
                                     ...rest,
                                     investmentBlockId: CreateinvestmentBlock.id,
+                                    investorUserId: rest.investorUserId || null,
+                                    fundedAt: rest.fundedAt || null,
+                                    
                                 },
                             });
                         }),
@@ -520,14 +521,13 @@ export const PropertiesRouter = createTRPCRouter({
                     },
                     data: {
                         ...propertyData,
+                        videoTourUrl: propertyData.videoTourUrl || null,
 
-                        ...(cleanInvestmentBlock && {
-                            investBlock: {
-                                update: {
-                                    ...cleanInvestmentBlock,
-                                },
+                        investBlock: {
+                            update: {
+                                ...cleanInvestmentBlock,
                             },
-                        }),
+                        },
                     },
                     include: {
                         investBlock: {
@@ -549,10 +549,14 @@ export const PropertiesRouter = createTRPCRouter({
                     if (oldExternalInvestors.length > 0) {
                         await Promise.all(
                             oldExternalInvestors.map((item) => {
-                                const { id, ...rest } = item;
+                                const { id,createdAt ,updatedAt, ...rest } = item;
                                 return ctx.prisma.externalInvestor.update({
                                     where: { id },
-                                    data: rest,
+                                    data: {
+                                        ...rest,
+                                        investorUserId: item.investorUserId || null,
+                                        fundedAt: item.fundedAt || null,
+                                    },
                                 });
                             }),
                         );
@@ -560,12 +564,14 @@ export const PropertiesRouter = createTRPCRouter({
                     if (newExternalInvestors.length > 0) {
                         const res = await Promise.all(
                             newExternalInvestors.map((item) => {
-                                const { id, ...rest } = item;
+                                const { id, createdAt, updatedAt, ...rest } = item;
 
                                 return ctx.prisma.externalInvestor.create({
                                     data: {
                                         ...rest,
                                         investmentBlockId: BlockId,
+                                        investorUserId: item.investorUserId || null,
+                                        fundedAt: item.fundedAt || null,
                                     },
                                 });
                             }),
@@ -631,17 +637,17 @@ export const PropertiesRouter = createTRPCRouter({
         .mutation(async ({ input, ctx }) => {
             try {
                 const { id } = input;
-                const updataData = await ctx.prisma.file.deleteMany({
+                const updataData = await ctx.prisma.file.delete({
                     where: { id: id },
                 });
-                if (!updataData) {
-                    return {
-                        message: "Failed to process property image",
-                        success: false,
-                        data: null,
-                    };
-                }
                 await DeleteImages([input.path]);
+                if (!updataData) {
+                   throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Image not found",
+                    });
+                }
+              
                 return {
                     message: "successfully deleted image",
                     success: true,
@@ -670,13 +676,16 @@ export const PropertiesRouter = createTRPCRouter({
         .mutation(async ({ input, ctx }) => {
             try {
                 const { externalInvestors } = input;
+                const { id: externalInvestorId , createdAt, updatedAt , ...rest } = externalInvestors;
                 const updataData = await ctx.prisma.externalInvestor.update({
                     where: {
-                        id: externalInvestors.id,
+                        id: externalInvestorId,
                         investmentBlockId: externalInvestors.investmentBlockId,
                     },
                     data: {
-                        ...externalInvestors,
+                        ...rest,
+                        investorUserId: rest.investorUserId || null,
+                        fundedAt: rest.fundedAt || null,
                     },
                 });
                 if (!updataData) {

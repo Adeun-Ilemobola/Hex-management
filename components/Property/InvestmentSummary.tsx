@@ -10,7 +10,6 @@ import {
   DollarSign,
   TrendingUp,
   Percent,
-  Calendar,
   Target,
   LucideIcon,
   ArrowUp,
@@ -18,7 +17,6 @@ import {
   Clock,
   Calculator,
   Users,
-  PieChart,
   AlertTriangle,
   Wallet
 } from 'lucide-react';

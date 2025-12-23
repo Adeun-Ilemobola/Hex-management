@@ -1,14 +1,13 @@
 "use client"
 import { useSearchParams } from 'next/navigation'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { usePropertyModification } from '@/components/Hook/usePropertyModification'
-import { investmentBlockSchema, OwnerTypeEnum, propertySchema } from '@/lib/ZodObject'
+import { investmentBlockSchema, propertySchema } from '@/lib/ZodObject'
 import { toast } from 'sonner'
 import { trpc as api } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import PropertyForm from '@/components/Form/PropertyForm'
-import z, { set } from 'zod'
-import { se } from 'date-fns/locale'
+
 import FinancialMetrics from '@/components/Property/FinancialMetrics'
 import InvestmentSummary from '@/components/Property/InvestmentSummary'
 import PoolInvestorsSection from '@/components/Property/ExternalInvestor'
@@ -29,11 +28,9 @@ function MultiStepForm() {
         CreateProperty,
         UpdateProperty,
         Session,
-        isLoading,
         isSubmitting,
         financials,
         investorCalculations,
-        member
 
     } = usePropertyModification(Id)
      
@@ -107,7 +104,10 @@ function MultiStepForm() {
                             disable={isSubmitting}
                             handleSSubscriptionRequirement={() => 0}
                             RemoveImage={(id, supabaseID) => {
-                                // RemoveImage(id, supabaseID)
+                                 RemoveImage({
+                                    id: id,
+                                    path: supabaseID
+                                 })
                             }}
                             orgInfo={{
                                 data: ownerList?.value || [],

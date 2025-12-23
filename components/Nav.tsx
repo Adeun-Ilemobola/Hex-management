@@ -16,7 +16,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import CustomSVG from './Icon/logo'
-import { auth } from '@/lib/auth'
 import { Spinner } from './ui/spinner'
 
 // --- Reusable Styles ---
@@ -107,7 +106,12 @@ export function Nav({ }: { session: Session | null, SignOut: () => void }) {
                                 </Button>
                                 
                                 <UserCard
-                                    user={session.user}
+                                    user={{
+                                        id: session.user.id,
+                                        name: session.user.name || "",
+                                        image: session.user.image || "",
+                                        email: session.user.email || "",
+                                    }}
                                     onLogout={() => SignOut()}
                                     onNavigate={(path) => router.push(path)}
                                 />

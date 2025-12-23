@@ -1,6 +1,5 @@
 "use client"
 
-import React from 'react'
 import DropBack from '@/components/DropBack'
 import SubscriptionCard from '@/components/SubscriptionCard'
 import { authClient } from '@/lib/auth-client'

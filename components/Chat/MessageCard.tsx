@@ -1,4 +1,3 @@
-import React from 'react'
 import Image from 'next/image'
 import { FileXInput, Message } from '@/lib/ZodObject' 
 import { ExternalLink } from 'lucide-react'

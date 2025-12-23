@@ -4,8 +4,7 @@ import { authClient } from '@/lib/auth-client';
 import { auth } from '@/lib/auth';
 
 import { Metadata, UpdateUser } from '@/lib/ZodObject';
-import { TRPCError } from '@trpc/server';
-import { get } from 'http';
+
 import { getPlanLimits } from '@/lib/PlanConfig';
 
 

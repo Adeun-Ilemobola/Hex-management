@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useForm } from "@tanstack/react-form"; // TanStack Form
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
@@ -14,12 +13,10 @@ import SocialSignOn from "@/components/SocialSignOn";
 // Shadcn UI Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import {
   Field,
   FieldLabel,
   FieldError,
-  FieldDescription, // Optional if you need hint text
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {

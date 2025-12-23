@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Loading from '@/components/Loading';
 import { Suspense } from 'react';
