@@ -270,7 +270,7 @@ export default function Page() {
                         id="terms"
                         name={field.name}
                         checked={field.state.value}
-                        onCheckedChange={(val) => field.handleChange(true)}
+                        onCheckedChange={() => field.handleChange(true)}
                         disabled={registerMut.isPending}
                         
                       />

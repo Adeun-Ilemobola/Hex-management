@@ -5,11 +5,11 @@ import {
   httpBatchLink,
   splitLink,
   wsLink,
-  createWSClient,
+  
 } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 import superjson from 'superjson';
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import type { AppRouter } from '@/server/app';
 import { wsClient } from './ws-client';
 

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
     Card,
-    CardContent,
     CardDescription,
     CardHeader,
     CardTitle
@@ -34,67 +33,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-const initialOrgData: OrganizationInfoFull = {
-    id: "org_123",
-    name: "Acme Corp",
-    slug: "acme-corp",
-    createdAt: new Date("2023-01-15"),
-    logo: null,
-    metadata: {},
-    members: [
-        {
-            id: "mem_1",
-            organizationId: "org_123",
-            userId: "user_1",
-            name: "Alice Johnson",
-            email: "alice@acme.com",
-            role: "Admin",
-            createdAt: new Date("2023-01-16"),
-        },
-        {
-            id: "mem_2",
-            organizationId: "org_123",
-            userId: "user_2",
-            name: "Bob Smith",
-            email: "bob@acme.com",
-            role: "Member",
-            createdAt: new Date("2023-02-20"),
-        },
-        {
-            id: "mem_3",
-            organizationId: "org_123",
-            userId: "user_3",
-            name: "Charlie Brown",
-            email: "charlie@acme.com",
-            role: "Viewer",
-            createdAt: new Date("2023-03-10"),
-        },
-    ],
-    invitations: [
-        {
-            id: "inv_1",
-            organizationId: "org_123",
-            email: "david.waiting@gmail.com",
-            role: "Member",
-            status: "pending",
-            inviterId: "user_1",
-            expiresAt: new Date("2024-12-30"),
-            createdAt: new Date("2024-12-01"),
-            teamId: null,
-        },
-        {
-            id: "inv_2",
-            organizationId: "org_123",
-            email: "sarah.pending@outlook.com",
-            role: "Viewer",
-            status: "pending",
-            inviterId: "user_1",
-            expiresAt: new Date("2024-12-31"),
-            createdAt: new Date("2024-12-05"),
-            teamId: null,
-        },
-    ],
-};
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { TextField } from './CustomUIComponent/TextField';
+import { FieldSelect } from './CustomUIComponent/CustomSelectField';
+
 
 const roleOptions = [
     { value: "Admin", label: "Admin" },
@@ -105,9 +53,10 @@ const roleOptions = [
 
 
 export default function OrganizationInfo({ id, slug }: { id: string, slug: string }) {
-    const [orgData, setOrgData] = useState<OrganizationInfoFull>(initialOrgData);
+    const [orgData, setOrgData] = useState<OrganizationInfoFull | null>(null);
+    const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [OnboardingForm, setOnboardingForm] = useState <Onboarding>(defaultOnboarding);
+    const [OnboardingForm, setOnboardingForm] = useState<Onboarding>(defaultOnboarding);
     const orgInfo = api.organization.OrganizationInfo.useQuery({
         organizationId: id,
         organizationSlug: slug,
@@ -123,7 +72,7 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
         onMutate() {
             toast.loading("Adding member...", { id: "addMember" });
         },
-        
+
     })
     const ChangeRole = api.organization.updateMemberRole.useMutation({
         onSuccess: () => {
@@ -160,7 +109,7 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
 
     function SearchSystemMember() {
         const data = orgInfo.data?.value;
-        if (!data && searchQuery.length > 0) {
+        if (!data && searchQuery.length > 0 ) {
             return
         }
         // Filter members based on search query (Name or Email)
@@ -170,27 +119,27 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
         );
 
         // Update the orgData state with the filtered members
-        setOrgData(pre => ({ ...pre, members: filteredMembers || [] }));
+        setOrgData(pre => ({ ...pre!, members: filteredMembers || [] }));
         setSearchQuery("");
 
     }
 
 
-    function SearchSystemInvitation() {
-        const data = orgInfo.data?.value;
-        if (!data && searchQuery.length > 0) {
-            return
-        }
-        // Filter members based on search query (Name or Email)
-        const filteredinvitations = data?.invitations.filter((invitation) =>
-            invitation.email.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+    // function SearchSystemInvitation() {
+    //     const data = orgInfo.data?.value;
+    //     if (!data && searchQuery.length > 0) {
+    //         return
+    //     }
+    //     // Filter members based on search query (Name or Email)
+    //     const filteredinvitations = data?.invitations.filter((invitation) =>
+    //         invitation.email.toLowerCase().includes(searchQuery.toLowerCase())
+    //     );
 
-        // Update the orgData state with the filtered members
-        setOrgData(pre => ({ ...pre, invitations: filteredinvitations || [] }));
-        setSearchQuery("");
+    //     // Update the orgData state with the filtered members
+    //     setOrgData(pre => ({ ...pre, invitations: filteredinvitations || [] }));
+    //     setSearchQuery("");
 
-    }
+    // }
     return (
         <DropBack is={orgInfo.isLoading || ChangeRole.isPending || (id.length === 0 || slug.length === 0)} >
             <Nav session={null} SignOut={() => { }} />
@@ -200,17 +149,17 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
                 <Card>
                     <CardHeader className="flex flex-row items-center gap-4">
                         <Avatar className="h-16 w-16">
-                            <AvatarImage src={orgData.logo || ""} alt={orgData.name} />
+                            <AvatarImage src={orgData?.logo || ""} alt={orgData?.name} />
                             <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
-                                {orgData.name.substring(0, 2).toUpperCase()}
+                                {orgData?.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                            <CardTitle className="text-2xl">{orgData.name}</CardTitle>
+                            <CardTitle className="text-2xl">{orgData?.name}</CardTitle>
                             <CardDescription className="text-muted-foreground flex items-center gap-2 mt-1">
-                                <span className="font-mono bg-muted px-1 rounded text-xs">@{orgData.slug}</span>
+                                <span className="font-mono bg-muted px-1 rounded text-xs">@{orgData?.slug}</span>
                                 <span>•</span>
-                                <span className="text-xs">Est. {orgData.createdAt.getFullYear()}</span>
+                                <span className="text-xs">Est. {orgData?.createdAt.getFullYear()}</span>
                             </CardDescription>
                         </div>
 
@@ -263,8 +212,8 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {orgData.members.length > 0 ? (
-                                    orgData.members.map((member) => (
+                                {orgData && orgData.members.length > 0 ? (
+                                    orgData?.members.map((member) => (
                                         <TableRow key={member.id}>
                                             <TableCell>
                                                 <div className="flex flex-col">
@@ -345,7 +294,7 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {orgData.invitations.filter(i => i.status === 'pending').length > 0 ? (
+                                {orgData && orgData.invitations.filter(i => i.status === 'pending').length > 0 ? (
                                     orgData.invitations
                                         .filter((inv) => inv.status === "pending")
                                         .map((invitation) => (
@@ -381,6 +330,52 @@ export default function OrganizationInfo({ id, slug }: { id: string, slug: strin
                 </div>
 
             </div>
+
+
+
+
+
+
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Start on-boarding operation</DialogTitle>
+                        <DialogDescription>
+                            Invite or add an existing or a non-existing user to the organization.
+                        </DialogDescription>
+
+                        <div className=' flex gap-1.5'>
+                            <TextField
+                                label="Email"
+                                type="email"
+                                id="email"
+                                value={OnboardingForm.email}
+                                onChange={(e) => setOnboardingForm({ ...OnboardingForm, email: e })}
+                            />
+                            <TextField
+                                label="Name"
+                                type="text"
+                                id="name"
+                                value={OnboardingForm.name}
+                                onChange={(e) => setOnboardingForm({ ...OnboardingForm, name: e })}
+                            />
+
+                            <FieldSelect
+                                label="Role"
+                                value={OnboardingForm.role}
+                                items={roleOptions}
+                                onValueChange={(value) => setOnboardingForm({ ...OnboardingForm, role: value as any })}
+                            />
+
+
+                            <Button disabled={AddMember.isPending} onClick={() => AddNewMember()}>
+                                Add Member
+                                {AddMember.isPending && <span className="ml-2 animate-pulse">...</span>}
+                            </Button>
+                        </div>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
 
 
         </DropBack>

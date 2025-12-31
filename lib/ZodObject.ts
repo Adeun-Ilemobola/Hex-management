@@ -5,12 +5,11 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 export type ContextInput =
   | {
-      // ✅ Fetch / App Router / Edge / Webhook
+     
       req: Request;
       res?: never;
     }
   | {
-      // ✅ Node / WebSocket
       req: IncomingMessage;
       res: ServerResponse;
     }
