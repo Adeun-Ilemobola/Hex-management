@@ -4,7 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/init"
 import util from "util";
 
 import { Message, MessageSchema } from "@/lib/ZodObject";
-import { on } from "events";import { email, z } from "zod";
+import { on } from "events";import {  z } from "zod";
 import { FilesToCloud } from "@/lib/supabase";
 import superjson from 'superjson';
 import chatEvents from "./chatEvent";

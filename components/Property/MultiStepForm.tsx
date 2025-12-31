@@ -142,7 +142,7 @@ function MultiStepForm() {
                             setMembers={setExternalInvestor}
                             reLoad={organizationsQuery.refetch}
                             removeInvestor={(email, name) => {
-                                setExternalInvestor(prev => prev.filter(inv => inv.email !== email))
+                                setExternalInvestor(prev => prev.filter(inv => inv.email !== email || inv.name !== name))
                                 
                             }}
                             Locked={() => externalInvestor.some(inv => inv.status !== "DRAFT")}

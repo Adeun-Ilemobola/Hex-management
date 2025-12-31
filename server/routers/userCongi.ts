@@ -41,10 +41,11 @@ export const userCongiRouter = createTRPCRouter({
                     return { success: true }
                 }
 
-                const { currentPassword, newPassword, confirmPassword } = input;
+                const { currentPassword, newPassword } = input;
                 await authClient.changePassword({
                     newPassword: newPassword,
-                    currentPassword: currentPassword
+                    currentPassword: currentPassword,
+                    
                 }, { headers });
                 return { success: true }
 
