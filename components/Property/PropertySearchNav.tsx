@@ -36,7 +36,7 @@ export default function PropertySearchNav({onSubmit, changeMode, mode , allowed}
 
     <div className=' flex flex-row gap-1.5 items-center'>
         <Checkbox 
-        checked={mode}
+        checked={mode || false}
         onCheckedChange={(e) => changeMode && changeMode(e === "indeterminate" ? true : e)}
          />
         <label>Edit Mode</label>
